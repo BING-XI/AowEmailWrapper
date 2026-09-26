@@ -28,6 +28,28 @@ namespace AowEmailWrapper.Tests
         }
 
         [Fact]
+        public void An_executable_marked_as_downloaded_starts_without_a_prompt()
+        {
+            //A mod's executable came out of a downloaded zip and carries the mark of the web; started through
+            //the shell, Windows would put up "Open File - Security Warning" and wait, so the watcher must not
+            string folder = Path.Combine(_root, "modded");
+            Directory.CreateDirectory(folder);
+            string exe = Path.Combine(folder, AowGame.Aow1ExeName);
+            File.Copy(Path.Combine(Environment.SystemDirectory, "whoami.exe"), exe);
+            File.WriteAllText(exe + ":Zone.Identifier", "[ZoneTransfer]\r\nZoneId=3\r\n");
+            AowGame game = new AowGame(AowGameType.Aow1, folder, InstallSource.Manual);
+
+            using (ManualResetEvent ended = new ManualResetEvent(false))
+            {
+                StartedTaskWatcher watcher = new StartedTaskWatcher(game, (sender, gameType) => ended.Set());
+
+                watcher.Start();
+
+                Assert.True(ended.WaitOne(TimeSpan.FromSeconds(30)), "the marked executable did not start and end within 30 seconds");
+            }
+        }
+
+        [Fact]
         public void The_watcher_starts_the_executable_in_the_game_folder_and_reports_when_it_ends()
         {
             //A real executable that exits at once, under the game's file name, in a folder that is not on any path

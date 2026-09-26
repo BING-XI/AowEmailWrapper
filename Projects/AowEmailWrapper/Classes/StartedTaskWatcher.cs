@@ -30,19 +30,36 @@ namespace AowEmailWrapper.Classes
             _callBack = callBack;
         }
 
+        private const int ErrorElevationRequired = 740;
+
         public void Start()
         {
-            _process = new Process();
-            //The full path, started through the shell as on .NET Framework: since .NET Core a bare file
-            //name is looked up in the Wrapper's own folder and on the PATH, not in the working directory,
-            //so "AoW.exe" was not found and no game started
-            _process.StartInfo.FileName = _theGame.ExePath;
-            _process.StartInfo.WorkingDirectory = _theGame.Root.FullName;
-            _process.StartInfo.UseShellExecute = true;
+            //The full path: since .NET Core a bare file name is looked up in the Wrapper's own folder and
+            //on the PATH, not in the working directory, so "AoW.exe" was not found and no game started.
+            //Started directly rather than through the shell: an executable that came out of a downloaded
+            //zip (a mod) carries the mark of the web, and the shell answers with an "Open File - Security
+            //Warning" that opens behind other windows when the Wrapper sits in the tray, so the game seemed
+            //not to start. Only when Windows insists on elevation is the shell asked, for its UAC prompt.
+            try
+            {
+                _process = StartProcess(false);
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == ErrorElevationRequired)
+            {
+                _process = StartProcess(true);
+            }
 
-            _process.Start();
-            
             new Thread(new ThreadStart(this.Watch)).Start();
+        }
+
+        private Process StartProcess(bool useShellExecute)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = _theGame.ExePath;
+            process.StartInfo.WorkingDirectory = _theGame.Root.FullName;
+            process.StartInfo.UseShellExecute = useShellExecute;
+            process.Start();
+            return process;
         }
 
         private void Watch()
