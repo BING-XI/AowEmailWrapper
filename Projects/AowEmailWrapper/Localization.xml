@@ -195,6 +195,7 @@
 		<lookup key="buttonRemoveInstall" value="Remove"/>
 		<lookup key="msgIgnoreInstall" value="This copy was found automatically. Remove it from the list and ignore {0} from now on? Add folder... brings it back."/>
 		<lookup key="msgIgnoreInstalls" value="These copies were found automatically. Remove them from the list and ignore their folders from now on? Add folder... brings a copy back."/>
+		<lookup key="msgGameStartFailed" value="The game could not be started from {0}: {1}"/>
 		<lookup key="buttonRescan" value="Rescan"/>
 		<lookup key="buttonRescanning" value="Scanning..."/>
 		<lookup key="lblGamesHelp" value="Give each copy of a game a short label such as Vanilla, AoWx or Ziggurat. The label travels with the turns you send, so everyone in a game must use the same label. The default copy receives turns that carry no label."/>
@@ -449,6 +450,7 @@
 		<lookup key="buttonRemoveInstall" value="Retirer"/>
 		<lookup key="msgIgnoreInstall" value="Cette copie a été trouvée automatiquement. La retirer de la liste et ignorer {0} désormais ? Ajouter un dossier... la fait revenir."/>
 		<lookup key="msgIgnoreInstalls" value="Ces copies ont été trouvées automatiquement. Les retirer de la liste et ignorer leurs dossiers désormais ? Ajouter un dossier... fait revenir une copie."/>
+		<lookup key="msgGameStartFailed" value="Le jeu n&apos;a pas pu être lancé depuis {0} : {1}"/>
 		<lookup key="buttonRescan" value="Rechercher à nouveau"/>
 		<lookup key="buttonRescanning" value="Recherche..."/>
 		<lookup key="lblGamesHelp" value="Donnez à chaque copie d'un jeu une courte étiquette, par exemple Vanilla, AoWx ou Ziggurat. L'étiquette accompagne les tours que vous envoyez : tous les joueurs d'une partie doivent utiliser la même. La copie par défaut reçoit les tours sans étiquette."/>
@@ -696,6 +698,7 @@
 		<lookup key="buttonRemoveInstall" value="Entfernen"/>
 		<lookup key="msgIgnoreInstall" value="Diese Kopie wurde automatisch gefunden. Aus der Liste entfernen und {0} ab jetzt ignorieren? Ordner hinzufügen... holt sie zurück."/>
 		<lookup key="msgIgnoreInstalls" value="Diese Kopien wurden automatisch gefunden. Aus der Liste entfernen und ihre Ordner ab jetzt ignorieren? Ordner hinzufügen... holt eine Kopie zurück."/>
+		<lookup key="msgGameStartFailed" value="Das Spiel konnte nicht aus {0} gestartet werden: {1}"/>
 		<lookup key="buttonRescan" value="Erneut suchen"/>
 		<lookup key="buttonRescanning" value="Suche läuft..."/>
 		<lookup key="lblGamesHelp" value="Geben Sie jeder Kopie eines Spiels eine kurze Bezeichnung wie Vanilla, AoWx oder Ziggurat. Die Bezeichnung reist mit den gesendeten Zügen mit, daher müssen alle Spieler einer Partie dieselbe verwenden. Die Standardkopie erhält Züge ohne Bezeichnung."/>
@@ -943,6 +946,7 @@
 		<lookup key="buttonRemoveInstall" value="Quitar"/>
 		<lookup key="msgIgnoreInstall" value="Esta copia se encontró automáticamente. ¿Quitarla de la lista e ignorar {0} a partir de ahora? Añadir carpeta... la recupera."/>
 		<lookup key="msgIgnoreInstalls" value="Estas copias se encontraron automáticamente. ¿Quitarlas de la lista e ignorar sus carpetas a partir de ahora? Añadir carpeta... recupera una copia."/>
+		<lookup key="msgGameStartFailed" value="No se pudo iniciar el juego desde {0}: {1}"/>
 		<lookup key="buttonRescan" value="Volver a buscar"/>
 		<lookup key="buttonRescanning" value="Buscando..."/>
 		<lookup key="lblGamesHelp" value="Dé a cada copia de un juego una etiqueta corta, como Vanilla, AoWx o Ziggurat. La etiqueta viaja con los turnos que envía, así que todos los jugadores de una partida deben usar la misma. La copia predeterminada recibe los turnos sin etiqueta."/>
@@ -1190,6 +1194,7 @@
 		<lookup key="buttonRemoveInstall" value="Verwijderen"/>
 		<lookup key="msgIgnoreInstall" value="Deze kopie is automatisch gevonden. Uit de lijst verwijderen en {0} voortaan negeren? Map toevoegen... haalt hem terug."/>
 		<lookup key="msgIgnoreInstalls" value="Deze kopieën zijn automatisch gevonden. Uit de lijst verwijderen en hun mappen voortaan negeren? Map toevoegen... haalt een kopie terug."/>
+		<lookup key="msgGameStartFailed" value="Het spel kon niet worden gestart vanuit {0}: {1}"/>
 		<lookup key="buttonRescan" value="Opnieuw zoeken"/>
 		<lookup key="buttonRescanning" value="Bezig met zoeken..."/>
 		<lookup key="lblGamesHelp" value="Geef elke kopie van een spel een kort label, zoals Vanilla, AoWx of Ziggurat. Het label reist mee met de beurten die u verstuurt, dus iedereen in een partij moet hetzelfde label gebruiken. De standaardkopie ontvangt beurten zonder label."/>
@@ -1435,6 +1440,7 @@
 		<lookup key="buttonRemoveInstall" value="Fjern"/>
 		<lookup key="msgIgnoreInstall" value="Denne kopi blev fundet automatisk. Fjern den fra listen og ignorer {0} fremover? Tilføj mappe... henter den tilbage."/>
 		<lookup key="msgIgnoreInstalls" value="Disse kopier blev fundet automatisk. Fjern dem fra listen og ignorer deres mapper fremover? Tilføj mappe... henter en kopi tilbage."/>
+		<lookup key="msgGameStartFailed" value="Spillet kunne ikke startes fra {0}: {1}"/>
 		<lookup key="buttonRescan" value="Søg igen"/>
 		<lookup key="buttonRescanning" value="Søger..."/>
 		<lookup key="lblGamesHelp" value="Giv hver kopi af et spil en kort mærkat som Vanilla, AoWx eller Ziggurat. Mærkaten følger med de ture du sender, så alle i et spil skal bruge den samme. Standardkopien modtager ture uden mærkat."/>
@@ -1681,6 +1687,7 @@
 		<lookup key="buttonRemoveInstall" value="Ta bort"/>
 		<lookup key="msgIgnoreInstall" value="Den här kopian hittades automatiskt. Ta bort den från listan och ignorera {0} från och med nu? Lägg till mapp... tar tillbaka den."/>
 		<lookup key="msgIgnoreInstalls" value="De här kopiorna hittades automatiskt. Ta bort dem från listan och ignorera deras mappar från och med nu? Lägg till mapp... tar tillbaka en kopia."/>
+		<lookup key="msgGameStartFailed" value="Spelet kunde inte startas från {0}: {1}"/>
 		<lookup key="buttonRescan" value="Sök igen"/>
 		<lookup key="buttonRescanning" value="Söker..."/>
 		<lookup key="lblGamesHelp" value="Ge varje kopia av ett spel en kort etikett, till exempel Vanilla, AoWx eller Ziggurat. Etiketten följer med de drag du skickar, så alla i ett parti måste använda samma etikett. Standardkopian tar emot drag utan etikett."/>
@@ -1935,6 +1942,7 @@
 		<lookup key="buttonRemoveInstall" value="Usuń"/>
 		<lookup key="msgIgnoreInstall" value="Ta kopia została znaleziona automatycznie. Usunąć ją z listy i odtąd ignorować {0}? Dodaj folder... przywraca ją."/>
 		<lookup key="msgIgnoreInstalls" value="Te kopie zostały znalezione automatycznie. Usunąć je z listy i odtąd ignorować ich foldery? Dodaj folder... przywraca kopię."/>
+		<lookup key="msgGameStartFailed" value="Nie udało się uruchomić gry z {0}: {1}"/>
 		<lookup key="buttonRescan" value="Szukaj ponownie"/>
 		<lookup key="buttonRescanning" value="Szukanie..."/>
 		<lookup key="lblGamesHelp" value="Nadaj każdej kopii gry krótką etykietę, np. Vanilla, AoWx lub Ziggurat. Etykieta podróżuje z wysyłanymi turami, więc wszyscy gracze w rozgrywce muszą używać tej samej. Kopia domyślna odbiera tury bez etykiety."/>
@@ -2183,6 +2191,7 @@
 		<lookup key="buttonRemoveInstall" value="Poista"/>
 		<lookup key="msgIgnoreInstall" value="Tämä kopio löytyi automaattisesti. Poistetaanko se luettelosta ja ohitetaanko {0} tästä lähtien? Lisää kansio... tuo sen takaisin."/>
 		<lookup key="msgIgnoreInstalls" value="Nämä kopiot löytyivät automaattisesti. Poistetaanko ne luettelosta ja ohitetaanko niiden kansiot tästä lähtien? Lisää kansio... tuo kopion takaisin."/>
+		<lookup key="msgGameStartFailed" value="Peliä ei voitu käynnistää kansiosta {0}: {1}"/>
 		<lookup key="buttonRescan" value="Etsi uudelleen"/>
 		<lookup key="buttonRescanning" value="Etsitään..."/>
 		<lookup key="lblGamesHelp" value="Anna jokaiselle pelin kopiolle lyhyt tunniste, kuten Vanilla, AoWx tai Ziggurat. Tunniste kulkee lähettämiesi vuorojen mukana, joten kaikkien saman pelin pelaajien on käytettävä samaa tunnistetta. Oletuskopio vastaanottaa tunnisteettomat vuorot."/>
@@ -2433,6 +2442,7 @@
 		<lookup key="buttonRemoveInstall" value="Elimină"/>
 		<lookup key="msgIgnoreInstall" value="Această copie a fost găsită automat. O eliminați din listă și ignorați {0} de acum înainte? Adăugare dosar... o aduce înapoi."/>
 		<lookup key="msgIgnoreInstalls" value="Aceste copii au fost găsite automat. Le eliminați din listă și ignorați dosarele lor de acum înainte? Adăugare dosar... aduce o copie înapoi."/>
+		<lookup key="msgGameStartFailed" value="Jocul nu a putut fi pornit din {0}: {1}"/>
 		<lookup key="buttonRescan" value="Caută din nou"/>
 		<lookup key="buttonRescanning" value="Se caută..."/>
 		<lookup key="lblGamesHelp" value="Dați fiecărei copii a unui joc o etichetă scurtă, de exemplu Vanilla, AoWx sau Ziggurat. Eticheta călătorește cu turele trimise, așa că toți jucătorii dintr-o partidă trebuie să folosească aceeași etichetă. Copia implicită primește turele fără etichetă."/>
@@ -2681,6 +2691,7 @@
 		<lookup key="buttonRemoveInstall" value="Удалить"/>
 		<lookup key="msgIgnoreInstall" value="Эта копия найдена автоматически. Убрать её из списка и впредь игнорировать {0}? «Добавить папку...» вернёт её."/>
 		<lookup key="msgIgnoreInstalls" value="Эти копии найдены автоматически. Убрать их из списка и впредь игнорировать их папки? «Добавить папку...» вернёт копию."/>
+		<lookup key="msgGameStartFailed" value="Не удалось запустить игру из {0}: {1}"/>
 		<lookup key="buttonRescan" value="Искать снова"/>
 		<lookup key="buttonRescanning" value="Поиск..."/>
 		<lookup key="lblGamesHelp" value="Дайте каждой копии игры короткую метку, например Vanilla, AoWx или Ziggurat. Метка передаётся вместе с отправляемыми ходами, поэтому все участники партии должны использовать одну и ту же метку. Копия по умолчанию получает ходы без метки."/>

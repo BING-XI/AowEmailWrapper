@@ -33,8 +33,12 @@ namespace AowEmailWrapper.Classes
         public void Start()
         {
             _process = new Process();
-            _process.StartInfo.FileName = _theGame.ExeFile;
+            //The full path, started through the shell as on .NET Framework: since .NET Core a bare file
+            //name is looked up in the Wrapper's own folder and on the PATH, not in the working directory,
+            //so "AoW.exe" was not found and no game started
+            _process.StartInfo.FileName = _theGame.ExePath;
             _process.StartInfo.WorkingDirectory = _theGame.Root.FullName;
+            _process.StartInfo.UseShellExecute = true;
 
             _process.Start();
             

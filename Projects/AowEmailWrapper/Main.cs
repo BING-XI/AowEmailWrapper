@@ -50,6 +50,8 @@ namespace AowEmailWrapper
         private const string WrapperFixPermissionsFailedKey = "msgWrapperFixPermissionsFailed";
         private const string WrapperArchiveGameMessageBoxKey = "msgWrapperArchiveGame";
         private const string WrapperCannotActivateAccountMessageBoxKey = "msgWrapperCannotActivateAccount";
+        private const string WrapperGameStartFailedKey = "msgGameStartFailed";
+        private const string WrapperGameStartFailedFallback = "The game could not be started from {0}: {1}";
         private const string WrapperEmailSentSuccessKey = "msgWrapperEmailSentSuccess";
         private const string WrapperEmailSentFailedKey = "msgWrapperEmailSentFailed";
         private const string WrapperRestartRequiredKey = "msgWrapperRestartRequired";
@@ -785,9 +787,10 @@ namespace AowEmailWrapper
                 {
                     theState = IconState.EmailWaiting;
 
+                    //No Activate here: when a turn arrives the player may be in a game, and the balloon
+                    //(a toast on Windows 10 and 11) is the announcement
                     if (showBaloon)
                     {
-                        this.Activate();
                         Activity stranger = NextUnannouncedNewSender();
                         if (stranger != null)
                         {
@@ -1065,27 +1068,50 @@ namespace AowEmailWrapper
             switch (theGame.GameType)
             {
                 case AowGameType.Aow1:
-                    if (_aow1GameWatcher == null)
-                    {
-                        _aow1GameWatcher = new StartedTaskWatcher(theGame, new StartedTaskCompleteEventHandler(StartedGameWatchCompleted));
-                        _aow1GameWatcher.Start();
-                    }
+                    StartGame(theGame, ref _aow1GameWatcher);
                     break;
                 case AowGameType.Aow2:
-                    if (_aow2GameWatcher == null)
-                    {
-                        _aow2GameWatcher = new StartedTaskWatcher(theGame, new StartedTaskCompleteEventHandler(StartedGameWatchCompleted));
-                        _aow2GameWatcher.Start();
-                    }
+                    StartGame(theGame, ref _aow2GameWatcher);
                     break;
                 case AowGameType.AowSm:
                 case AowGameType.AowMpe:
-                    if (_aowSmGameWatcher == null)
-                    {
-                        _aowSmGameWatcher = new StartedTaskWatcher(theGame, new StartedTaskCompleteEventHandler(StartedGameWatchCompleted));
-                        _aowSmGameWatcher.Start();
-                    }
+                    StartGame(theGame, ref _aowSmGameWatcher);
                     break;
+            }
+        }
+
+        /// <summary>
+        /// One running copy of each game is watched, so a second click while it runs does nothing. A start
+        /// that fails is reported and leaves the slot free: before, the failed watcher stayed in it and
+        /// every later click was ignored without a word.
+        /// </summary>
+        private void StartGame(AowGame theGame, ref StartedTaskWatcher watcher)
+        {
+            if (watcher != null)
+            {
+                return;
+            }
+
+            try
+            {
+                StartedTaskWatcher started = new StartedTaskWatcher(theGame, new StartedTaskCompleteEventHandler(StartedGameWatchCompleted));
+                started.Start();
+                watcher = started;
+                Trace.TraceInformation("Started {0}", theGame.ExePath);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Could not start {0}: {1}", theGame.ExePath, ex);
+                //Shown once the tray menu has closed: a box put up while the menu is still open is owned by
+                //the menu, and the menu closes and hides it the moment the box takes the focus, leaving an
+                //invisible box that blocks the Wrapper
+                string message = Translator.Translate(WrapperGameStartFailedKey, theGame.ExePath, ex.Message);
+                if (string.IsNullOrEmpty(message))
+                {
+                    message = string.Format(WrapperGameStartFailedFallback, theGame.ExePath, ex.Message);
+                }
+                string title = Translator.Translate(this.Name);
+                BeginInvoke(new Action(() => MessageBox.Show(Visible ? this : null, message, title, MessageBoxButtons.OK, MessageBoxIcon.Error)));
             }
         }
 
@@ -1540,7 +1566,9 @@ namespace AowEmailWrapper
                             //The connection should be good
                             RetrySendFailures();
                         }
-                        CheckNotifyIconState();
+                        //A turn that has just arrived is announced as well as shown by the icon: Windows hides the
+                        //tray icon of a newly installed program in the overflow, where the envelope is out of sight
+                        CheckNotifyIconState(e.EmailRecieved);
                         break;
                 }
             }
@@ -2496,29 +2524,40 @@ namespace AowEmailWrapper
 
         private void menuItem_Click(object sender, EventArgs e)
         {
-            string tag = ((ToolStripItem)sender).Tag.ToString();
-
-            if (tag.StartsWith(GameMenuTagPrefix, StringComparison.Ordinal))
+            //Nothing may escape a tray menu click: an exception thrown out of it interrupts the menu's
+            //own click handling, after which the menu no longer opens until the Wrapper is restarted
+            try
             {
-                AowGame theGame = _gameManager.GetGameById(tag.Substring(GameMenuTagPrefix.Length));
-                if (theGame != null)
+                string tag = ((ToolStripItem)sender).Tag.ToString();
+
+                if (tag.StartsWith(GameMenuTagPrefix, StringComparison.Ordinal))
                 {
-                    StartGame(theGame);
+                    AowGame theGame = _gameManager.GetGameById(tag.Substring(GameMenuTagPrefix.Length));
+                    if (theGame != null)
+                    {
+                        StartGame(theGame);
+                    }
+                    return;
                 }
-                return;
-            }
 
-            switch (tag)
+                switch (tag)
+                {
+                    case Menu_Show_Tag:
+                        Maximize();
+                        break;
+                    case Menu_Poll_Tag:
+                        PollAll();
+                        break;
+                    case Menu_Exit_Tag:
+                        RaiseEvent(_shutDownEvent, sender, new EventArgs());
+                        break;
+                }
+            }
+            catch (Exception ex)
             {
-                case Menu_Show_Tag:
-                    Maximize();
-                    break;
-                case Menu_Poll_Tag:
-                    PollAll();
-                    break;
-                case Menu_Exit_Tag:
-                    RaiseEvent(_shutDownEvent, sender, new EventArgs());
-                    break;
+                Trace.TraceError("Tray menu action failed: {0}", ex);
+                string title = Translator.Translate(this.Name);
+                BeginInvoke(new Action(() => MessageBox.Show(Visible ? this : null, ex.Message, title, MessageBoxButtons.OK, MessageBoxIcon.Error)));
             }
         }
 

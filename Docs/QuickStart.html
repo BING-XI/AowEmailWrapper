@@ -31,11 +31,13 @@ to your first turn in about ten minutes.</p>
 
 <h2>1. Install</h2>
 <ol>
-  <li>Run <code>AowEmailWrapper-2.0.7-setup.exe</code>. No administrator password is needed.</li>
+  <li>Run <code>AowEmailWrapper-2.0.8-setup.exe</code>. No administrator password is needed.</li>
   <li>If your PC does not have the .NET 8 Desktop Runtime, the setup downloads it from Microsoft (about 55 MB) and installs it first.</li>
   <li>Finish the setup with <em>Launch</em> ticked. The Wrapper starts and puts its icon
       <img class="icon" src="images/state-Normal.png" width="20" height="20" alt=""> in the notification area by the clock.
-      If you do not see it, click the small arrow there to show hidden icons.</li>
+      Windows hides a new program's icon behind the small arrow there. To keep it in view on Windows 11, open
+      <em>Settings &gt; Personalization &gt; Taskbar &gt; Other system tray icons</em> and switch <em>Age of Wonders Email Wrapper</em> on;
+      on Windows 10 drag the icon from behind the arrow onto the taskbar.</li>
 </ol>
 
 <h2>2. Add your email account</h2>
@@ -81,7 +83,7 @@ to your first turn in about ten minutes.</p>
   <li>Start the game, go to <em>Scenario &gt; Email</em> (or <em>Play by email</em>) and create or load a play-by-email game as usual. The Wrapper has already configured the game to hand its turns to the Wrapper.</li>
   <li>End your turn and let the game send the email. The progress bar jumps straight to 100%: the game has handed the turn to the Wrapper, which sends it through your email account in the background. You hear a chime and see a balloon when it has gone.</li>
   <li>When an opponent's turn arrives the tray icon becomes an envelope
-      <img class="icon" src="images/state-EmailWaiting.png" width="16" height="16" alt=""> and you hear a sound. With IMAP the mail server announces new mail at once, so this usually happens within seconds. To force a check, right-click the tray icon and choose <strong>Poll now</strong>.</li>
+      <img class="icon" src="images/state-EmailWaiting.png" width="16" height="16" alt="">, a notification says how many games are waiting, and you hear a sound. With IMAP the mail server announces new mail at once, so this usually happens within seconds. To force a check, right-click the tray icon and choose <strong>Poll now</strong>.</li>
   <li>Double-click the tray icon, or the game's line on the <strong>Activity Log</strong> tab, to start the game. Load the turn with <em>Scenario &gt; Email &gt; Load Game</em>.</li>
 </ol>
 <figure>
