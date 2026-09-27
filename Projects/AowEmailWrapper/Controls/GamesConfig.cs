@@ -20,6 +20,7 @@ namespace AowEmailWrapper.Controls
     {
         private const string NoGameInFolderKey = "msgAddFolderNoGame";
         private const string MissingKey = "msgInstallMissing";
+        private const string NoModFoundKey = "msgNoModFound";
         private const string ScanningKey = "buttonRescanning";
         private const string DefaultMark = "✓";
         private const int ButtonPanelWidth = 113;
@@ -116,7 +117,7 @@ namespace AowEmailWrapper.Controls
         {
             string found = game.IsInstalled ? Translator.TranslateEnum(game.Source) : Translator.Translate(MissingKey);
             string mods = game.DetectedMods.Count == 0
-                ? "No mod found: taken to be the stock game"
+                ? Translator.Translate(NoModFoundKey)
                 : string.Join(Environment.NewLine, game.DetectedMods.Select(mod => mod.ToString() + ": " + mod.Evidence));
             return string.Concat(game.Folder, Environment.NewLine, found, Environment.NewLine, mods);
         }

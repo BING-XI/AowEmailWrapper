@@ -26,7 +26,6 @@
 		<lookup key="fbEmailType" value="Email Type:"/>
 		<lookup key="tabOutgoing" value="Outgoing Email"/>
 		<lookup key="fbUsePolling" value="Use Polling Credentials:"/>
-		<lookup key="groupBoxServer" value="Server"/>
 		<lookup key="fbBccMyself" value="BCC myself:"/>
 		<lookup key="fbAuthentication" value="Authentication Required:"/>
 		<lookup key="fbSSLType" value="SSL Type:"/>
@@ -116,6 +115,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Please restart the Wrapper for these changes to take effect."/>
 		<lookup key="msgWrapperPollFailed" value="Poll failed"/>
 		<lookup key="msgWrapperGamesWaiting" value="You have {0} game(s) waiting."/>
+		<lookup key="msgWrapperClickToStart" value="Click here to start {0}."/>
 		<lookup key="msgWrapperNewSender" value="'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with."/>
 		<lookup key="activityNewSender" value="new sender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Found {0} unplayed turn(s) in your mailbox and added them to the activity log."/>
@@ -196,6 +196,7 @@
 		<lookup key="msgIgnoreInstall" value="This copy was found automatically. Remove it from the list and ignore {0} from now on? Add folder... brings it back."/>
 		<lookup key="msgIgnoreInstalls" value="These copies were found automatically. Remove them from the list and ignore their folders from now on? Add folder... brings a copy back."/>
 		<lookup key="msgGameStartFailed" value="The game could not be started from {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Some changes on the Accounts or Settings tab have not been saved. Save them before the Wrapper closes?"/>
 		<lookup key="buttonRescan" value="Rescan"/>
 		<lookup key="buttonRescanning" value="Scanning..."/>
 		<lookup key="lblGamesHelp" value="Give each copy of a game a short label such as Vanilla, AoWx or Ziggurat. The label travels with the turns you send, so everyone in a game must use the same label. The default copy receives turns that carry no label."/>
@@ -263,6 +264,10 @@
 		<lookup key="activeAccount" value="Active"/>
 		<lookup key="startUpAccount" value="Default"/>
 		<!-- END: Misc -->
+		<lookup key="buttonDetailsShow" value="Details &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Details"/>
+		<lookup key="lblDedication" value="To the Heroes and Wizards who have been sent forever to the void - their towers torn asunder and their mounts slain."/>
+		<lookup key="msgNoModFound" value="No mod found: taken to be the stock game"/>
 	</language>
 	<language code="fr" display="Français">
 		<!-- BEGIN: Main forms -->
@@ -290,7 +295,6 @@
 		<lookup key="fbEmailType" value="Type de compte:"/>
 		<lookup key="tabOutgoing" value="Serveur sortant"/>
 		<lookup key="fbUsePolling" value="Utiliser les paramètres de scrutation:"/>
-		<lookup key="groupBoxServer" value="Serveur"/>
 		<lookup key="fbBccMyself" value="Cci à moi-même:"/>
 		<lookup key="fbAuthentication" value="Authentification requise :"/>
 		<lookup key="fbSSLType" value="Type de SSL:"/>
@@ -380,6 +384,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Voulez-vous redémarrer maintenant?"/>
 		<lookup key="msgWrapperPollFailed" value="Echec de scrutation"/>
 		<lookup key="msgWrapperGamesWaiting" value="Vous avez {0} partie(s) en attente."/>
+		<lookup key="msgWrapperClickToStart" value="Cliquez ici pour lancer {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Vous remplirez les paramètres manuellement."/>
 		<lookup key="msgWrapperResendTo" value="Renvoyer à:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Paramètres de messagerie trouvés. Cliquez sur Suivant."/>
@@ -451,6 +456,7 @@
 		<lookup key="msgIgnoreInstall" value="Cette copie a été trouvée automatiquement. La retirer de la liste et ignorer {0} désormais ? Ajouter un dossier... la fait revenir."/>
 		<lookup key="msgIgnoreInstalls" value="Ces copies ont été trouvées automatiquement. Les retirer de la liste et ignorer leurs dossiers désormais ? Ajouter un dossier... fait revenir une copie."/>
 		<lookup key="msgGameStartFailed" value="Le jeu n&apos;a pas pu être lancé depuis {0} : {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Certaines modifications des onglets Comptes ou Paramètres n&apos;ont pas été enregistrées. Les enregistrer avant la fermeture du Wrapper ?"/>
 		<lookup key="buttonRescan" value="Rechercher à nouveau"/>
 		<lookup key="buttonRescanning" value="Recherche..."/>
 		<lookup key="lblGamesHelp" value="Donnez à chaque copie d'un jeu une courte étiquette, par exemple Vanilla, AoWx ou Ziggurat. L'étiquette accompagne les tours que vous envoyez : tous les joueurs d'une partie doivent utiliser la même. La copie par défaut reçoit les tours sans étiquette."/>
@@ -511,6 +517,28 @@
 		<lookup key="activeAccount" value="Actif"/>
 		<lookup key="startUpAccount" value="Défault"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; vient de {1}, qui ne vous a jamais envoyé de tour. N&apos;ouvrez que les tours des personnes avec qui vous jouez."/>
+		<lookup key="activityNewSender" value="nouvel expéditeur"/>
+		<lookup key="msgWrapperTurnsRecovered" value="{0} tour(s) non joué(s) trouvé(s) dans votre boîte aux lettres et ajouté(s) au journal d&apos;activité."/>
+		<lookup key="menuItemWhereIs" value="Où est le tour ?"/>
+		<lookup key="activityHeldBy" value="chez {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Où est le tour ?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="{0} joueur(s) interrogé(s) sur l&apos;emplacement de &apos;{1}&apos;. Les réponses arrivent avec les prochaines vérifications du courrier."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Aucun autre joueur n&apos;est connu pour &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Des paramètres ont été trouvés pour cette adresse, mais ils enverraient votre mot de passe sans chiffrement ; le Wrapper ne les utilisera donc pas. Veuillez saisir les paramètres du serveur manuellement."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="enumSave" value="Save"/>
+		<lookup key="buttonOK" value="OK"/>
+		<lookup key="buttonDetailsShow" value="Détails &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Détails"/>
+		<lookup key="lblDedication" value="Aux Héros et aux Sorciers envoyés à jamais dans le néant, leurs tours abattues et leurs montures tuées."/>
+		<lookup key="msgNoModFound" value="Aucun mod trouvé : considéré comme le jeu d&apos;origine"/>
 	</language>
 	<language code="de" display="Deutsch">
 		<!-- BEGIN: Main forms -->
@@ -538,7 +566,6 @@
 		<lookup key="fbEmailType" value="E-Mail Typ:"/>
 		<lookup key="tabOutgoing" value="Ausgehende E-Mail"/>
 		<lookup key="fbUsePolling" value="Abrufverbindungsinformationen verwenden:"/>
-		<lookup key="groupBoxServer" value="Server"/>
 		<lookup key="fbBccMyself" value="Sich selbst im BCC hinzufügen:"/>
 		<lookup key="fbAuthentication" value="Authentifizierung benötigt:"/>
 		<lookup key="fbSSLType" value="SSL Typ:"/>
@@ -628,6 +655,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Bitte starten Sie den Wrapper neu um die Änderungen zu übernehmen."/>
 		<lookup key="msgWrapperPollFailed" value="Abruf fehlgeschlagen"/>
 		<lookup key="msgWrapperGamesWaiting" value="Sie haben {0} Spiel(e) wartend."/>
+		<lookup key="msgWrapperClickToStart" value="Hier klicken, um {0} zu starten."/>
 		<lookup key="msgInputEmailSettingsManual" value="Ich werde die Einstellungen manuell vornehmen."/>
 		<lookup key="msgWrapperResendTo" value="Erneut senden:"/>
 		<lookup key="msgAutoconfigPage2Success" value="E-Mail-Einstellungen gefunden. Klicken Sie auf Weiter."/>
@@ -699,6 +727,7 @@
 		<lookup key="msgIgnoreInstall" value="Diese Kopie wurde automatisch gefunden. Aus der Liste entfernen und {0} ab jetzt ignorieren? Ordner hinzufügen... holt sie zurück."/>
 		<lookup key="msgIgnoreInstalls" value="Diese Kopien wurden automatisch gefunden. Aus der Liste entfernen und ihre Ordner ab jetzt ignorieren? Ordner hinzufügen... holt eine Kopie zurück."/>
 		<lookup key="msgGameStartFailed" value="Das Spiel konnte nicht aus {0} gestartet werden: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Einige Änderungen auf den Registerkarten Konten oder Einstellungen wurden nicht gespeichert. Vor dem Schließen des Wrappers speichern?"/>
 		<lookup key="buttonRescan" value="Erneut suchen"/>
 		<lookup key="buttonRescanning" value="Suche läuft..."/>
 		<lookup key="lblGamesHelp" value="Geben Sie jeder Kopie eines Spiels eine kurze Bezeichnung wie Vanilla, AoWx oder Ziggurat. Die Bezeichnung reist mit den gesendeten Zügen mit, daher müssen alle Spieler einer Partie dieselbe verwenden. Die Standardkopie erhält Züge ohne Bezeichnung."/>
@@ -760,6 +789,27 @@
 		<lookup key="activeAccount" value="Aktiv"/>
 		<lookup key="startUpAccount" value="Default"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kam von {1}, der Ihnen noch nie einen Zug geschickt hat. Öffnen Sie nur Züge von Leuten, mit denen Sie spielen."/>
+		<lookup key="activityNewSender" value="neuer Absender"/>
+		<lookup key="msgWrapperTurnsRecovered" value="{0} ungespielte(r) Zug/Züge im Postfach gefunden und dem Aktivitätsprotokoll hinzugefügt."/>
+		<lookup key="menuItemWhereIs" value="Wo ist der Zug?"/>
+		<lookup key="activityHeldBy" value="bei {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Wo ist der Zug?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="{0} Spieler gefragt, wo &apos;{1}&apos; ist. Die Antworten kommen mit den nächsten E-Mail-Abfragen."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Für &apos;{0}&apos; sind keine anderen Spieler bekannt."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Für diese Adresse wurden Einstellungen gefunden, aber sie würden Ihr Passwort unverschlüsselt senden, daher verwendet der Wrapper sie nicht. Bitte geben Sie die Servereinstellungen manuell ein."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="buttonOK" value="OK"/>
+		<lookup key="buttonDetailsShow" value="Details &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Details"/>
+		<lookup key="lblDedication" value="Den Helden und Zauberern, die für immer in die Leere geschickt wurden – ihre Türme niedergerissen, ihre Reittiere erschlagen."/>
+		<lookup key="msgNoModFound" value="Kein Mod gefunden: gilt als Originalspiel"/>
 	</language>
 	<language code="es" display="Español">
 		<!-- BEGIN: Main forms -->
@@ -787,7 +837,6 @@
 		<lookup key="fbEmailType" value="Tipo de Email:"/>
 		<lookup key="tabOutgoing" value="Email saliente"/>
 		<lookup key="fbUsePolling" value="Usar credenciales de chequeo:"/>
-		<lookup key="groupBoxServer" value="Servidor"/>
 		<lookup key="fbBccMyself" value="Enviar BCC a mi mismo:"/>
 		<lookup key="fbAuthentication" value="Auntenticación Requerida:"/>
 		<lookup key="fbSSLType" value="Tipo de SSL:"/>
@@ -876,6 +925,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Por favor reinicialice el programa para que estos cambios tengan efecto."/>
 		<lookup key="msgWrapperPollFailed" value="Chequeo fallido."/>
 		<lookup key="msgWrapperGamesWaiting" value="Tienes {0} juegos esperando."/>
+		<lookup key="msgWrapperClickToStart" value="Haga clic aquí para iniciar {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Entrarás la configuracoón manualmente."/>
 		<lookup key="msgWrapperResendTo" value="Reenviar a:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Configuración de correo encontrada. Haz clic en Siguiente."/>
@@ -947,6 +997,7 @@
 		<lookup key="msgIgnoreInstall" value="Esta copia se encontró automáticamente. ¿Quitarla de la lista e ignorar {0} a partir de ahora? Añadir carpeta... la recupera."/>
 		<lookup key="msgIgnoreInstalls" value="Estas copias se encontraron automáticamente. ¿Quitarlas de la lista e ignorar sus carpetas a partir de ahora? Añadir carpeta... recupera una copia."/>
 		<lookup key="msgGameStartFailed" value="No se pudo iniciar el juego desde {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Algunos cambios en las pestañas Cuentas o Configuración no se han guardado. ¿Guardarlos antes de cerrar el Wrapper?"/>
 		<lookup key="buttonRescan" value="Volver a buscar"/>
 		<lookup key="buttonRescanning" value="Buscando..."/>
 		<lookup key="lblGamesHelp" value="Dé a cada copia de un juego una etiqueta corta, como Vanilla, AoWx o Ziggurat. La etiqueta viaja con los turnos que envía, así que todos los jugadores de una partida deben usar la misma. La copia predeterminada recibe los turnos sin etiqueta."/>
@@ -1008,6 +1059,28 @@
 		<lookup key="activeAccount" value="Activo"/>
 		<lookup key="startUpAccount" value="Por omisión"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; viene de {1}, que nunca le ha enviado un turno. Abra solo turnos de personas con las que juega."/>
+		<lookup key="activityNewSender" value="remitente nuevo"/>
+		<lookup key="msgWrapperTurnsRecovered" value="Se encontraron {0} turno(s) sin jugar en su buzón y se añadieron al registro de actividad."/>
+		<lookup key="menuItemWhereIs" value="¿Dónde está el turno?"/>
+		<lookup key="activityHeldBy" value="lo tiene {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="¿Dónde está el turno?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Se preguntó a {0} jugador(es) dónde está &apos;{1}&apos;. Las respuestas llegan con las próximas comprobaciones del correo."/>
+		<lookup key="msgWrapperWhereIsNobody" value="No se conocen otros jugadores de &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Se encontró una configuración para esta dirección, pero enviaría su contraseña sin cifrar, así que el Wrapper no la usará. Introduzca la configuración del servidor manualmente."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="buttonOK" value="OK"/>
+		<lookup key="buttonDetailsShow" value="Detalles &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Detalles"/>
+		<lookup key="lblDedication" value="A los Héroes y Magos enviados para siempre al vacío: sus torres derribadas y sus monturas abatidas."/>
+		<lookup key="msgNoModFound" value="No se encontró ningún mod: se considera el juego original"/>
 	</language>
 	<language code="nl" display="Nederlands">
 		<!-- BEGIN: Main forms -->
@@ -1035,7 +1108,6 @@
 		<lookup key="fbEmailType" value="E-mail type:"/>
 		<lookup key="tabOutgoing" value="Uitgaande E-mail"/>
 		<lookup key="fbUsePolling" value="Gebruik doorzoek credenties:"/>
-		<lookup key="groupBoxServer" value="Server"/>
 		<lookup key="fbBccMyself" value="BCC mezelf:"/>
 		<lookup key="fbAuthentication" value="Authentificatie Noodzakelijk:"/>
 		<lookup key="fbSSLType" value="SSL type:"/>
@@ -1124,6 +1196,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Herstart de Wrapper om deze veranderingen in effect te laten gaan, aub."/>
 		<lookup key="msgWrapperPollFailed" value="Doorzoeken gefaald"/>
 		<lookup key="msgWrapperGamesWaiting" value="Je hebt {0} game(s) wachten."/>
+		<lookup key="msgWrapperClickToStart" value="Klik hier om {0} te starten."/>
 		<lookup key="msgInputEmailSettingsManual" value="Instellingen zelf invoeren."/>
 		<lookup key="msgWrapperResendTo" value="Verzend opnieuw:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Uw mailinstellingen zijn gevonden. Klik op Volgende."/>
@@ -1195,6 +1268,7 @@
 		<lookup key="msgIgnoreInstall" value="Deze kopie is automatisch gevonden. Uit de lijst verwijderen en {0} voortaan negeren? Map toevoegen... haalt hem terug."/>
 		<lookup key="msgIgnoreInstalls" value="Deze kopieën zijn automatisch gevonden. Uit de lijst verwijderen en hun mappen voortaan negeren? Map toevoegen... haalt een kopie terug."/>
 		<lookup key="msgGameStartFailed" value="Het spel kon niet worden gestart vanuit {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Sommige wijzigingen op de tabbladen Accounts of Instellingen zijn niet opgeslagen. Opslaan voordat de Wrapper sluit?"/>
 		<lookup key="buttonRescan" value="Opnieuw zoeken"/>
 		<lookup key="buttonRescanning" value="Bezig met zoeken..."/>
 		<lookup key="lblGamesHelp" value="Geef elke kopie van een spel een kort label, zoals Vanilla, AoWx of Ziggurat. Het label reist mee met de beurten die u verstuurt, dus iedereen in een partij moet hetzelfde label gebruiken. De standaardkopie ontvangt beurten zonder label."/>
@@ -1260,6 +1334,24 @@
 		<lookup key="activeAccount" value="Actief"/>
 		<lookup key="startUpAccount" value="Default"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; komt van {1}, die u nog nooit een beurt heeft gestuurd. Open alleen beurten van mensen met wie u speelt."/>
+		<lookup key="activityNewSender" value="nieuwe afzender"/>
+		<lookup key="msgWrapperTurnsRecovered" value="{0} ongespeelde beurt(en) gevonden in uw postvak en toegevoegd aan het activiteitenlogboek."/>
+		<lookup key="menuItemWhereIs" value="Waar is de beurt?"/>
+		<lookup key="activityHeldBy" value="bij {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Waar is de beurt?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="{0} speler(s) gevraagd waar &apos;{1}&apos; is. De antwoorden komen met de volgende e-mailcontroles."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Er zijn geen andere spelers bekend voor &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Er zijn instellingen voor dit adres gevonden, maar die zouden uw wachtwoord onversleuteld versturen, dus de Wrapper gebruikt ze niet. Voer de serverinstellingen handmatig in."/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="enumSave" value="Save"/>
+		<lookup key="buttonDetailsShow" value="Details &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Details"/>
+		<lookup key="lblDedication" value="Aan de Helden en Tovenaars die voorgoed naar de leegte zijn gestuurd – hun torens neergehaald en hun rijdieren gedood."/>
+		<lookup key="msgNoModFound" value="Geen mod gevonden: beschouwd als het originele spel"/>
 	</language>
 	<language code="da" display="Dansk">
 		<!-- BEGIN: Main forms -->
@@ -1370,6 +1462,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Genstart venligst Wrapper'en for at disse ændringer kan tage effekt."/>
 		<lookup key="msgWrapperPollFailed" value="Forespørgsel fejlede"/>
 		<lookup key="msgWrapperGamesWaiting" value="Du har {0} spil der venter."/>
+		<lookup key="msgWrapperClickToStart" value="Klik her for at starte {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Du vil angive indstillingerne manuelt."/>
 		<lookup key="msgWrapperResendTo" value="Gensend:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Dine mailindstillinger blev fundet. Klik på Næste."/>
@@ -1441,6 +1534,7 @@
 		<lookup key="msgIgnoreInstall" value="Denne kopi blev fundet automatisk. Fjern den fra listen og ignorer {0} fremover? Tilføj mappe... henter den tilbage."/>
 		<lookup key="msgIgnoreInstalls" value="Disse kopier blev fundet automatisk. Fjern dem fra listen og ignorer deres mapper fremover? Tilføj mappe... henter en kopi tilbage."/>
 		<lookup key="msgGameStartFailed" value="Spillet kunne ikke startes fra {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Nogle ændringer på fanerne Konti eller Indstillinger er ikke gemt. Gem dem, før Wrapperen lukker?"/>
 		<lookup key="buttonRescan" value="Søg igen"/>
 		<lookup key="buttonRescanning" value="Søger..."/>
 		<lookup key="lblGamesHelp" value="Giv hver kopi af et spil en kort mærkat som Vanilla, AoWx eller Ziggurat. Mærkaten følger med de ture du sender, så alle i et spil skal bruge den samme. Standardkopien modtager ture uden mærkat."/>
@@ -1500,6 +1594,35 @@
 		<lookup key="activeAccount" value="Aktiv"/>
 		<lookup key="startUpAccount" value="Standard"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="groupBoxServer" value="Server"/>
+		<lookup key="fbPort" value="Port:"/>
+		<lookup key="fbServer" value="Server:"/>
+		<lookup key="fbEmailType" value="E-mailtype:"/>
+		<lookup key="fbSSLType" value="SSL-type:"/>
+		<lookup key="fbSmtpServer" value="SMTP-server:"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kom fra {1}, som ikke har sendt dig en tur før. Åbn kun ture fra folk, du spiller med."/>
+		<lookup key="activityNewSender" value="ny afsender"/>
+		<lookup key="msgWrapperTurnsRecovered" value="Fandt {0} uspillede ture i din postkasse og føjede dem til aktivitetsloggen."/>
+		<lookup key="menuItemWhereIs" value="Hvor er turen?"/>
+		<lookup key="activityHeldBy" value="hos {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Hvor er turen?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Spurgte {0} spiller(e), hvor &apos;{1}&apos; er. Svarene kommer med de næste posttjek."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Der kendes ingen andre spillere til &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Der blev fundet indstillinger for denne adresse, men de ville sende din adgangskode ukrypteret, så Wrapperen bruger dem ikke. Indtast serverindstillingerne manuelt."/>
+		<lookup key="menuItemExit" value="&amp;Afslut"/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="enumSave" value="Save"/>
+		<lookup key="buttonOK" value="OK"/>
+		<lookup key="buttonDetailsShow" value="Detaljer &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Detaljer"/>
+		<lookup key="lblDedication" value="Til de Helte og Troldmænd, der for evigt er sendt ud i tomrummet – deres tårne revet ned og deres ridedyr dræbt."/>
+		<lookup key="msgNoModFound" value="Intet mod fundet: regnes som det originale spil"/>
 	</language>
 	<language code="se" display="Svenska">
 		<!-- BEGIN: Main forms -->
@@ -1527,7 +1650,6 @@
 		<lookup key="fbEmailType" value="Email Typ:"/>
 		<lookup key="tabOutgoing" value="Utgående Email"/>
 		<lookup key="fbUsePolling" value="Använd inloggningsuppgifter återkommande:"/>
-		<lookup key="groupBoxServer" value="Server"/>
 		<lookup key="fbBccMyself" value="Kopia till mig själv:"/>
 		<lookup key="fbAuthentication" value="Autentisering Krävs:"/>
 		<lookup key="fbSSLType" value="SSL Typ:"/>
@@ -1617,6 +1739,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Vänligen starta om Wrappern för att dessa förändringar skall gälla i fortsättningen."/>
 		<lookup key="msgWrapperPollFailed" value="Poll misslyckades"/>
 		<lookup key="msgWrapperGamesWaiting" value="Du har {0} spel som väntar."/>
+		<lookup key="msgWrapperClickToStart" value="Klicka här för att starta {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Du kommer att skriva in inställningarna manuellt."/>
 		<lookup key="msgWrapperResendTo" value="Skicka om Till:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Dina e-postinställningar hittades. Klicka på Nästa."/>
@@ -1688,6 +1811,7 @@
 		<lookup key="msgIgnoreInstall" value="Den här kopian hittades automatiskt. Ta bort den från listan och ignorera {0} från och med nu? Lägg till mapp... tar tillbaka den."/>
 		<lookup key="msgIgnoreInstalls" value="De här kopiorna hittades automatiskt. Ta bort dem från listan och ignorera deras mappar från och med nu? Lägg till mapp... tar tillbaka en kopia."/>
 		<lookup key="msgGameStartFailed" value="Spelet kunde inte startas från {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Vissa ändringar på flikarna Konton eller Inställningar har inte sparats. Spara dem innan Wrappern stängs?"/>
 		<lookup key="buttonRescan" value="Sök igen"/>
 		<lookup key="buttonRescanning" value="Söker..."/>
 		<lookup key="lblGamesHelp" value="Ge varje kopia av ett spel en kort etikett, till exempel Vanilla, AoWx eller Ziggurat. Etiketten följer med de drag du skickar, så alla i ett parti måste använda samma etikett. Standardkopian tar emot drag utan etikett."/>
@@ -1755,6 +1879,21 @@
 		<lookup key="activeAccount" value="Active"/>
 		<lookup key="startUpAccount" value="Default"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kom från {1}, som inte har skickat ett drag till dig tidigare. Öppna bara drag från personer du spelar med."/>
+		<lookup key="activityNewSender" value="ny avsändare"/>
+		<lookup key="msgWrapperTurnsRecovered" value="Hittade {0} ospelade drag i din brevlåda och lade till dem i aktivitetsloggen."/>
+		<lookup key="menuItemWhereIs" value="Var är draget?"/>
+		<lookup key="activityHeldBy" value="hos {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Var är draget?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Frågade {0} spelare var &apos;{1}&apos; är. Svaren kommer med nästa e-postkontroll."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Inga andra spelare är kända för &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Inställningar hittades för den här adressen, men de skulle skicka ditt lösenord okrypterat, så Wrappern använder dem inte. Ange serverinställningarna manuellt."/>
+		<lookup key="buttonDetailsShow" value="Detaljer &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Detaljer"/>
+		<lookup key="lblDedication" value="Till de Hjältar och Trollkarlar som för alltid skickats ut i tomheten – deras torn rivna och deras riddjur dräpta."/>
+		<lookup key="msgNoModFound" value="Ingen mod hittades: räknas som originalspelet"/>
 	</language>
 	<language code="pl" display="Polski">
 		<!-- BEGIN: Main forms -->
@@ -1782,7 +1921,6 @@
 		<lookup key="fbEmailType" value="Protokół email:"/>
 		<lookup key="tabOutgoing" value="Poczta Wychodząca"/>
 		<lookup key="fbUsePolling" value="Użyj poświadczeń poczty przychodzącej:"/>
-		<lookup key="groupBoxServer" value="Serwer"/>
 		<lookup key="fbBccMyself" value="Wyślij kopię do mnie:"/>
 		<lookup key="fbAuthentication" value="Wymagane uwierzytelnienie:"/>
 		<lookup key="fbSSLType" value="Rodzaj SSL:"/>
@@ -1872,6 +2010,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Proszę ponownie uruchomić Wrappera, żeby te zmiany zaczęły obowiązywać."/>
 		<lookup key="msgWrapperPollFailed" value="Sprawdzanie nie powiodło się."/>
 		<lookup key="msgWrapperGamesWaiting" value="Liczba oczekujących gier: {0}."/>
+		<lookup key="msgWrapperClickToStart" value="Kliknij tutaj, aby uruchomić {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Ustawienia trzeba wprowadzić ręcznie."/>
 		<lookup key="msgWrapperResendTo" value="Wyślij ponownie do:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Znaleziono ustawienia poczty. Kliknij Dalej."/>
@@ -1943,6 +2082,7 @@
 		<lookup key="msgIgnoreInstall" value="Ta kopia została znaleziona automatycznie. Usunąć ją z listy i odtąd ignorować {0}? Dodaj folder... przywraca ją."/>
 		<lookup key="msgIgnoreInstalls" value="Te kopie zostały znalezione automatycznie. Usunąć je z listy i odtąd ignorować ich foldery? Dodaj folder... przywraca kopię."/>
 		<lookup key="msgGameStartFailed" value="Nie udało się uruchomić gry z {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Niektóre zmiany na kartach Konta lub Ustawienia nie zostały zapisane. Zapisać je przed zamknięciem Wrappera?"/>
 		<lookup key="buttonRescan" value="Szukaj ponownie"/>
 		<lookup key="buttonRescanning" value="Szukanie..."/>
 		<lookup key="lblGamesHelp" value="Nadaj każdej kopii gry krótką etykietę, np. Vanilla, AoWx lub Ziggurat. Etykieta podróżuje z wysyłanymi turami, więc wszyscy gracze w rozgrywce muszą używać tej samej. Kopia domyślna odbiera tury bez etykiety."/>
@@ -2004,6 +2144,27 @@
 		<lookup key="activeAccount" value="Aktywne"/>
 		<lookup key="startUpAccount" value="Domyślne"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; przyszła od {1}, który nigdy wcześniej nie przysłał ci tury. Otwieraj tylko tury od osób, z którymi grasz."/>
+		<lookup key="activityNewSender" value="nowy nadawca"/>
+		<lookup key="msgWrapperTurnsRecovered" value="Znaleziono {0} nierozegranych tur w skrzynce i dodano je do dziennika aktywności."/>
+		<lookup key="menuItemWhereIs" value="Gdzie jest tura?"/>
+		<lookup key="activityHeldBy" value="ma {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Gdzie jest tura?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Zapytano {0} graczy, gdzie jest &apos;{1}&apos;. Odpowiedzi przyjdą przy kolejnych sprawdzeniach poczty."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Nie są znani inni gracze dla &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Znaleziono ustawienia dla tego adresu, ale wysyłałyby hasło bez szyfrowania, więc Wrapper ich nie użyje. Wprowadź ustawienia serwera ręcznie."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="enumSave" value="Save"/>
+		<lookup key="buttonDetailsShow" value="Szczegóły &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Szczegóły"/>
+		<lookup key="lblDedication" value="Bohaterom i Czarodziejom na zawsze strąconym w pustkę – ich wieże zburzone, a wierzchowce zabite."/>
+		<lookup key="msgNoModFound" value="Nie znaleziono moda: traktowane jako gra podstawowa"/>
 	</language>
 	<language code="fi" display="Suomi">
 		<!-- BEGIN: Main forms -->
@@ -2031,7 +2192,6 @@
 		<lookup key="fbEmailType" value="Sähköpostin tyyppi:"/>
 		<lookup key="tabOutgoing" value="Lähtevät"/>
 		<lookup key="fbUsePolling" value="Käytä sähköpostin tarkistuksen suosituksia:"/>
-		<lookup key="groupBoxServer" value="Palvelin"/>
 		<lookup key="fbBccMyself" value="BCC minulle:"/>
 		<lookup key="fbAuthentication" value="Tunnistaminen:"/>
 		<lookup key="fbSSLType" value="SSL-tyyppi:"/>
@@ -2112,7 +2272,7 @@
 		<lookup key="msgWrapperArchiveGame" value="Haluatko arkistoida valitut kohteet? Tällöin kohteet siirtyvät kansioon  '{0}' johon pääset käsiksi myös pelin aikana."/>
 		<lookup key="msgWrapperCannotActivateAccount" value="Ei voi aktivoida &quot;{0}&quot; tiliä juuri nyt. Odota kunnes viestin lähetys loppuu."/>
 		<lookup key="msgAccountPrompt" value="Lisää käyttäjätilin nimi:"/>
-		<lookup key="msgAccountDeletePrompt" value="Oletko varma, että haluat poistaa tilin:"/>
+		<lookup key="msgAccountDeletePrompt" value="Oletko varma, että haluat poistaa tilin: {0}?"/>
 		<lookup key="msgAccountDuplicate" value="Tämän niminen tunnus on jo käytössä. Valitse toinen nimi."/>
 		<lookup key="msgWrapperEmailSentSuccess" value="Lähetetty [{0}] onnistuneesti."/>
 		<lookup key="msgWrapperEmailSentFailed" value="Virhe lähetettäessä sähköpostia: {0}.&#xA;{1}"/>
@@ -2121,6 +2281,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Käynnistä Wrapper uudelleen, jotta muutokset astuvat voimaan."/>
 		<lookup key="msgWrapperPollFailed" value="Sähköpostin tarkistus epäonnistui"/>
 		<lookup key="msgWrapperGamesWaiting" value="Sinulla on {0} peliä odottamassa."/>
+		<lookup key="msgWrapperClickToStart" value="Käynnistä {0} napsauttamalla tätä."/>
 		<lookup key="msgInputEmailSettingsManual" value="Lisää asetukset manuaalisesti."/>
 		<lookup key="msgWrapperResendTo" value="Lähetä:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Sähköpostiasetukset löytyivät. Napsauta Seuraava."/>
@@ -2192,6 +2353,7 @@
 		<lookup key="msgIgnoreInstall" value="Tämä kopio löytyi automaattisesti. Poistetaanko se luettelosta ja ohitetaanko {0} tästä lähtien? Lisää kansio... tuo sen takaisin."/>
 		<lookup key="msgIgnoreInstalls" value="Nämä kopiot löytyivät automaattisesti. Poistetaanko ne luettelosta ja ohitetaanko niiden kansiot tästä lähtien? Lisää kansio... tuo kopion takaisin."/>
 		<lookup key="msgGameStartFailed" value="Peliä ei voitu käynnistää kansiosta {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Joitakin Tilit- tai Asetukset-välilehden muutoksia ei ole tallennettu. Tallennetaanko ne ennen Wrapperin sulkemista?"/>
 		<lookup key="buttonRescan" value="Etsi uudelleen"/>
 		<lookup key="buttonRescanning" value="Etsitään..."/>
 		<lookup key="lblGamesHelp" value="Anna jokaiselle pelin kopiolle lyhyt tunniste, kuten Vanilla, AoWx tai Ziggurat. Tunniste kulkee lähettämiesi vuorojen mukana, joten kaikkien saman pelin pelaajien on käytettävä samaa tunnistetta. Oletuskopio vastaanottaa tunnisteettomat vuorot."/>
@@ -2255,6 +2417,25 @@
 		<lookup key="activeAccount" value="Aktiivinen"/>
 		<lookup key="startUpAccount" value="Oletus"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; tuli osoitteesta {1}, joka ei ole lähettänyt sinulle vuoroa aiemmin. Avaa vain niiden vuoroja, joiden kanssa pelaat."/>
+		<lookup key="activityNewSender" value="uusi lähettäjä"/>
+		<lookup key="msgWrapperTurnsRecovered" value="Postilaatikosta löytyi {0} pelaamatonta vuoroa, ja ne lisättiin toimintalokiin."/>
+		<lookup key="menuItemWhereIs" value="Missä vuoro on?"/>
+		<lookup key="activityHeldBy" value="pelaajalla {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Missä vuoro on?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Kysyttiin {0} pelaajalta, missä &apos;{1}&apos; on. Vastaukset saapuvat seuraavien postitarkistusten mukana."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Pelille &apos;{0}&apos; ei tunneta muita pelaajia."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Tälle osoitteelle löytyi asetukset, mutta ne lähettäisivät salasanasi salaamattomana, joten Wrapper ei käytä niitä. Syötä palvelimen asetukset käsin."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="buttonDetailsShow" value="Tiedot &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Tiedot"/>
+		<lookup key="lblDedication" value="Sankareille ja Velhoille, jotka on lähetetty ikuisiksi ajoiksi tyhjyyteen – heidän torninsa revitty maahan ja ratsunsa surmattu."/>
+		<lookup key="msgNoModFound" value="Modia ei löytynyt: katsotaan alkuperäiseksi peliksi"/>
 	</language>
 	<language code="ro" display="Română">
 		<!-- BEGIN: Main forms -->
@@ -2282,7 +2463,6 @@
 		<lookup key="fbEmailType" value="Tip Email:"/>
 		<lookup key="tabOutgoing" value="Setări Trimitere"/>
 		<lookup key="fbUsePolling" value="Folosire Setări Primire:"/>
-		<lookup key="groupBoxServer" value="Server"/>
 		<lookup key="fbBccMyself" value="Vreau să fiu trecut în BCC:"/>
 		<lookup key="fbAuthentication" value="Autentificarea Necesară:"/>
 		<lookup key="fbSSLType" value="Tip SSL:"/>
@@ -2372,6 +2552,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Wrapper-ul necesită repornire pentru ca modificările sâ îşi poată face efectul."/>
 		<lookup key="msgWrapperPollFailed" value="Interogare eşuată"/>
 		<lookup key="msgWrapperGamesWaiting" value="Aveţi {0} jocuri în aşteptare."/>
+		<lookup key="msgWrapperClickToStart" value="Faceți clic aici pentru a porni {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Veţi introduce manual setările."/>
 		<lookup key="msgWrapperResendTo" value="Retrimiteţi:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Setările de e-mail au fost găsite. Apăsați Următorul."/>
@@ -2443,6 +2624,7 @@
 		<lookup key="msgIgnoreInstall" value="Această copie a fost găsită automat. O eliminați din listă și ignorați {0} de acum înainte? Adăugare dosar... o aduce înapoi."/>
 		<lookup key="msgIgnoreInstalls" value="Aceste copii au fost găsite automat. Le eliminați din listă și ignorați dosarele lor de acum înainte? Adăugare dosar... aduce o copie înapoi."/>
 		<lookup key="msgGameStartFailed" value="Jocul nu a putut fi pornit din {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Unele modificări din filele Conturi sau Setări nu au fost salvate. Le salvați înainte de închiderea Wrapperului?"/>
 		<lookup key="buttonRescan" value="Caută din nou"/>
 		<lookup key="buttonRescanning" value="Se caută..."/>
 		<lookup key="lblGamesHelp" value="Dați fiecărei copii a unui joc o etichetă scurtă, de exemplu Vanilla, AoWx sau Ziggurat. Eticheta călătorește cu turele trimise, așa că toți jucătorii dintr-o partidă trebuie să folosească aceeași etichetă. Copia implicită primește turele fără etichetă."/>
@@ -2482,7 +2664,6 @@
 		<lookup key="menuItemResend" value="Retrimiteţi"/>
 		<!-- END: Messages -->
 		<!-- BEGIN: Context Menus -->
-		<lookup key="enumChooser" value="Alegeţi"/>
 		<lookup key="enumSending" value="În curs de trimitere"/>
 		<lookup key="enumChecking" value="În curs de interogare"/>
 		<lookup key="enumEmailWaiting" value="Email Primit"/>
@@ -2504,6 +2685,28 @@
 		<lookup key="activeAccount" value="Activ"/>
 		<lookup key="startUpAccount" value="Implicit"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; a venit de la {1}, care nu v-a mai trimis o tură. Deschideți doar ture de la persoanele cu care jucați."/>
+		<lookup key="activityNewSender" value="expeditor nou"/>
+		<lookup key="msgWrapperTurnsRecovered" value="Am găsit {0} ture nejucate în căsuța poștală și le-am adăugat în jurnalul de activitate."/>
+		<lookup key="menuItemWhereIs" value="Unde este tura?"/>
+		<lookup key="activityHeldBy" value="la {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Unde este tura?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Am întrebat {0} jucător(i) unde este &apos;{1}&apos;. Răspunsurile sosesc la următoarele verificări ale poștei."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Nu se cunosc alți jucători pentru &apos;{0}&apos;."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Au fost găsite setări pentru această adresă, dar ar trimite parola necriptată, așa că Wrapperul nu le va folosi. Introduceți manual setările serverului."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumNone" value="Niciuna"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="enumSave" value="Save"/>
+		<lookup key="buttonDetailsShow" value="Detalii &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Detalii"/>
+		<lookup key="lblDedication" value="Eroilor și Vrăjitorilor trimiși pentru totdeauna în neant – turnurile lor dărâmate, iar animalele lor de călărie ucise."/>
+		<lookup key="msgNoModFound" value="Niciun mod găsit: considerat jocul original"/>
 	</language>
 	<language code="ru" display="Русский">
 		<!-- BEGIN: Main forms -->
@@ -2531,7 +2734,6 @@
 		<lookup key="fbEmailType" value="Протокол:"/>
 		<lookup key="tabOutgoing" value="Отправка почты"/>
 		<lookup key="fbUsePolling" value="Использовать настройки получения почты:"/>
-		<lookup key="groupBoxServer" value="Сервер"/>
 		<lookup key="fbBccMyself" value="Отправить себе копию письма:"/>
 		<lookup key="fbAuthentication" value="Требуется аутентификация:"/>
 		<lookup key="fbSSLType" value="Тип SSL:"/>
@@ -2621,6 +2823,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Изменения вступят в силу после перезагрузки Wrapper'а."/>
 		<lookup key="msgWrapperPollFailed" value="Не удалось проверить почту."/>
 		<lookup key="msgWrapperGamesWaiting" value="У вас есть {0} несыгранных игр(ы)."/>
+		<lookup key="msgWrapperClickToStart" value="Нажмите здесь, чтобы запустить {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Настройки надо будет прописать вручную."/>
 		<lookup key="msgWrapperResendTo" value="Отправить заново:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Настройки почты найдены. Нажмите «Далее»."/>
@@ -2692,6 +2895,7 @@
 		<lookup key="msgIgnoreInstall" value="Эта копия найдена автоматически. Убрать её из списка и впредь игнорировать {0}? «Добавить папку...» вернёт её."/>
 		<lookup key="msgIgnoreInstalls" value="Эти копии найдены автоматически. Убрать их из списка и впредь игнорировать их папки? «Добавить папку...» вернёт копию."/>
 		<lookup key="msgGameStartFailed" value="Не удалось запустить игру из {0}: {1}"/>
+		<lookup key="msgWrapperUnsavedChanges" value="Некоторые изменения на вкладках «Учётные записи» или «Настройки» не сохранены. Сохранить их перед закрытием Wrapper?"/>
 		<lookup key="buttonRescan" value="Искать снова"/>
 		<lookup key="buttonRescanning" value="Поиск..."/>
 		<lookup key="lblGamesHelp" value="Дайте каждой копии игры короткую метку, например Vanilla, AoWx или Ziggurat. Метка передаётся вместе с отправляемыми ходами, поэтому все участники партии должны использовать одну и ту же метку. Копия по умолчанию получает ходы без метки."/>
@@ -2753,5 +2957,26 @@
 		<lookup key="activeAccount" value="Активный"/>
 		<lookup key="startUpAccount" value="По умолчанию"/>
 		<!-- END: Misc -->
+		<!-- Added in 2.1: keys this language was missing -->
+		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
+		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; пришёл от {1}, который раньше не присылал вам ходов. Открывайте только ходы от тех, с кем играете."/>
+		<lookup key="activityNewSender" value="новый отправитель"/>
+		<lookup key="msgWrapperTurnsRecovered" value="В почтовом ящике найдено несыгранных ходов: {0}. Они добавлены в журнал активности."/>
+		<lookup key="menuItemWhereIs" value="Где ход?"/>
+		<lookup key="activityHeldBy" value="у {0}"/>
+		<lookup key="msgWrapperWhereIsTitle" value="Где ход?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Спросили игроков ({0}), где &apos;{1}&apos;. Ответы придут при следующих проверках почты."/>
+		<lookup key="msgWrapperWhereIsNobody" value="Другие игроки для &apos;{0}&apos; неизвестны."/>
+		<lookup key="msgAutoconfigUnencryptedOnly" value="Для этого адреса найдены настройки, но с ними пароль передавался бы без шифрования, поэтому Wrapper их не использует. Введите настройки сервера вручную."/>
+		<lookup key="enumIMAP" value="IMAP"/>
+		<lookup key="enumPOP3" value="POP3"/>
+		<lookup key="enumSSL" value="SSL"/>
+		<lookup key="enumTLS" value="TLS"/>
+		<lookup key="enumEmailIn" value="EmailIn"/>
+		<lookup key="enumSave" value="Save"/>
+		<lookup key="buttonDetailsShow" value="Подробности &gt;&gt;"/>
+		<lookup key="buttonDetailsHide" value="&lt;&lt; Подробности"/>
+		<lookup key="lblDedication" value="Героям и Волшебникам, навеки отправленным в пустоту, — их башни разрушены, а скакуны убиты."/>
+		<lookup key="msgNoModFound" value="Мод не найден: считается оригинальной игрой"/>
 	</language>
 </languages>

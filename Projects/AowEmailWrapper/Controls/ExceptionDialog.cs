@@ -3,6 +3,7 @@ using AowEmailWrapper.Helpers;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using AowEmailWrapper.Localization;
 
 namespace AowEmailWrapper.Controls
 {
@@ -18,6 +19,8 @@ namespace AowEmailWrapper.Controls
             Theme.Apply(this);
         }
 
+        private const string DetailsShowKey = "buttonDetailsShow";
+        private const string DetailsHideKey = "buttonDetailsHide";
         private const int Pad = 16;
         private const int ButtonHeight = 28;
         private const int DetailsHeight = 230;
@@ -92,8 +95,11 @@ namespace AowEmailWrapper.Controls
             Controls.Add(_details);
 
             _detailsButton = new Button();
-            _detailsButton.Text = "Details >>";
-            _detailsButton.Size = new Size(DpiHelper.Scale(90), buttonHeight);
+            _detailsButton.Text = DetailsText(false);
+            //As wide as the longer of its two captions needs, which varies with the language
+            Font detailsFont = Theme.Enabled ? Theme.ButtonFont(buttonHeight) : Font;
+            int detailsWidth = Math.Max(TextRenderer.MeasureText(DetailsText(false), detailsFont).Width, TextRenderer.MeasureText(DetailsText(true), detailsFont).Width) + DpiHelper.Scale(24);
+            _detailsButton.Size = new Size(Math.Max(DpiHelper.Scale(90), detailsWidth), buttonHeight);
             _detailsButton.Location = new Point(pad, _collapsedHeight - pad - buttonHeight);
             _detailsButton.Click += new EventHandler(DetailsButton_Click);
             Controls.Add(_detailsButton);
@@ -129,11 +135,17 @@ namespace AowEmailWrapper.Controls
             Close();
         }
 
+        private static string DetailsText(bool expanded)
+        {
+            string text = Translator.Translate(expanded ? DetailsHideKey : DetailsShowKey);
+            return string.IsNullOrEmpty(text) ? (expanded ? "<< Details" : "Details >>") : text;
+        }
+
         private void DetailsButton_Click(object sender, EventArgs e)
         {
             bool expand = !_details.Visible;
             _details.Visible = expand;
-            _detailsButton.Text = expand ? "<< Details" : "Details >>";
+            _detailsButton.Text = DetailsText(expand);
             ClientSize = new Size(ClientSize.Width, expand ? _expandedHeight : _collapsedHeight);
         }
 

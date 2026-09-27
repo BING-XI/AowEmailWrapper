@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zlib.net", "..\Projects\Zli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AowEmailWrapper.Tests", "..\Tests\AowEmailWrapper.Tests\AowEmailWrapper.Tests.csproj", "{B516E5D8-D4BA-47D0-B3B4-4636BE377393}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AowEmailWrapper.SmokeTests", "..\Tests\AowEmailWrapper.SmokeTests\AowEmailWrapper.SmokeTests.csproj", "{04E2EDAE-7D5A-4501-A587-9968C4023144}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{B516E5D8-D4BA-47D0-B3B4-4636BE377393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B516E5D8-D4BA-47D0-B3B4-4636BE377393}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B516E5D8-D4BA-47D0-B3B4-4636BE377393}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04E2EDAE-7D5A-4501-A587-9968C4023144}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04E2EDAE-7D5A-4501-A587-9968C4023144}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04E2EDAE-7D5A-4501-A587-9968C4023144}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04E2EDAE-7D5A-4501-A587-9968C4023144}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

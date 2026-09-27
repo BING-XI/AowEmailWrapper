@@ -51,6 +51,12 @@ namespace AowEmailWrapper
         private const string WrapperArchiveGameMessageBoxKey = "msgWrapperArchiveGame";
         private const string WrapperCannotActivateAccountMessageBoxKey = "msgWrapperCannotActivateAccount";
         private const string WrapperGameStartFailedKey = "msgGameStartFailed";
+        private const string WrapperUnsavedChangesKey = "msgWrapperUnsavedChanges";
+        private const string WrapperClickToStartKey = "msgWrapperClickToStart";
+        //The text of the last "games waiting" notification, so a click on it can be told from a click on another
+        private string _gamesWaitingBalloonText;
+        //The text of the last notification shown; NotifyIcon does not keep it when the text is passed to ShowBalloonTip
+        private string _lastBalloonText;
         private const string WrapperGameStartFailedFallback = "The game could not be started from {0}: {1}";
         private const string WrapperEmailSentSuccessKey = "msgWrapperEmailSentSuccess";
         private const string WrapperEmailSentFailedKey = "msgWrapperEmailSentFailed";
@@ -127,6 +133,10 @@ namespace AowEmailWrapper
         //only announces waits until the pollers and the games have settled
         private const int UpdateInstallDelayMilliseconds = 3000;
         private const int UpdateCheckDelayMilliseconds = 20000;
+        //A Wrapper that runs for days, or started while offline, still learns of new builds
+        private const int UpdateCheckIntervalMilliseconds = 24 * 60 * 60 * 1000;
+        //An automatic install waits while a game is running or a turn is being sent
+        private const int UpdateBusyRetryMilliseconds = 60 * 60 * 1000;
         private const int UpdateNotesMaxLength = 600;
         private System.Windows.Forms.Timer _updateTimer;
         private UpdateInfo _availableUpdate;
@@ -135,6 +145,8 @@ namespace AowEmailWrapper
         private bool _isNewConfig = false;
         private bool _configNeedsSave = false;
         private bool _configChangeTracking = false;
+        //Set when the Wrapper starts into the tray; the first request to show the window is then turned down
+        private bool _startInTray = false;
         //Set while the window is brought back from the tray: its native state passes through minimized on the way
         private bool _restoringFromTray = false;
         //The size the window was designed with, for a window that has to be put back on a screen
@@ -314,10 +326,15 @@ namespace AowEmailWrapper
 
         private void updateTimer_Tick(object sender, EventArgs e)
         {
-            _updateTimer.Stop();
-            _updateTimer.Dispose();
-            _updateTimer = null;
+            //The same timer then checks once a day for as long as the Wrapper runs
+            _updateTimer.Interval = UpdateCheckIntervalMilliseconds;
             CheckForUpdates(false);
+        }
+
+        /// <summary>True while a game started from the tray is running or a turn is on its way out.</summary>
+        private bool IsBusyForUpdate
+        {
+            get { return _aow1GameWatcher != null || _aow2GameWatcher != null || _aowSmGameWatcher != null || IsAnySending || ConfigNeedsSave; }
         }
 
         private void cmdCheckUpdates_Click(object sender, EventArgs e)
@@ -361,6 +378,12 @@ namespace AowEmailWrapper
                     {
                         OfferUpdate();
                     }
+                    else if (AutoInstallUpdates && IsBusyForUpdate && _updateTimer != null)
+                    {
+                        //Closing the Wrapper now would cut off the game's turn or drop unsaved settings; look again in an hour
+                        Trace.TraceInformation("Update {0} waits: a game is running, a turn is being sent or settings are unsaved", update.Describe());
+                        _updateTimer.Interval = UpdateBusyRetryMilliseconds;
+                    }
                     else if (AutoInstallUpdates && OkayToShutDown && await InstallSilently(update))
                     {
                         return;
@@ -369,7 +392,7 @@ namespace AowEmailWrapper
                     {
                         UpdateHelper.LastNotifiedTag = update.Tag;
                         _updateBalloonShown = true;
-                        notifyIcon.ShowBalloonTip(20000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateBalloonKey, update.Describe()), ToolTipIcon.Info);
+                        ShowBalloon(20000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateBalloonKey, update.Describe()), ToolTipIcon.Info);
                     }
                 }
                 else
@@ -419,7 +442,7 @@ namespace AowEmailWrapper
             }
 
             Trace.TraceInformation("Installing {0} automatically", update.Describe());
-            notifyIcon.ShowBalloonTip(10000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateInstallingKey, update.Describe()), ToolTipIcon.Info);
+            ShowBalloon(10000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateInstallingKey, update.Describe()), ToolTipIcon.Info);
 
             UpdateHelper.PendingInstaller = installer;
             _closeCancel = false;
@@ -461,6 +484,11 @@ namespace AowEmailWrapper
                 return;
             }
 
+            if (!ConfirmUnsavedChanges())
+            {
+                return;
+            }
+
             string installer = UpdateForm.Download(this, update);
             if (string.IsNullOrEmpty(installer))
             {
@@ -479,6 +507,41 @@ namespace AowEmailWrapper
                 _updateBalloonShown = false;
                 OfferUpdate();
             }
+            else if (_gamesWaitingBalloonText != null && string.Equals(_lastBalloonText, _gamesWaitingBalloonText, StringComparison.Ordinal))
+            {
+                //The game with the waiting turn, or the Activity Log when turns wait in more than one
+                _gamesWaitingBalloonText = null;
+                AowGame waiting = SingleGameWaiting();
+                if (waiting != null)
+                {
+                    StartGame(waiting);
+                }
+                else
+                {
+                    Maximize();
+                }
+            }
+        }
+
+        /// <summary>Every notification goes through here, so a click can be matched to the one it was on.</summary>
+        private void ShowBalloon(int timeout, string title, string text, ToolTipIcon icon)
+        {
+            _lastBalloonText = text;
+            notifyIcon.ShowBalloonTip(timeout, title, text, icon);
+        }
+
+        /// <summary>The copy of a game every waiting turn belongs to, or null when there are none or several.</summary>
+        private AowGame SingleGameWaiting()
+        {
+            List<AowGame> games = _activityLog.Activities
+                .Where(activity => activity.Status.Equals(ActivityState.Received))
+                .Select(activity => _gameManager.GetGameForActivity(activity))
+                .ToList();
+            if (games.Count == 0 || games.Any(game => game == null || !game.IsInstalled))
+            {
+                return null;
+            }
+            return games.Select(game => game.Id).Distinct().Count() == 1 ? games[0] : null;
         }
 
         private void notifyIcon_BalloonTipClosed(object sender, EventArgs e)
@@ -567,6 +630,7 @@ namespace AowEmailWrapper
                 {
                     this.WindowState = FormWindowState.Minimized;
                     Minimized();
+                    _startInTray = true;
                 }
 
                 if (_wrapperConfig != null)
@@ -638,7 +702,13 @@ namespace AowEmailWrapper
                     }
                     else
                     {
-                        RegistryHelper.DeleteValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                        //Only this copy's own entry: another installation of the Wrapper (or a test copy with
+                        //autostart off) must not switch off the autostart of the one the player uses
+                        string current = RegistryHelper.GetValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                        if (current != null && current.IndexOf(Application.ExecutablePath, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            RegistryHelper.DeleteValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                        }
                     }
                 }
 
@@ -715,11 +785,37 @@ namespace AowEmailWrapper
 
         private void ShutDown(object sender, EventArgs e)
         {
-            if (OkayToShutDown)
+            if (OkayToShutDown && ConfirmUnsavedChanges())
             {
                 _closeCancel = false;
                 this.Close();
             }
+        }
+
+        /// <summary>
+        /// Before the Wrapper closes on the player's say-so (Exit, or installing an update), changes on the
+        /// Accounts or Settings tab that were never saved are offered for saving instead of being dropped
+        /// without a word. Returns false when the player cancels, or when saving did not succeed.
+        /// </summary>
+        private bool ConfirmUnsavedChanges()
+        {
+            if (!ConfigNeedsSave)
+            {
+                return true;
+            }
+
+            Maximize();
+            DialogResult answer = MessageBox.Show(this, Translator.Translate(WrapperUnsavedChangesKey), Translator.Translate(this.Name), MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (answer == DialogResult.Cancel)
+            {
+                return false;
+            }
+            if (answer == DialogResult.Yes)
+            {
+                SaveConfig(false);
+                return !ConfigNeedsSave;
+            }
+            return true;
         }
 
         private void StartedGameWatchCompleted(object sender, AowGameType gameType)
@@ -794,11 +890,19 @@ namespace AowEmailWrapper
                         Activity stranger = NextUnannouncedNewSender();
                         if (stranger != null)
                         {
-                            notifyIcon.ShowBalloonTip(15000, Translator.Translate(this.Name), NewSenderMessage(stranger), ToolTipIcon.Warning);
+                            ShowBalloon(15000, Translator.Translate(this.Name), NewSenderMessage(stranger), ToolTipIcon.Warning);
                         }
                         else
                         {
-                            notifyIcon.ShowBalloonTip(5000, Translator.Translate(this.Name), Translator.Translate(WrapperGamesWaitingKey, fileCount.ToString()), ToolTipIcon.Info);
+                            //A click on the notification starts the game when all the waiting turns belong to one copy
+                            string text = Translator.Translate(WrapperGamesWaitingKey, fileCount.ToString());
+                            AowGame waiting = SingleGameWaiting();
+                            if (waiting != null)
+                            {
+                                text = string.Concat(text, Environment.NewLine, Translator.Translate(WrapperClickToStartKey, waiting.DisplayName));
+                            }
+                            _gamesWaitingBalloonText = text;
+                            ShowBalloon(5000, Translator.Translate(this.Name), text, ToolTipIcon.Info);
                         }
                     }
                 }
@@ -932,6 +1036,26 @@ namespace AowEmailWrapper
         /// and letting Windows restore it first uses the placement Windows itself keeps; the taskbar button
         /// comes back only once the window is at its normal bounds.
         /// </summary>
+        /// <summary>
+        /// Application.Run shows the main window. Starting into the tray, that would leave it shown but
+        /// minimized off-screen, where it has no taskbar button yet appears in Alt+Tab; so that first show
+        /// is turned down and the window stays hidden until Show. Its handle is created all the same, as
+        /// the mail checkers and the local mail server report back through it.
+        /// </summary>
+        protected override void SetVisibleCore(bool value)
+        {
+            if (value && _startInTray)
+            {
+                _startInTray = false;
+                if (!IsHandleCreated)
+                {
+                    CreateHandle();
+                }
+                value = false;
+            }
+            base.SetVisibleCore(value);
+        }
+
         private void RestoreFromTray()
         {
             _restoringFromTray = true;
@@ -1374,7 +1498,7 @@ namespace AowEmailWrapper
             if (count > 0)
             {
                 string text = Translator.Translate(WrapperTurnsRecoveredKey, count.ToString());
-                notifyIcon.ShowBalloonTip(15000, Translator.Translate(this.Name), string.IsNullOrEmpty(text) ? string.Format(WrapperTurnsRecoveredFallback, count) : text, ToolTipIcon.Info);
+                ShowBalloon(15000, Translator.Translate(this.Name), string.IsNullOrEmpty(text) ? string.Format(WrapperTurnsRecoveredFallback, count) : text, ToolTipIcon.Info);
             }
 
             RaiseEvent(_activityLogRefresh, this, new EventArgs());
@@ -1455,7 +1579,7 @@ namespace AowEmailWrapper
             DataManagerHelper.SaveActivityLog(_activityLog);
             activityListView.Refresh();
 
-            notifyIcon.ShowBalloonTip(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
+            ShowBalloon(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
 
         /// <summary>"Where is the turn?" on the activity list: every other player of the game is asked by email.</summary>
@@ -1467,7 +1591,7 @@ namespace AowEmailWrapper
                 if (players.Count == 0)
                 {
                     string none = Translator.Translate(WrapperWhereIsNobodyKey, activity.FileName);
-                    notifyIcon.ShowBalloonTip(10000, WhereIsTitle(), string.IsNullOrEmpty(none) ? string.Format(WrapperWhereIsNobodyFallback, activity.FileName) : none, ToolTipIcon.Info);
+                    ShowBalloon(10000, WhereIsTitle(), string.IsNullOrEmpty(none) ? string.Format(WrapperWhereIsNobodyFallback, activity.FileName) : none, ToolTipIcon.Info);
                     continue;
                 }
 
@@ -1487,7 +1611,7 @@ namespace AowEmailWrapper
 
                 Trace.TraceInformation("Asked {0} player(s) where '{1}' is", players.Count, activity.FileName);
                 string asked = Translator.Translate(WrapperWhereIsAskedKey, players.Count.ToString(), activity.FileName);
-                notifyIcon.ShowBalloonTip(10000, WhereIsTitle(), string.IsNullOrEmpty(asked) ? string.Format(WrapperWhereIsAskedFallback, players.Count, activity.FileName) : asked, ToolTipIcon.Info);
+                ShowBalloon(10000, WhereIsTitle(), string.IsNullOrEmpty(asked) ? string.Format(WrapperWhereIsAskedFallback, players.Count, activity.FileName) : asked, ToolTipIcon.Info);
             }
         }
 
@@ -1555,11 +1679,11 @@ namespace AowEmailWrapper
                                 failed.Stop();
                                 _pollers.Remove(failed.AccountName ?? string.Empty);
                             }
-                            notifyIcon.ShowBalloonTip(20000, Translator.Translate(WrapperPollFailedKey), BuildPollAuthFailedMessage(failed), ToolTipIcon.Warning);
+                            ShowBalloon(20000, Translator.Translate(WrapperPollFailedKey), BuildPollAuthFailedMessage(failed), ToolTipIcon.Warning);
                         }
                         else if (e.Exception != null)
                         {
-                            notifyIcon.ShowBalloonTip(15000, Translator.Translate(WrapperPollFailedKey), e.Exception.Message, ToolTipIcon.Error);
+                            ShowBalloon(15000, Translator.Translate(WrapperPollFailedKey), e.Exception.Message, ToolTipIcon.Error);
                         }
                         else
                         {
@@ -1732,7 +1856,7 @@ namespace AowEmailWrapper
                     DataManagerHelper.SaveConfig(_wrapperConfig);
                 }
 
-                notifyIcon.ShowBalloonTip(15000, theResponse.GameEmail.Subject, Translator.Translate(WrapperEmailSentSuccessKey, MailHelper.GetFirstToAddress(theResponse.GameEmail)), ToolTipIcon.Info);
+                ShowBalloon(15000, theResponse.GameEmail.Subject, Translator.Translate(WrapperEmailSentSuccessKey, MailHelper.GetFirstToAddress(theResponse.GameEmail)), ToolTipIcon.Info);
                 if (_wrapperConfig.PreferencesConfig != null && _wrapperConfig.PreferencesConfig.PlaySoundOnSend)
                 {
                     PlaySound(ConfigHelper.SentSound);
@@ -1784,7 +1908,7 @@ namespace AowEmailWrapper
                 if (account != null && account.SmtpConfig != null && account.SmtpConfig.Verified)
                 {
                     //Just show Baloon error
-                    notifyIcon.ShowBalloonTip(15000, theResponse.GameEmail.Subject, theResponse.Exception.Message, ToolTipIcon.Error);
+                    ShowBalloon(15000, theResponse.GameEmail.Subject, theResponse.Exception.Message, ToolTipIcon.Error);
                     theResponse.Dispose();
                 }
                 else
@@ -1941,8 +2065,21 @@ namespace AowEmailWrapper
         #region Activity Log
 
         //Raised by the AowGameManager class
+        /// <summary>
+        /// Raised on the mail checker's thread when a downloaded turn has been stored. The activity log
+        /// is also read by the window (the list, the tray icon, saving), and a list changed on one thread
+        /// while another reads it can throw or be saved half written, so the turn is recorded on the
+        /// window's thread. Invoke rather than BeginInvoke: the checker goes on to report the end of the
+        /// check, and the turn must be in the log by then.
+        /// </summary>
         private void OnAowGameSaved(object sender, AowGameSavedEventArgs e)
         {
+            if (this.InvokeRequired && this.IsHandleCreated && !this.IsDisposed)
+            {
+                this.Invoke(new AowGameSavedEventHandler(OnAowGameSaved), sender, e);
+                return;
+            }
+
             ResendHelper.Delete(e.FileName); //Avoids the user resending the previous turn by mistake
 
             //Decided before the previous turn of this game is dropped, since that may be the record of this sender

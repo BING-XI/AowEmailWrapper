@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Smoke tests: start the real, built Wrapper in its own process with an isolated settings folder and
+    drive it the way a player does (tray icon, tray menu, tabs, dialogs, a turn arriving by mail).
+    They need an interactive desktop, which Windows developer machines and GitHub's Windows runners have.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- For UI Automation (System.Windows.Automation), which reads the tray menu and the tabs -->
+    <UseWPF>true</UseWPF>
+    <RootNamespace>AowEmailWrapper.SmokeTests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Builds the Wrapper first and gives the tests its configuration types and game detection -->
+    <ProjectReference Include="..\..\Projects\AowEmailWrapper\AowEmailWrapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
