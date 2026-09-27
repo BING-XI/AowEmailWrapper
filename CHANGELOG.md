@@ -3,6 +3,26 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## 2.1.0
+
+- Clicking the "games waiting" notification starts the game when all the waiting turns belong to one
+  copy of it; otherwise it opens the Activity Log.
+- The Wrapper looks for a new version once a day while it runs, not only when it starts, so one that
+  started offline or runs for days still finds updates. An automatic install waits while a game started
+  from the tray is running, a turn is being sent, or settings are unsaved.
+- Exit on the tray menu and installing an update offer to save unsaved changes on the Accounts and
+  Settings tabs instead of dropping them.
+- Every language now has every text. Until now 10 to 24 texts per language quietly appeared in English;
+  among them the Where is the turn? feature, new-sender warnings and the Details button of error messages.
+- The splash screen no longer stays on screen when the Wrapper loads faster than the splash appears.
+- Started from the Start menu, the Wrapper goes straight to the tray instead of leaving an invisible
+  minimized window behind that showed up in Alt+Tab.
+- A turn that arrives while the Activity Log is being drawn or saved can no longer upset it.
+- Switching autostart off removes only this installation's own autostart entry.
+
+Run `AowEmailWrapper-2.1.0-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
+*Check for updates* on the Settings tab. Accounts and settings carry over.
+
 ## 2.0.9
 
 - A game whose executable came out of a downloaded zip, as a mod's does, starts from the tray menu without
