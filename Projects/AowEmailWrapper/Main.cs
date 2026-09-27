@@ -51,6 +51,7 @@ namespace AowEmailWrapper
         private const string WrapperArchiveGameMessageBoxKey = "msgWrapperArchiveGame";
         private const string WrapperCannotActivateAccountMessageBoxKey = "msgWrapperCannotActivateAccount";
         private const string WrapperGameStartFailedKey = "msgGameStartFailed";
+        private const string WrapperUnsavedChangesKey = "msgWrapperUnsavedChanges";
         private const string WrapperGameStartFailedFallback = "The game could not be started from {0}: {1}";
         private const string WrapperEmailSentSuccessKey = "msgWrapperEmailSentSuccess";
         private const string WrapperEmailSentFailedKey = "msgWrapperEmailSentFailed";
@@ -127,6 +128,10 @@ namespace AowEmailWrapper
         //only announces waits until the pollers and the games have settled
         private const int UpdateInstallDelayMilliseconds = 3000;
         private const int UpdateCheckDelayMilliseconds = 20000;
+        //A Wrapper that runs for days, or started while offline, still learns of new builds
+        private const int UpdateCheckIntervalMilliseconds = 24 * 60 * 60 * 1000;
+        //An automatic install waits while a game is running or a turn is being sent
+        private const int UpdateBusyRetryMilliseconds = 60 * 60 * 1000;
         private const int UpdateNotesMaxLength = 600;
         private System.Windows.Forms.Timer _updateTimer;
         private UpdateInfo _availableUpdate;
@@ -314,10 +319,15 @@ namespace AowEmailWrapper
 
         private void updateTimer_Tick(object sender, EventArgs e)
         {
-            _updateTimer.Stop();
-            _updateTimer.Dispose();
-            _updateTimer = null;
+            //The same timer then checks once a day for as long as the Wrapper runs
+            _updateTimer.Interval = UpdateCheckIntervalMilliseconds;
             CheckForUpdates(false);
+        }
+
+        /// <summary>True while a game started from the tray is running or a turn is on its way out.</summary>
+        private bool IsBusyForUpdate
+        {
+            get { return _aow1GameWatcher != null || _aow2GameWatcher != null || _aowSmGameWatcher != null || IsAnySending || ConfigNeedsSave; }
         }
 
         private void cmdCheckUpdates_Click(object sender, EventArgs e)
@@ -360,6 +370,12 @@ namespace AowEmailWrapper
                     if (interactive)
                     {
                         OfferUpdate();
+                    }
+                    else if (AutoInstallUpdates && IsBusyForUpdate && _updateTimer != null)
+                    {
+                        //Closing the Wrapper now would cut off the game's turn or drop unsaved settings; look again in an hour
+                        Trace.TraceInformation("Update {0} waits: a game is running, a turn is being sent or settings are unsaved", update.Describe());
+                        _updateTimer.Interval = UpdateBusyRetryMilliseconds;
                     }
                     else if (AutoInstallUpdates && OkayToShutDown && await InstallSilently(update))
                     {
@@ -457,6 +473,11 @@ namespace AowEmailWrapper
             }
 
             if (MessageBox.Show(this, message, Translator.Translate(WrapperUpdateAvailableKey), MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            if (!ConfirmUnsavedChanges())
             {
                 return;
             }
@@ -715,11 +736,37 @@ namespace AowEmailWrapper
 
         private void ShutDown(object sender, EventArgs e)
         {
-            if (OkayToShutDown)
+            if (OkayToShutDown && ConfirmUnsavedChanges())
             {
                 _closeCancel = false;
                 this.Close();
             }
+        }
+
+        /// <summary>
+        /// Before the Wrapper closes on the player's say-so (Exit, or installing an update), changes on the
+        /// Accounts or Settings tab that were never saved are offered for saving instead of being dropped
+        /// without a word. Returns false when the player cancels, or when saving did not succeed.
+        /// </summary>
+        private bool ConfirmUnsavedChanges()
+        {
+            if (!ConfigNeedsSave)
+            {
+                return true;
+            }
+
+            Maximize();
+            DialogResult answer = MessageBox.Show(this, Translator.Translate(WrapperUnsavedChangesKey), Translator.Translate(this.Name), MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (answer == DialogResult.Cancel)
+            {
+                return false;
+            }
+            if (answer == DialogResult.Yes)
+            {
+                SaveConfig(false);
+                return !ConfigNeedsSave;
+            }
+            return true;
         }
 
         private void StartedGameWatchCompleted(object sender, AowGameType gameType)
@@ -1941,8 +1988,21 @@ namespace AowEmailWrapper
         #region Activity Log
 
         //Raised by the AowGameManager class
+        /// <summary>
+        /// Raised on the mail checker's thread when a downloaded turn has been stored. The activity log
+        /// is also read by the window (the list, the tray icon, saving), and a list changed on one thread
+        /// while another reads it can throw or be saved half written, so the turn is recorded on the
+        /// window's thread. Invoke rather than BeginInvoke: the checker goes on to report the end of the
+        /// check, and the turn must be in the log by then.
+        /// </summary>
         private void OnAowGameSaved(object sender, AowGameSavedEventArgs e)
         {
+            if (this.InvokeRequired && this.IsHandleCreated && !this.IsDisposed)
+            {
+                this.Invoke(new AowGameSavedEventHandler(OnAowGameSaved), sender, e);
+                return;
+            }
+
             ResendHelper.Delete(e.FileName); //Avoids the user resending the previous turn by mistake
 
             //Decided before the previous turn of this game is dropped, since that may be the record of this sender

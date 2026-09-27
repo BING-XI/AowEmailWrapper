@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="AowEmailWrapper.Tests" />
     <!-- Runtime data files shipped next to the executable -->
     <None Update="Localization.xml" CopyToOutputDirectory="PreserveNewest" />
     <None Update="notify.wav" CopyToOutputDirectory="PreserveNewest" />

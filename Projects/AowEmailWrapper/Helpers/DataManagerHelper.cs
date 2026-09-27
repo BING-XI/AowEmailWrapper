@@ -15,8 +15,16 @@ namespace AowEmailWrapper.Helpers
 
         #region Localization
 
+        /// <summary>Set by the localisation tests to supply a pseudo language; the Wrapper never sets it.</summary>
+        internal static Languages LanguagesOverride { get; set; }
+
         public static Languages LoadLanguages()
         {
+            if (LanguagesOverride != null)
+            {
+                return LanguagesOverride;
+            }
+
             string localizationFilePath = Path.Combine(Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath), LOCALIZATION_FILE_NAME);
 
             Languages returnVal = FileHelper.LoadXmlFile<Languages>(localizationFilePath);
