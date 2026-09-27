@@ -210,8 +210,10 @@ namespace AowEmailWrapper.SmokeTests
                 Native.PostMessage(h, TrayMessage, IntPtr.Zero, (IntPtr)0x205);
             }
             IntPtr menu = IntPtr.Zero;
-            Until(() => (menu = TopWindows().FirstOrDefault(h => Native.IsWindowVisible(h) && Native.Class(h).StartsWith("WindowsForms10.Window.20808", StringComparison.Ordinal))) != IntPtr.Zero,
-                TimeSpan.FromSeconds(10), "the tray menu did not open");
+            //A menu's class carries CS_DROPSHADOW (Window.20808) only where Windows draws shadows; build
+            //machines often have visual effects off, and then it is Window.808
+            Until(() => (menu = TopWindows().FirstOrDefault(h => Native.IsWindowVisible(h) && IsMenuClass(Native.Class(h)))) != IntPtr.Zero,
+                TimeSpan.FromSeconds(10), "the tray menu did not open:" + Environment.NewLine + DescribeWindows());
 
             AutomationElement root = AutomationElement.FromHandle(menu);
             List<AutomationElement> items = root.FindAll(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.MenuItem)).Cast<AutomationElement>().ToList();
@@ -251,6 +253,11 @@ namespace AowEmailWrapper.SmokeTests
         /// the notification WinForms switches pages on (UI Automation's Select moves only the header).
         /// Each index is tried until the page with that caption is the one showing.
         /// </summary>
+        private static bool IsMenuClass(string name)
+        {
+            return name.StartsWith("WindowsForms10.Window.20808.", StringComparison.Ordinal) || name.StartsWith("WindowsForms10.Window.808.", StringComparison.Ordinal);
+        }
+
         public void SelectTab(string name)
         {
             const int TCM_GETITEMCOUNT = 0x1304, TCM_SETCURFOCUS = 0x1330;
