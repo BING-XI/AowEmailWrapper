@@ -8,6 +8,9 @@ namespace AowEmailWrapper
     {
         private static Splash _frmSplash = null;
         private static Thread _frmThread = null;
+        //The splash is built on its own thread; the main window may finish loading first
+        private static readonly object Sync = new object();
+        private static bool _closeRequested;
 
         private double _opacityIncrement = .05;
         private double _opacityDecrement = .1;
@@ -55,13 +58,22 @@ namespace AowEmailWrapper
 
         private static void ShowForm()
         {
-            _frmSplash = new Splash();
-            Application.Run(_frmSplash);
+            Splash splash = new Splash();
+            lock (Sync)
+            {
+                //Asked to close before it existed: it fades out at once instead of staying for good
+                if (_closeRequested)
+                {
+                    splash._opacityIncrement = -splash._opacityDecrement;
+                }
+                _frmSplash = splash;
+            }
+            Application.Run(splash);
         }
 
         public static  void ShowSplashScreen()
         {
-            if (_frmSplash != null)
+            if (_frmThread != null)
                 return;
             _frmThread = new Thread(new ThreadStart(Splash.ShowForm));
             _frmThread.IsBackground = true;
@@ -71,13 +83,15 @@ namespace AowEmailWrapper
 
         public static void CloseForm()
         {
-            if (_frmSplash != null && _frmSplash.IsDisposed == false)
+            lock (Sync)
             {
-                // Make it start going away.
-                _frmSplash._opacityIncrement = -_frmSplash._opacityDecrement;
+                _closeRequested = true;
+                if (_frmSplash != null && _frmSplash.IsDisposed == false)
+                {
+                    // Make it start going away.
+                    _frmSplash._opacityIncrement = -_frmSplash._opacityDecrement;
+                }
             }
-            _frmThread = null;	// we don't need these any more.
-            _frmSplash = null;
         }
     }
 }

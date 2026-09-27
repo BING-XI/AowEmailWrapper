@@ -145,6 +145,8 @@ namespace AowEmailWrapper
         private bool _isNewConfig = false;
         private bool _configNeedsSave = false;
         private bool _configChangeTracking = false;
+        //Set when the Wrapper starts into the tray; the first request to show the window is then turned down
+        private bool _startInTray = false;
         //Set while the window is brought back from the tray: its native state passes through minimized on the way
         private bool _restoringFromTray = false;
         //The size the window was designed with, for a window that has to be put back on a screen
@@ -628,6 +630,7 @@ namespace AowEmailWrapper
                 {
                     this.WindowState = FormWindowState.Minimized;
                     Minimized();
+                    _startInTray = true;
                 }
 
                 if (_wrapperConfig != null)
@@ -699,7 +702,13 @@ namespace AowEmailWrapper
                     }
                     else
                     {
-                        RegistryHelper.DeleteValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                        //Only this copy's own entry: another installation of the Wrapper (or a test copy with
+                        //autostart off) must not switch off the autostart of the one the player uses
+                        string current = RegistryHelper.GetValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                        if (current != null && current.IndexOf(Application.ExecutablePath, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            RegistryHelper.DeleteValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                        }
                     }
                 }
 
@@ -1027,6 +1036,26 @@ namespace AowEmailWrapper
         /// and letting Windows restore it first uses the placement Windows itself keeps; the taskbar button
         /// comes back only once the window is at its normal bounds.
         /// </summary>
+        /// <summary>
+        /// Application.Run shows the main window. Starting into the tray, that would leave it shown but
+        /// minimized off-screen, where it has no taskbar button yet appears in Alt+Tab; so that first show
+        /// is turned down and the window stays hidden until Show. Its handle is created all the same, as
+        /// the mail checkers and the local mail server report back through it.
+        /// </summary>
+        protected override void SetVisibleCore(bool value)
+        {
+            if (value && _startInTray)
+            {
+                _startInTray = false;
+                if (!IsHandleCreated)
+                {
+                    CreateHandle();
+                }
+                value = false;
+            }
+            base.SetVisibleCore(value);
+        }
+
         private void RestoreFromTray()
         {
             _restoringFromTray = true;
