@@ -107,9 +107,9 @@ namespace AowEmailWrapper.SmokeTests
             Config.AccountsList.StartUpAccountName = account.Name;
         }
 
-        private void CopyBuiltWrapper()
+        /// <summary>The output folder of a project in this repository, for the configuration these tests were built in.</summary>
+        private static string BuiltFolder(params string[] project)
         {
-            //The Wrapper's own output folder for the configuration these tests were built in
             string configuration = AppContext.BaseDirectory.Split(Path.DirectorySeparatorChar).Contains("Debug") ? "Debug" : "Release";
             string repository = AppContext.BaseDirectory;
             while (repository != null && !Directory.Exists(Path.Combine(repository, "Solution")))
@@ -117,17 +117,71 @@ namespace AowEmailWrapper.SmokeTests
                 repository = Path.GetDirectoryName(repository.TrimEnd(Path.DirectorySeparatorChar));
             }
             Assert.NotNull(repository);
-            string built = Path.Combine(repository, "Projects", "AowEmailWrapper", "bin", configuration, "net8.0-windows");
-            Assert.True(File.Exists(Path.Combine(built, "AowEmailWrapper.exe")), "the Wrapper has not been built: " + built);
+            return Path.Combine(new[] { repository }.Concat(project).Concat(new[] { "bin", configuration, "net8.0-windows" }).ToArray());
+        }
 
-            foreach (string file in Directory.GetFiles(built, "*", SearchOption.AllDirectories))
+        private static void CopyFolder(string from, string to)
+        {
+            foreach (string file in Directory.GetFiles(from, "*", SearchOption.AllDirectories))
             {
-                string target = Path.Combine(AppFolder, Path.GetRelativePath(built, file));
+                string target = Path.Combine(to, Path.GetRelativePath(from, file));
                 Directory.CreateDirectory(Path.GetDirectoryName(target));
-                File.Copy(file, target);
+                File.Copy(file, target, true);
             }
+        }
+
+        private void CopyBuiltWrapper()
+        {
+            string built = BuiltFolder("Projects", "AowEmailWrapper");
+            Assert.True(File.Exists(Path.Combine(built, "AowEmailWrapper.exe")), "the Wrapper has not been built: " + built);
+            CopyFolder(built, AppFolder);
             //Its own name, so it does not take a running Wrapper for itself and exit
             File.Move(Path.Combine(AppFolder, "AowEmailWrapper.exe"), Path.Combine(AppFolder, ExeName));
+        }
+
+        /// <summary>A copy of Age of Wonders whose AoW.exe is the stand-in game, a window that stays open.</summary>
+        public void AddStandInGameCopy(string label)
+        {
+            string built = BuiltFolder("Tests", "StandInGame");
+            Assert.True(File.Exists(Path.Combine(built, "StandInGame.exe")), "the stand-in game has not been built: " + built);
+            CopyFolder(built, GameFolder);
+            //The executable may be renamed: it finds StandInGame.dll by the name built into it
+            AddGameCopy(Path.Combine(GameFolder, "StandInGame.exe"), label);
+        }
+
+        /// <summary>A second start of the same executable with the same settings, as from the Start menu.</summary>
+        public Process StartAgain()
+        {
+            ProcessStartInfo start = new ProcessStartInfo(Path.Combine(AppFolder, ExeName)) { UseShellExecute = false, WorkingDirectory = AppFolder };
+            start.Environment["APPDATA"] = AppData;
+            string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT")) && !string.IsNullOrEmpty(host))
+            {
+                start.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(host);
+            }
+            return Process.Start(start);
+        }
+
+        /// <summary>The stand-in game's window, when the copy started from the tray is running.</summary>
+        public IntPtr GameWindow()
+        {
+            foreach (Process process in Process.GetProcessesByName("AoW"))
+            {
+                using (process)
+                {
+                    string path;
+                    try { path = process.MainModule.FileName; } catch { continue; }
+                    if (path.StartsWith(Root, StringComparison.OrdinalIgnoreCase))
+                    {
+                        IntPtr window = Native.TopWindows((uint)process.Id).FirstOrDefault(h => Native.Text(h) == "Stand-in game");
+                        if (window != IntPtr.Zero)
+                        {
+                            return window;
+                        }
+                    }
+                }
+            }
+            return IntPtr.Zero;
         }
 
         public void Start()
@@ -421,6 +475,24 @@ namespace AowEmailWrapper.SmokeTests
                 }
             }
             _process?.Dispose();
+            //Anything started from the test's folders, the stand-in game or a second start
+            foreach (Process process in Process.GetProcesses())
+            {
+                using (process)
+                {
+                    try
+                    {
+                        if (process.MainModule.FileName.StartsWith(Root, StringComparison.OrdinalIgnoreCase))
+                        {
+                            process.Kill();
+                            process.WaitForExit(5000);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
 
             List<string> changes = RestoreRegistry();
             try { Directory.Delete(Root, true); } catch { }

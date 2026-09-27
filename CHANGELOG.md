@@ -3,6 +3,16 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## 2.1.1
+
+- Choosing a game on the tray menu while it is already running brings it to the front, restoring it
+  if it was minimized. Before, the click did nothing.
+- Starting the Wrapper while it is already running, from the Start menu or a desktop shortcut, shows
+  the running Wrapper. Before, the second start quietly did nothing.
+
+Run `AowEmailWrapper-2.1.1-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
+*Check for updates* on the Settings tab. Accounts and settings carry over.
+
 ## 2.1.0
 
 - Clicking the "games waiting" notification starts the game when all the waiting turns belong to one

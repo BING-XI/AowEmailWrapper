@@ -90,6 +90,48 @@ namespace AowEmailWrapper.SmokeTests
         }
 
         [Fact]
+        public void Choosing_a_running_game_again_brings_it_to_the_front()
+        {
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                app.AddStandInGameCopy(GameLabel);
+                app.Start();
+
+                app.ChooseFromTrayMenu(GameMenuItem);
+                IntPtr game = IntPtr.Zero;
+                AppUnderTest.Until(() => (game = app.GameWindow()) != IntPtr.Zero, TimeSpan.FromSeconds(20), "the game did not start:" + Environment.NewLine + app.ReadLog());
+
+                //The player switches away from the game, then picks it on the tray menu again
+                Native.PostMessage(game, 0x0112, (IntPtr)0xF020, IntPtr.Zero);
+                AppUnderTest.Until(() => Native.IsIconic(game), TimeSpan.FromSeconds(10), "the game did not minimize");
+                app.ChooseFromTrayMenu(GameMenuItem);
+
+                AppUnderTest.Until(() => !Native.IsIconic(game), TimeSpan.FromSeconds(10), "the running game was not brought back:" + Environment.NewLine + app.ReadLog());
+                Assert.Contains("brought it to the front", app.ReadLog());
+                Assert.Equal(game, app.GameWindow());
+            }
+        }
+
+        [Fact]
+        public void Starting_the_Wrapper_again_shows_the_one_already_running()
+        {
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                app.Start();
+                AppUnderTest.Until(() => !Native.IsWindowVisible(app.MainWindow()), TimeSpan.FromSeconds(20), "the Wrapper did not start in the tray");
+
+                using (System.Diagnostics.Process again = app.StartAgain())
+                {
+                    Assert.True(again.WaitForExit(30000), "the second start did not exit");
+                }
+
+                AppUnderTest.Until(() => app.MainWindow() != IntPtr.Zero && Native.IsWindowVisible(app.MainWindow()) && !Native.IsIconic(app.MainWindow()),
+                    TimeSpan.FromSeconds(10), "the running Wrapper did not show itself:" + Environment.NewLine + app.DescribeWindows());
+                Assert.False(app.HasExited, "the running Wrapper exited");
+            }
+        }
+
+        [Fact]
         public void An_arriving_turn_is_stored_and_recorded_as_received()
         {
             using (FakePop3Server mail = new FakePop3Server())

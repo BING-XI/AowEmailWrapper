@@ -1056,6 +1056,31 @@ namespace AowEmailWrapper
             base.SetVisibleCore(value);
         }
 
+        private static bool HasExited(Process process)
+        {
+            try
+            {
+                return process.HasExited;
+            }
+            catch (InvalidOperationException)
+            {
+                return true;
+            }
+        }
+
+        /// <summary>Called on a pool thread when the Wrapper is started again while this one runs.</summary>
+        public void ShowFromAnotherStart()
+        {
+            if (IsHandleCreated && !IsDisposed)
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    Trace.TraceInformation("Started again while running: showing the window");
+                    Maximize();
+                }));
+            }
+        }
+
         private void RestoreFromTray()
         {
             _restoringFromTray = true;
@@ -1213,7 +1238,22 @@ namespace AowEmailWrapper
         {
             if (watcher != null)
             {
-                return;
+                //Already running: bring it to the front rather than doing nothing
+                if (WindowHelper.BringToFront(watcher.Process))
+                {
+                    Trace.TraceInformation("{0} is running; brought it to the front", theGame.ExePath);
+                    return;
+                }
+                if (watcher.Process == null || HasExited(watcher.Process))
+                {
+                    //It ended and the watcher has not reported it yet; start it again
+                    watcher = null;
+                }
+                else
+                {
+                    //Still starting up, with no window to show yet
+                    return;
+                }
             }
 
             try
