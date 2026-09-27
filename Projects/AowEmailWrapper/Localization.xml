@@ -115,6 +115,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Please restart the Wrapper for these changes to take effect."/>
 		<lookup key="msgWrapperPollFailed" value="Poll failed"/>
 		<lookup key="msgWrapperGamesWaiting" value="You have {0} game(s) waiting."/>
+		<lookup key="msgWrapperClickToStart" value="Click here to start {0}."/>
 		<lookup key="msgWrapperNewSender" value="'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with."/>
 		<lookup key="activityNewSender" value="new sender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Found {0} unplayed turn(s) in your mailbox and added them to the activity log."/>
@@ -383,6 +384,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Voulez-vous redémarrer maintenant?"/>
 		<lookup key="msgWrapperPollFailed" value="Echec de scrutation"/>
 		<lookup key="msgWrapperGamesWaiting" value="Vous avez {0} partie(s) en attente."/>
+		<lookup key="msgWrapperClickToStart" value="Cliquez ici pour lancer {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Vous remplirez les paramètres manuellement."/>
 		<lookup key="msgWrapperResendTo" value="Renvoyer à:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Paramètres de messagerie trouvés. Cliquez sur Suivant."/>
@@ -653,6 +655,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Bitte starten Sie den Wrapper neu um die Änderungen zu übernehmen."/>
 		<lookup key="msgWrapperPollFailed" value="Abruf fehlgeschlagen"/>
 		<lookup key="msgWrapperGamesWaiting" value="Sie haben {0} Spiel(e) wartend."/>
+		<lookup key="msgWrapperClickToStart" value="Hier klicken, um {0} zu starten."/>
 		<lookup key="msgInputEmailSettingsManual" value="Ich werde die Einstellungen manuell vornehmen."/>
 		<lookup key="msgWrapperResendTo" value="Erneut senden:"/>
 		<lookup key="msgAutoconfigPage2Success" value="E-Mail-Einstellungen gefunden. Klicken Sie auf Weiter."/>
@@ -922,6 +925,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Por favor reinicialice el programa para que estos cambios tengan efecto."/>
 		<lookup key="msgWrapperPollFailed" value="Chequeo fallido."/>
 		<lookup key="msgWrapperGamesWaiting" value="Tienes {0} juegos esperando."/>
+		<lookup key="msgWrapperClickToStart" value="Haga clic aquí para iniciar {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Entrarás la configuracoón manualmente."/>
 		<lookup key="msgWrapperResendTo" value="Reenviar a:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Configuración de correo encontrada. Haz clic en Siguiente."/>
@@ -1192,6 +1196,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Herstart de Wrapper om deze veranderingen in effect te laten gaan, aub."/>
 		<lookup key="msgWrapperPollFailed" value="Doorzoeken gefaald"/>
 		<lookup key="msgWrapperGamesWaiting" value="Je hebt {0} game(s) wachten."/>
+		<lookup key="msgWrapperClickToStart" value="Klik hier om {0} te starten."/>
 		<lookup key="msgInputEmailSettingsManual" value="Instellingen zelf invoeren."/>
 		<lookup key="msgWrapperResendTo" value="Verzend opnieuw:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Uw mailinstellingen zijn gevonden. Klik op Volgende."/>
@@ -1457,6 +1462,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Genstart venligst Wrapper'en for at disse ændringer kan tage effekt."/>
 		<lookup key="msgWrapperPollFailed" value="Forespørgsel fejlede"/>
 		<lookup key="msgWrapperGamesWaiting" value="Du har {0} spil der venter."/>
+		<lookup key="msgWrapperClickToStart" value="Klik her for at starte {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Du vil angive indstillingerne manuelt."/>
 		<lookup key="msgWrapperResendTo" value="Gensend:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Dine mailindstillinger blev fundet. Klik på Næste."/>
@@ -1733,6 +1739,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Vänligen starta om Wrappern för att dessa förändringar skall gälla i fortsättningen."/>
 		<lookup key="msgWrapperPollFailed" value="Poll misslyckades"/>
 		<lookup key="msgWrapperGamesWaiting" value="Du har {0} spel som väntar."/>
+		<lookup key="msgWrapperClickToStart" value="Klicka här för att starta {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Du kommer att skriva in inställningarna manuellt."/>
 		<lookup key="msgWrapperResendTo" value="Skicka om Till:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Dina e-postinställningar hittades. Klicka på Nästa."/>
@@ -2003,6 +2010,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Proszę ponownie uruchomić Wrappera, żeby te zmiany zaczęły obowiązywać."/>
 		<lookup key="msgWrapperPollFailed" value="Sprawdzanie nie powiodło się."/>
 		<lookup key="msgWrapperGamesWaiting" value="Liczba oczekujących gier: {0}."/>
+		<lookup key="msgWrapperClickToStart" value="Kliknij tutaj, aby uruchomić {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Ustawienia trzeba wprowadzić ręcznie."/>
 		<lookup key="msgWrapperResendTo" value="Wyślij ponownie do:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Znaleziono ustawienia poczty. Kliknij Dalej."/>
@@ -2273,6 +2281,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Käynnistä Wrapper uudelleen, jotta muutokset astuvat voimaan."/>
 		<lookup key="msgWrapperPollFailed" value="Sähköpostin tarkistus epäonnistui"/>
 		<lookup key="msgWrapperGamesWaiting" value="Sinulla on {0} peliä odottamassa."/>
+		<lookup key="msgWrapperClickToStart" value="Käynnistä {0} napsauttamalla tätä."/>
 		<lookup key="msgInputEmailSettingsManual" value="Lisää asetukset manuaalisesti."/>
 		<lookup key="msgWrapperResendTo" value="Lähetä:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Sähköpostiasetukset löytyivät. Napsauta Seuraava."/>
@@ -2543,6 +2552,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Wrapper-ul necesită repornire pentru ca modificările sâ îşi poată face efectul."/>
 		<lookup key="msgWrapperPollFailed" value="Interogare eşuată"/>
 		<lookup key="msgWrapperGamesWaiting" value="Aveţi {0} jocuri în aşteptare."/>
+		<lookup key="msgWrapperClickToStart" value="Faceți clic aici pentru a porni {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Veţi introduce manual setările."/>
 		<lookup key="msgWrapperResendTo" value="Retrimiteţi:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Setările de e-mail au fost găsite. Apăsați Următorul."/>
@@ -2813,6 +2823,7 @@
 		<lookup key="msgWrapperRestartRequired" value="Изменения вступят в силу после перезагрузки Wrapper'а."/>
 		<lookup key="msgWrapperPollFailed" value="Не удалось проверить почту."/>
 		<lookup key="msgWrapperGamesWaiting" value="У вас есть {0} несыгранных игр(ы)."/>
+		<lookup key="msgWrapperClickToStart" value="Нажмите здесь, чтобы запустить {0}."/>
 		<lookup key="msgInputEmailSettingsManual" value="Настройки надо будет прописать вручную."/>
 		<lookup key="msgWrapperResendTo" value="Отправить заново:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Настройки почты найдены. Нажмите «Далее»."/>

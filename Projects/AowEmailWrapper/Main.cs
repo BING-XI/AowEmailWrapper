@@ -52,6 +52,11 @@ namespace AowEmailWrapper
         private const string WrapperCannotActivateAccountMessageBoxKey = "msgWrapperCannotActivateAccount";
         private const string WrapperGameStartFailedKey = "msgGameStartFailed";
         private const string WrapperUnsavedChangesKey = "msgWrapperUnsavedChanges";
+        private const string WrapperClickToStartKey = "msgWrapperClickToStart";
+        //The text of the last "games waiting" notification, so a click on it can be told from a click on another
+        private string _gamesWaitingBalloonText;
+        //The text of the last notification shown; NotifyIcon does not keep it when the text is passed to ShowBalloonTip
+        private string _lastBalloonText;
         private const string WrapperGameStartFailedFallback = "The game could not be started from {0}: {1}";
         private const string WrapperEmailSentSuccessKey = "msgWrapperEmailSentSuccess";
         private const string WrapperEmailSentFailedKey = "msgWrapperEmailSentFailed";
@@ -385,7 +390,7 @@ namespace AowEmailWrapper
                     {
                         UpdateHelper.LastNotifiedTag = update.Tag;
                         _updateBalloonShown = true;
-                        notifyIcon.ShowBalloonTip(20000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateBalloonKey, update.Describe()), ToolTipIcon.Info);
+                        ShowBalloon(20000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateBalloonKey, update.Describe()), ToolTipIcon.Info);
                     }
                 }
                 else
@@ -435,7 +440,7 @@ namespace AowEmailWrapper
             }
 
             Trace.TraceInformation("Installing {0} automatically", update.Describe());
-            notifyIcon.ShowBalloonTip(10000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateInstallingKey, update.Describe()), ToolTipIcon.Info);
+            ShowBalloon(10000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateInstallingKey, update.Describe()), ToolTipIcon.Info);
 
             UpdateHelper.PendingInstaller = installer;
             _closeCancel = false;
@@ -500,6 +505,41 @@ namespace AowEmailWrapper
                 _updateBalloonShown = false;
                 OfferUpdate();
             }
+            else if (_gamesWaitingBalloonText != null && string.Equals(_lastBalloonText, _gamesWaitingBalloonText, StringComparison.Ordinal))
+            {
+                //The game with the waiting turn, or the Activity Log when turns wait in more than one
+                _gamesWaitingBalloonText = null;
+                AowGame waiting = SingleGameWaiting();
+                if (waiting != null)
+                {
+                    StartGame(waiting);
+                }
+                else
+                {
+                    Maximize();
+                }
+            }
+        }
+
+        /// <summary>Every notification goes through here, so a click can be matched to the one it was on.</summary>
+        private void ShowBalloon(int timeout, string title, string text, ToolTipIcon icon)
+        {
+            _lastBalloonText = text;
+            notifyIcon.ShowBalloonTip(timeout, title, text, icon);
+        }
+
+        /// <summary>The copy of a game every waiting turn belongs to, or null when there are none or several.</summary>
+        private AowGame SingleGameWaiting()
+        {
+            List<AowGame> games = _activityLog.Activities
+                .Where(activity => activity.Status.Equals(ActivityState.Received))
+                .Select(activity => _gameManager.GetGameForActivity(activity))
+                .ToList();
+            if (games.Count == 0 || games.Any(game => game == null || !game.IsInstalled))
+            {
+                return null;
+            }
+            return games.Select(game => game.Id).Distinct().Count() == 1 ? games[0] : null;
         }
 
         private void notifyIcon_BalloonTipClosed(object sender, EventArgs e)
@@ -841,11 +881,19 @@ namespace AowEmailWrapper
                         Activity stranger = NextUnannouncedNewSender();
                         if (stranger != null)
                         {
-                            notifyIcon.ShowBalloonTip(15000, Translator.Translate(this.Name), NewSenderMessage(stranger), ToolTipIcon.Warning);
+                            ShowBalloon(15000, Translator.Translate(this.Name), NewSenderMessage(stranger), ToolTipIcon.Warning);
                         }
                         else
                         {
-                            notifyIcon.ShowBalloonTip(5000, Translator.Translate(this.Name), Translator.Translate(WrapperGamesWaitingKey, fileCount.ToString()), ToolTipIcon.Info);
+                            //A click on the notification starts the game when all the waiting turns belong to one copy
+                            string text = Translator.Translate(WrapperGamesWaitingKey, fileCount.ToString());
+                            AowGame waiting = SingleGameWaiting();
+                            if (waiting != null)
+                            {
+                                text = string.Concat(text, Environment.NewLine, Translator.Translate(WrapperClickToStartKey, waiting.DisplayName));
+                            }
+                            _gamesWaitingBalloonText = text;
+                            ShowBalloon(5000, Translator.Translate(this.Name), text, ToolTipIcon.Info);
                         }
                     }
                 }
@@ -1421,7 +1469,7 @@ namespace AowEmailWrapper
             if (count > 0)
             {
                 string text = Translator.Translate(WrapperTurnsRecoveredKey, count.ToString());
-                notifyIcon.ShowBalloonTip(15000, Translator.Translate(this.Name), string.IsNullOrEmpty(text) ? string.Format(WrapperTurnsRecoveredFallback, count) : text, ToolTipIcon.Info);
+                ShowBalloon(15000, Translator.Translate(this.Name), string.IsNullOrEmpty(text) ? string.Format(WrapperTurnsRecoveredFallback, count) : text, ToolTipIcon.Info);
             }
 
             RaiseEvent(_activityLogRefresh, this, new EventArgs());
@@ -1502,7 +1550,7 @@ namespace AowEmailWrapper
             DataManagerHelper.SaveActivityLog(_activityLog);
             activityListView.Refresh();
 
-            notifyIcon.ShowBalloonTip(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
+            ShowBalloon(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
 
         /// <summary>"Where is the turn?" on the activity list: every other player of the game is asked by email.</summary>
@@ -1514,7 +1562,7 @@ namespace AowEmailWrapper
                 if (players.Count == 0)
                 {
                     string none = Translator.Translate(WrapperWhereIsNobodyKey, activity.FileName);
-                    notifyIcon.ShowBalloonTip(10000, WhereIsTitle(), string.IsNullOrEmpty(none) ? string.Format(WrapperWhereIsNobodyFallback, activity.FileName) : none, ToolTipIcon.Info);
+                    ShowBalloon(10000, WhereIsTitle(), string.IsNullOrEmpty(none) ? string.Format(WrapperWhereIsNobodyFallback, activity.FileName) : none, ToolTipIcon.Info);
                     continue;
                 }
 
@@ -1534,7 +1582,7 @@ namespace AowEmailWrapper
 
                 Trace.TraceInformation("Asked {0} player(s) where '{1}' is", players.Count, activity.FileName);
                 string asked = Translator.Translate(WrapperWhereIsAskedKey, players.Count.ToString(), activity.FileName);
-                notifyIcon.ShowBalloonTip(10000, WhereIsTitle(), string.IsNullOrEmpty(asked) ? string.Format(WrapperWhereIsAskedFallback, players.Count, activity.FileName) : asked, ToolTipIcon.Info);
+                ShowBalloon(10000, WhereIsTitle(), string.IsNullOrEmpty(asked) ? string.Format(WrapperWhereIsAskedFallback, players.Count, activity.FileName) : asked, ToolTipIcon.Info);
             }
         }
 
@@ -1602,11 +1650,11 @@ namespace AowEmailWrapper
                                 failed.Stop();
                                 _pollers.Remove(failed.AccountName ?? string.Empty);
                             }
-                            notifyIcon.ShowBalloonTip(20000, Translator.Translate(WrapperPollFailedKey), BuildPollAuthFailedMessage(failed), ToolTipIcon.Warning);
+                            ShowBalloon(20000, Translator.Translate(WrapperPollFailedKey), BuildPollAuthFailedMessage(failed), ToolTipIcon.Warning);
                         }
                         else if (e.Exception != null)
                         {
-                            notifyIcon.ShowBalloonTip(15000, Translator.Translate(WrapperPollFailedKey), e.Exception.Message, ToolTipIcon.Error);
+                            ShowBalloon(15000, Translator.Translate(WrapperPollFailedKey), e.Exception.Message, ToolTipIcon.Error);
                         }
                         else
                         {
@@ -1779,7 +1827,7 @@ namespace AowEmailWrapper
                     DataManagerHelper.SaveConfig(_wrapperConfig);
                 }
 
-                notifyIcon.ShowBalloonTip(15000, theResponse.GameEmail.Subject, Translator.Translate(WrapperEmailSentSuccessKey, MailHelper.GetFirstToAddress(theResponse.GameEmail)), ToolTipIcon.Info);
+                ShowBalloon(15000, theResponse.GameEmail.Subject, Translator.Translate(WrapperEmailSentSuccessKey, MailHelper.GetFirstToAddress(theResponse.GameEmail)), ToolTipIcon.Info);
                 if (_wrapperConfig.PreferencesConfig != null && _wrapperConfig.PreferencesConfig.PlaySoundOnSend)
                 {
                     PlaySound(ConfigHelper.SentSound);
@@ -1831,7 +1879,7 @@ namespace AowEmailWrapper
                 if (account != null && account.SmtpConfig != null && account.SmtpConfig.Verified)
                 {
                     //Just show Baloon error
-                    notifyIcon.ShowBalloonTip(15000, theResponse.GameEmail.Subject, theResponse.Exception.Message, ToolTipIcon.Error);
+                    ShowBalloon(15000, theResponse.GameEmail.Subject, theResponse.Exception.Message, ToolTipIcon.Error);
                     theResponse.Dispose();
                 }
                 else
