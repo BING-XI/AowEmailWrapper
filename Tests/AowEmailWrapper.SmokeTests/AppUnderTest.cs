@@ -194,6 +194,9 @@ namespace AowEmailWrapper.SmokeTests
             {
                 UseShellExecute = false,
                 WorkingDirectory = AppFolder,
+                //.NET writes an unhandled exception to standard error before it ends the process, even one that
+                //happens before the Wrapper's own log can record it
+                RedirectStandardError = true,
             };
             start.Environment["APPDATA"] = AppData;
             string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
@@ -202,6 +205,17 @@ namespace AowEmailWrapper.SmokeTests
                 start.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(host);
             }
             _process = Process.Start(start);
+            _process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
+                {
+                    lock (_standardError)
+                    {
+                        _standardError.AppendLine(e.Data);
+                    }
+                }
+            };
+            _process.BeginErrorReadLine();
 
             //Up once its tray icon's window exists and the main window has been created
             Until(() => NotifyWindows().Any() && MainWindow() != IntPtr.Zero, TimeSpan.FromSeconds(60), () => "the Wrapper did not start: " + StartFailureDetails());
@@ -226,12 +240,33 @@ namespace AowEmailWrapper.SmokeTests
             return Native.TopWindows((uint)_process.Id);
         }
 
+        private readonly StringBuilder _standardError = new StringBuilder();
+
+        /// <summary>What the Wrapper wrote to standard error, where .NET reports an exception that ended it.</summary>
+        public string StandardError
+        {
+            get
+            {
+                lock (_standardError)
+                {
+                    return _standardError.ToString();
+                }
+            }
+        }
+
         /// <summary>Why a start did not come up: the process's fate, its windows with any dialog's text, and its log.</summary>
         private string StartFailureDetails()
         {
             StringBuilder details = new StringBuilder();
             _process.Refresh();
             details.AppendLine(_process.HasExited ? $"the process exited with code {_process.ExitCode}" : "the process is still running");
+            if (_process.HasExited)
+            {
+                //Standard error is read asynchronously; give the last of it a moment to arrive
+                _process.WaitForExit();
+                string errors = StandardError;
+                details.AppendLine(string.IsNullOrWhiteSpace(errors) ? "nothing on standard error" : "standard error:" + Environment.NewLine + errors);
+            }
             details.AppendLine($"{Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ExeName)).Length} process(es) named {ExeName} are running");
             if (!_process.HasExited)
             {
