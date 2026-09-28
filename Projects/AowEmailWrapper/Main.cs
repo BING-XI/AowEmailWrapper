@@ -615,6 +615,22 @@ namespace AowEmailWrapper
             }
         }
 
+        /// <summary>Where the player last had the window, or the middle of the primary screen at its designed size.</summary>
+        private Rectangle UsableTarget()
+        {
+            if (!_lastGoodBounds.IsEmpty && IsUsable(_lastGoodBounds))
+            {
+                return _lastGoodBounds;
+            }
+            Screen primary = Screen.PrimaryScreen ?? Screen.AllScreens.FirstOrDefault();
+            Rectangle area = primary != null ? primary.WorkingArea : new Rectangle(0, 0, _normalSize.Width, _normalSize.Height);
+            return new Rectangle(
+                area.Left + Math.Max(0, (area.Width - _normalSize.Width) / 2),
+                area.Top + Math.Max(0, (area.Height - _normalSize.Height) / 2),
+                _normalSize.Width,
+                _normalSize.Height);
+        }
+
         /// <summary>At least half the designed size and on some screen.</summary>
         private bool IsUsable(Rectangle bounds)
         {
@@ -1142,6 +1158,16 @@ namespace AowEmailWrapper
             _restoringFromTray = true;
             try
             {
+                //Where WinForms will put the window back, fixed while it is still hidden: showing a window whose
+                //restore position lies off every screen stalled inside WinForms on the build machine (the call to
+                //show it never returned), and a restore that went wrong must not flash up in the wrong place
+                Rectangle restoreTo = RestoreBounds;
+                if (!IsUsable(restoreTo))
+                {
+                    Rectangle target = UsableTarget();
+                    Trace.TraceInformation("Window would come back at {0}; bringing it back at {1}", restoreTo, target);
+                    this.Bounds = target;
+                }
                 //Still minimized and without a taskbar button, so nothing shows yet
                 this.Visible = true;
                 //Windows restores the size and position it kept for the window
@@ -1226,21 +1252,7 @@ namespace AowEmailWrapper
                 return;
             }
 
-            Rectangle target = _lastGoodBounds;
-            if (target.IsEmpty || !IsUsable(target))
-            {
-                Screen primary = Screen.PrimaryScreen ?? Screen.AllScreens.FirstOrDefault();
-                if (primary == null)
-                {
-                    return;
-                }
-                Rectangle area = primary.WorkingArea;
-                target = new Rectangle(
-                    area.Left + Math.Max(0, (area.Width - _normalSize.Width) / 2),
-                    area.Top + Math.Max(0, (area.Height - _normalSize.Height) / 2),
-                    _normalSize.Width,
-                    _normalSize.Height);
-            }
+            Rectangle target = UsableTarget();
 
             Trace.TraceInformation("Window {0} at {1}; put back at {2}", when, bounds, target);
             this.Bounds = target;

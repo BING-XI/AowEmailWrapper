@@ -72,7 +72,7 @@ namespace AowEmailWrapper.SmokeTests
         private static string WindowLogLines(AppUnderTest app)
         {
             string[] lines = app.ReadLog().Split('\n');
-            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at") || line.Contains("; restoring it") || line.Contains("Show: ") || line.Contains("Error") || line.Contains("Exception") || line.TrimStart().StartsWith("at ")).Select(line => line.Trim()));
+            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at") || line.Contains("bringing it back at") || line.Contains("; restoring it") || line.Contains("Show: ") || line.Contains("Error") || line.Contains("Exception") || line.TrimStart().StartsWith("at ")).Select(line => line.Trim()));
             return string.IsNullOrEmpty(found) ? "The Wrapper logged no correction of its window." : "Wrapper log:" + Environment.NewLine + found;
         }
 
@@ -103,7 +103,8 @@ namespace AowEmailWrapper.SmokeTests
                 app.DoubleClickTrayIcon();
                 AppUnderTest.Until(() => IsShownAtSize(app) && SameRect(Native.Rect(app.MainWindow()), good), TimeSpan.FromSeconds(10),
                     $"the window did not come back where it was, {good}:" + Environment.NewLine + app.DescribeWindows() + Environment.NewLine + WindowLogLines(app));
-                Assert.Contains("put back at", WindowLogLines(app));
+                string corrections = WindowLogLines(app);
+                Assert.True(corrections.Contains("put back at") || corrections.Contains("bringing it back at"), "the Wrapper logged no correction:" + Environment.NewLine + corrections);
             }
         }
 
