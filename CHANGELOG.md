@@ -11,6 +11,10 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
   the running Wrapper. Before, the second start quietly did nothing.
 - "Where is the turn?" on the Activity Log's right-click menu is now called "Who has the turn?", in every
   language.
+- When nobody's Wrapper claims a turn, "Who has the turn?" works out who most probably has it: the
+  newest send any answer reports (yours included) went to a player who has not answered, typically one
+  without the Wrapper. The Status column then says "probably with" that player, and the answer's
+  notification says why. The question email now asks who has the turn, too.
 
 ### Fixed
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using AowEmailWrapper.Games;
 
@@ -142,6 +143,27 @@ namespace AowEmailWrapper.ConfigFramework
         [XmlAttribute("holder")]
         public string Holder { get; set; }
 
+        /// <summary>
+        /// When no wrapper says it holds the turn: the player who most probably has it, worked out from the
+        /// answers (the newest send known, whose recipient has not answered). A guess, shown as one.
+        /// </summary>
+        [XmlAttribute("likely_holder")]
+        public string LikelyHolder { get; set; }
+
+        /// <summary>What each player's wrapper last said, one entry per player, for working out who has the turn.</summary>
+        [XmlElement("answer")]
+        public List<TurnAnswer> Answers
+        {
+            get { return _answers; }
+            set { _answers = value ?? new List<TurnAnswer>(); }
+        }
+        private List<TurnAnswer> _answers = new List<TurnAnswer>();
+
+        public bool ShouldSerializeAnswers()
+        {
+            return _answers.Count > 0;
+        }
+
         [XmlAttribute("ticks")]
         public string DateTicks
         {
@@ -171,5 +193,23 @@ namespace AowEmailWrapper.ConfigFramework
             _turnNo = turnNo;
             _dateTicks = DateTime.Now.Ticks.ToString();
         }
+    }
+
+    /// <summary>One player's wrapper's answer to "who has the turn?".</summary>
+    public class TurnAnswer
+    {
+        [XmlAttribute("from")]
+        public string Responder { get; set; }
+
+        [XmlAttribute("status")]
+        public ActivityState Status { get; set; }
+
+        /// <summary>When the responder received or sent the turn, as an ISO date; empty when unknown.</summary>
+        [XmlAttribute("date")]
+        public string Date { get; set; }
+
+        /// <summary>Who the responder sent it to, separated by ';', when they sent it.</summary>
+        [XmlAttribute("sent_to")]
+        public string SentTo { get; set; }
     }
 }

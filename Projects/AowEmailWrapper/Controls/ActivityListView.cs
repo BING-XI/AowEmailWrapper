@@ -35,6 +35,8 @@ namespace AowEmailWrapper.Controls
         private const string WhereIsFallback = "Who has the turn?";
         private const string HeldByKey = "activityHeldBy";
         private const string HeldByFallback = "held by {0}";
+        private const string ProbablyWithKey = "activityProbablyWith";
+        private const string ProbablyWithFallback = "probably with {0}";
         private ToolStripMenuItem _whereIsMenuItem;
 
         #endregion
@@ -176,6 +178,11 @@ namespace AowEmailWrapper.Controls
             {
                 string held = Translator.Translate(HeldByKey, activity.Holder);
                 label = string.Format("{0} ({1})", label, string.IsNullOrEmpty(held) ? string.Format(HeldByFallback, activity.Holder) : held);
+            }
+            else if (activity.Status == ActivityState.Sent && !string.IsNullOrEmpty(activity.LikelyHolder))
+            {
+                string probably = Translator.Translate(ProbablyWithKey, activity.LikelyHolder);
+                label = string.Format("{0} ({1})", label, string.IsNullOrEmpty(probably) ? string.Format(ProbablyWithFallback, activity.LikelyHolder) : probably);
             }
             return label;
         }

@@ -74,6 +74,9 @@ namespace AowEmailWrapper
         private const string WrapperWhereIsNobodyKey = "msgWrapperWhereIsNobody";
         private const string WrapperWhereIsNobodyFallback = "No other players are known for '{0}'.";
         private const string WrapperWhereIsTitleKey = "msgWrapperWhereIsTitle";
+        private const string WrapperProbablyWithKey = "msgWrapperProbablyWith";
+        private const string WrapperProbablyWithYouSentKey = "msgWrapperProbablyWithYouSent";
+        private const string WrapperProbablyWithFallback = "{0} probably has '{1}': {2} sent it to them on {3}, and they have not answered.";
         private const string WrapperWhereIsTitleFallback = "Who has the turn?";
         private const string WrapperNewSenderFallback = "'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with.";
         private const string WrapperResendToKey = "msgWrapperResendTo";
@@ -1809,10 +1812,29 @@ namespace AowEmailWrapper
             }
 
             TurnQuery.RecordWhereabouts(activity, state);
+
+            //Nobody claims it: the newest send whose recipient has not answered says who most probably has it
+            string previousGuess = activity.LikelyHolder;
+            TurnSend likely = TurnQuery.LikelyHolder(activity, OwnAddresses());
+            activity.LikelyHolder = likely != null ? likely.To : null;
+
             DataManagerHelper.SaveActivityLog(_activityLog);
             activityListView.Refresh();
 
-            ShowBalloon(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
+            string text = TurnQuery.Describe(state, activity.FileName);
+            if (likely != null && !TurnQuery.SameAddress(previousGuess, likely.To))
+            {
+                string when = likely.Date.LocalDateTime.ToString("d MMM yyyy HH:mm", System.Globalization.CultureInfo.CurrentCulture);
+                string guess = string.IsNullOrEmpty(likely.From)
+                    ? Translator.Translate(WrapperProbablyWithYouSentKey, likely.To, activity.FileName, when)
+                    : Translator.Translate(WrapperProbablyWithKey, likely.To, activity.FileName, likely.From, when);
+                if (string.IsNullOrEmpty(guess))
+                {
+                    guess = string.Format(WrapperProbablyWithFallback, likely.To, activity.FileName, likely.From ?? "you", when);
+                }
+                text = string.Concat(text, Environment.NewLine, guess);
+            }
+            ShowBalloon(15000, WhereIsTitle(), text, state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
 
         /// <summary>"Who has the turn?" on the activity list: every other player of the game is asked by email.</summary>
@@ -2791,6 +2813,8 @@ namespace AowEmailWrapper
                 //The turn has moved on; what other wrappers said before no longer applies
                 theActivity.Whereabouts = null;
                 theActivity.Holder = null;
+                theActivity.LikelyHolder = null;
+                theActivity.Answers.Clear();
             }
             else
             {
