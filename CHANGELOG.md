@@ -9,6 +9,18 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
   if it was minimized. Before, the click did nothing.
 - Starting the Wrapper while it is already running, from the Start menu or a desktop shortcut, shows
   the running Wrapper. Before, the second start quietly did nothing.
+- "Where is the turn?" on the Activity Log's right-click menu is now called "Who has the turn?", in every
+  language.
+
+### Fixed
+
+- *Show* on the tray icon brings the window back where you left it, at its full size. On some versions of
+  Windows it could stay minimized so that nothing appeared, come back as a thin bar, or reappear in the
+  middle of the screen.
+- The Wrapper no longer closes at start without a word when the port the games hand their turns to is
+  already taken, for example by another Windows user's Wrapper. It says which port is busy and which
+  setting to change, and keeps running.
+- Fixed a rare crash at start when the first mail check began before the window had finished loading.
 
 Run `AowEmailWrapper-2.1.1-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
 *Check for updates* on the Settings tab. Accounts and settings carry over.

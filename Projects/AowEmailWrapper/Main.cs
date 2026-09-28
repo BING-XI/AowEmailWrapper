@@ -70,11 +70,11 @@ namespace AowEmailWrapper
         private const string WrapperTurnsRecoveredKey = "msgWrapperTurnsRecovered";
         private const string WrapperTurnsRecoveredFallback = "Found {0} unplayed turn(s) in your mailbox and added them to the activity log.";
         private const string WrapperWhereIsAskedKey = "msgWrapperWhereIsAsked";
-        private const string WrapperWhereIsAskedFallback = "Asked {0} player(s) where '{1}' is. Answers arrive with the next mail checks.";
+        private const string WrapperWhereIsAskedFallback = "Asked {0} player(s) who has '{1}'. Answers arrive with the next mail checks.";
         private const string WrapperWhereIsNobodyKey = "msgWrapperWhereIsNobody";
         private const string WrapperWhereIsNobodyFallback = "No other players are known for '{0}'.";
         private const string WrapperWhereIsTitleKey = "msgWrapperWhereIsTitle";
-        private const string WrapperWhereIsTitleFallback = "Where is the turn?";
+        private const string WrapperWhereIsTitleFallback = "Who has the turn?";
         private const string WrapperNewSenderFallback = "'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with.";
         private const string WrapperResendToKey = "msgWrapperResendTo";
         private const string WrapperUpdateAvailableKey = "msgWrapperUpdateAvailable";
@@ -1738,7 +1738,7 @@ namespace AowEmailWrapper
             CheckNotifyIconState();
         }
 
-        #region Where is the turn
+        #region Who has the turn
 
         /// <summary>A query or reply from another player's wrapper, already removed from the mailbox by the poller.</summary>
         private void PollerWrapperMessage(BasePoller poller, MimeMessage message)
@@ -1815,7 +1815,7 @@ namespace AowEmailWrapper
             ShowBalloon(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
 
-        /// <summary>"Where is the turn?" on the activity list: every other player of the game is asked by email.</summary>
+        /// <summary>"Who has the turn?" on the activity list: every other player of the game is asked by email.</summary>
         private void ActivityListViewWhereIs(object sender, List<Activity> activities)
         {
             foreach (Activity activity in activities)
