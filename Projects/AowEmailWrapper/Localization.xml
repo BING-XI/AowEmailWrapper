@@ -124,6 +124,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Who has the turn?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Asked {0} player(s) who has &apos;{1}&apos;. Answers arrive with the next mail checks."/>
 		<lookup key="msgWrapperWhereIsNobody" value="No other players are known for '{0}'."/>
+		<lookup key="activityProbablyWith" value="probably with {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} probably has &apos;{1}&apos;: {2} sent it to them on {3}, and they have not answered."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} probably has &apos;{1}&apos;: you sent it to them on {2}, and they have not answered."/>
 		<lookup key="msgInputEmailSettingsManual" value="You will enter the settings manually."/>
 		<lookup key="msgWrapperResendTo" value="Resend To:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Found your mail settings. Click Next."/>
@@ -529,6 +532,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Qui a le tour ?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} joueur(s) interrogé(s) pour savoir qui a &apos;{1}&apos;. Les réponses arrivent avec les prochaines vérifications du courrier."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Aucun autre joueur n&apos;est connu pour &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="probablement chez {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} a probablement &apos;{1}&apos; : {2} le lui a envoyé le {3}, et il n&apos;a pas répondu."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} a probablement &apos;{1}&apos; : vous le lui avez envoyé le {2}, et il n&apos;a pas répondu."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Des paramètres ont été trouvés pour cette adresse, mais ils enverraient votre mot de passe sans chiffrement ; le Wrapper ne les utilisera donc pas. Veuillez saisir les paramètres du serveur manuellement."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -802,6 +808,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Wer hat den Zug?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} Spieler gefragt, wer &apos;{1}&apos; hat. Die Antworten kommen mit den nächsten E-Mail-Abfragen."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Für &apos;{0}&apos; sind keine anderen Spieler bekannt."/>
+		<lookup key="activityProbablyWith" value="vermutlich bei {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} hat &apos;{1}&apos; vermutlich: {2} hat es am {3} an ihn geschickt, und er hat nicht geantwortet."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} hat &apos;{1}&apos; vermutlich: Sie haben es am {2} an ihn geschickt, und er hat nicht geantwortet."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Für diese Adresse wurden Einstellungen gefunden, aber sie würden Ihr Passwort unverschlüsselt senden, daher verwendet der Wrapper sie nicht. Bitte geben Sie die Servereinstellungen manuell ein."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -1074,6 +1083,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="¿Quién tiene el turno?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Se preguntó a {0} jugador(es) quién tiene &apos;{1}&apos;. Las respuestas llegan con las próximas comprobaciones del correo."/>
 		<lookup key="msgWrapperWhereIsNobody" value="No se conocen otros jugadores de &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="probablemente lo tiene {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="Probablemente {0} tiene &apos;{1}&apos;: {2} se lo envió el {3} y no ha respondido."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="Probablemente {0} tiene &apos;{1}&apos;: se lo enviaste el {2} y no ha respondido."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Se encontró una configuración para esta dirección, pero enviaría su contraseña sin cifrar, así que el Wrapper no la usará. Introduzca la configuración del servidor manualmente."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -1350,6 +1362,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Wie heeft de beurt?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} speler(s) gevraagd wie &apos;{1}&apos; heeft. De antwoorden komen met de volgende e-mailcontroles."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Er zijn geen andere spelers bekend voor &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="waarschijnlijk bij {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} heeft &apos;{1}&apos; waarschijnlijk: {2} stuurde het op {3} en er is geen antwoord gekomen."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} heeft &apos;{1}&apos; waarschijnlijk: u stuurde het op {2} en er is geen antwoord gekomen."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Er zijn instellingen voor dit adres gevonden, maar die zouden uw wachtwoord onversleuteld versturen, dus de Wrapper gebruikt ze niet. Voer de serverinstellingen handmatig in."/>
 		<lookup key="enumEmailIn" value="EmailIn"/>
 		<lookup key="enumSave" value="Save"/>
@@ -1616,6 +1631,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Hvem har turen?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Spurgte {0} spiller(e), hvem der har &apos;{1}&apos;. Svarene kommer med de næste posttjek."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Der kendes ingen andre spillere til &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="sandsynligvis hos {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} har sandsynligvis &apos;{1}&apos;: {2} sendte den til dem den {3}, og de har ikke svaret."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} har sandsynligvis &apos;{1}&apos;: du sendte den til dem den {2}, og de har ikke svaret."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Der blev fundet indstillinger for denne adresse, men de ville sende din adgangskode ukrypteret, så Wrapperen bruger dem ikke. Indtast serverindstillingerne manuelt."/>
 		<lookup key="menuItemExit" value="&amp;Afslut"/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -1896,6 +1914,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Vem har draget?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Frågade {0} spelare vem som har &apos;{1}&apos;. Svaren kommer med nästa e-postkontroll."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Inga andra spelare är kända för &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="troligen hos {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} har troligen &apos;{1}&apos;: {2} skickade det till dem den {3}, och de har inte svarat."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} har troligen &apos;{1}&apos;: du skickade det till dem den {2}, och de har inte svarat."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Inställningar hittades för den här adressen, men de skulle skicka ditt lösenord okrypterat, så Wrappern använder dem inte. Ange serverinställningarna manuellt."/>
 		<lookup key="buttonDetailsShow" value="Detaljer &gt;&gt;"/>
 		<lookup key="buttonDetailsHide" value="&lt;&lt; Detaljer"/>
@@ -2162,6 +2183,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Kto ma turę?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Zapytano {0} graczy, kto ma &apos;{1}&apos;. Odpowiedzi przyjdą przy kolejnych sprawdzeniach poczty."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Nie są znani inni gracze dla &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="prawdopodobnie u {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} prawdopodobnie ma &apos;{1}&apos;: {2} wysłał mu je {3} i nie odpowiedział."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} prawdopodobnie ma &apos;{1}&apos;: wysłałeś mu je {2} i nie odpowiedział."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Znaleziono ustawienia dla tego adresu, ale wysyłałyby hasło bez szyfrowania, więc Wrapper ich nie użyje. Wprowadź ustawienia serwera ręcznie."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -2436,6 +2460,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Kenellä vuoro on?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Kysyttiin {0} pelaajalta, kenellä &apos;{1}&apos; on. Vastaukset saapuvat seuraavien postitarkistusten mukana."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Pelille &apos;{0}&apos; ei tunneta muita pelaajia."/>
+		<lookup key="activityProbablyWith" value="luultavasti pelaajalla {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="{0} luultavasti pitää vuoroa &apos;{1}&apos;: {2} lähetti sen hänelle {3}, eikä hän ole vastannut."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="{0} luultavasti pitää vuoroa &apos;{1}&apos;: lähetit sen hänelle {2}, eikä hän ole vastannut."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Tälle osoitteelle löytyi asetukset, mutta ne lähettäisivät salasanasi salaamattomana, joten Wrapper ei käytä niitä. Syötä palvelimen asetukset käsin."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -2705,6 +2732,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="Cine are tura?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Am întrebat {0} jucător(i) cine are &apos;{1}&apos;. Răspunsurile sosesc la următoarele verificări ale poștei."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Nu se cunosc alți jucători pentru &apos;{0}&apos;."/>
+		<lookup key="activityProbablyWith" value="probabil la {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="Probabil {0} are &apos;{1}&apos;: {2} i l-a trimis pe {3}, iar acesta nu a răspuns."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="Probabil {0} are &apos;{1}&apos;: i l-ați trimis pe {2}, iar acesta nu a răspuns."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Au fost găsite setări pentru această adresă, dar ar trimite parola necriptată, așa că Wrapperul nu le va folosi. Introduceți manual setările serverului."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -2978,6 +3008,9 @@
 		<lookup key="msgWrapperWhereIsTitle" value="У кого ход?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Спросили игроков ({0}), у кого &apos;{1}&apos;. Ответы придут при следующих проверках почты."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Другие игроки для &apos;{0}&apos; неизвестны."/>
+		<lookup key="activityProbablyWith" value="вероятно, у {0}"/>
+		<lookup key="msgWrapperProbablyWith" value="Вероятно, &apos;{1}&apos; у {0}: {2} отправил ход {3}, а ответа нет."/>
+		<lookup key="msgWrapperProbablyWithYouSent" value="Вероятно, &apos;{1}&apos; у {0}: вы отправили ход {2}, а ответа нет."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Для этого адреса найдены настройки, но с ними пароль передавался бы без шифрования, поэтому Wrapper их не использует. Введите настройки сервера вручную."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>

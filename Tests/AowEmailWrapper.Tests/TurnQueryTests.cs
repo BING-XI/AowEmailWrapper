@@ -12,7 +12,7 @@ using Xunit;
 namespace AowEmailWrapper.Tests
 {
     /// <summary>
-    /// Wrapper-to-wrapper "where is the turn?" mail: recognised by its headers, answered only for a
+    /// Wrapper-to-wrapper "who has the turn?" mail: recognised by its headers, answered only for a
     /// known player of a game the player has, and the answer recorded against the game.
     /// </summary>
     public class TurnQueryTests
@@ -188,6 +188,137 @@ namespace AowEmailWrapper.Tests
             Assert.Equal(2, activity.Whereabouts.Split(new[] { TurnQuery.WhereaboutsSeparator }, StringSplitOptions.None).Length);
             Assert.DoesNotContain("has held", activity.Whereabouts);
             Assert.Contains("carol@example.org sent 'Highpass (Dave, Fred).asg' to dave@example.net", activity.Whereabouts);
+        }
+
+        #endregion
+
+        #region Who probably has it
+
+        private const string Me = "me@example.com";
+        private const string Bob = "bob@example.com";
+        private const string Carol = "carol@example.org";
+        private const string Dave = "dave@example.net";
+        private static readonly DateTimeOffset Day1 = new DateTimeOffset(2026, 9, 1, 20, 0, 0, TimeSpan.Zero);
+
+        /// <summary>A turn the player sent to Bob on day 1, as the activity log has it.</summary>
+        private static Activity SentToBob()
+        {
+            Activity activity = new Activity(ActivityState.Sent, AowGameType.Aow1, Game, "Highpass", "4");
+            activity.Recipients = Bob;
+            activity.DateTicks = Day1.LocalDateTime.Ticks.ToString();
+            return activity;
+        }
+
+        private static void Answer(Activity activity, string from, ActivityState status, int day, string sentTo = null)
+        {
+            TurnQuery.RecordWhereabouts(activity, new TurnState { Responder = from, Status = status, SentTo = sentTo, Date = Day1.AddDays(day - 1) });
+        }
+
+        [Fact]
+        public void Three_wrappers_saying_not_us_point_at_the_fourth_player()
+        {
+            //Four players; Dave has no Wrapper and never answers
+            Activity activity = SentToBob();
+            Answer(activity, Bob, ActivityState.Sent, 2, Carol);
+            Answer(activity, Carol, ActivityState.Sent, 3, Dave);
+
+            TurnSend likely = TurnQuery.LikelyHolder(activity, new[] { Me });
+
+            Assert.NotNull(likely);
+            Assert.Equal(Dave, likely.To);
+            Assert.Equal(Carol, likely.From);
+            Assert.Equal(Day1.AddDays(2), likely.Date);
+        }
+
+        [Fact]
+        public void The_players_own_send_is_part_of_the_chain()
+        {
+            //Carol answered about an older turn; the newest send is the player's own, to Bob, who has not answered
+            Activity activity = SentToBob();
+            activity.DateTicks = Day1.AddDays(4).LocalDateTime.Ticks.ToString();
+            Answer(activity, Carol, ActivityState.Sent, 3, Me);
+
+            TurnSend likely = TurnQuery.LikelyHolder(activity, new[] { Me });
+
+            Assert.Equal(Bob, likely.To);
+            Assert.Null(likely.From);
+        }
+
+        [Fact]
+        public void No_guess_when_a_wrapper_says_it_holds_the_turn()
+        {
+            Activity activity = SentToBob();
+            Answer(activity, Bob, ActivityState.Sent, 2, Carol);
+            Answer(activity, Carol, ActivityState.Received, 2);
+
+            Assert.Null(TurnQuery.LikelyHolder(activity, new[] { Me }));
+            Assert.Equal(Carol, activity.Holder);
+        }
+
+        [Fact]
+        public void No_guess_when_the_suspected_player_has_answered_without_claiming_it()
+        {
+            Activity activity = SentToBob();
+            Answer(activity, Bob, ActivityState.Sent, 2, Carol);
+            Answer(activity, Carol, ActivityState.None, 0);
+
+            Assert.Null(TurnQuery.LikelyHolder(activity, new[] { Me }));
+        }
+
+        [Fact]
+        public void The_senders_own_copy_is_not_a_recipient_but_two_recipients_are_no_guess()
+        {
+            //Carol keeps a copy for herself: the turn still went to Dave alone
+            Activity activity = SentToBob();
+            Answer(activity, Bob, ActivityState.Sent, 2, Carol);
+            Answer(activity, Carol, ActivityState.Sent, 3, Dave + ";" + Carol);
+            Assert.Equal(Dave, TurnQuery.LikelyHolder(activity, new[] { Me }).To);
+
+            //Sent to two players at once: which one plays next cannot be told
+            Answer(activity, Carol, ActivityState.Sent, 3, Dave + ";" + "erin@example.com");
+            Assert.Null(TurnQuery.LikelyHolder(activity, new[] { Me }));
+        }
+
+        [Fact]
+        public void Answers_survive_the_activity_log_and_older_logs_still_load()
+        {
+            Activity activity = SentToBob();
+            Answer(activity, Carol, ActivityState.Sent, 3, Dave);
+            activity.LikelyHolder = Dave;
+
+            System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(Activity));
+            string xml;
+            using (StringWriter writer = new StringWriter())
+            {
+                serializer.Serialize(writer, activity);
+                xml = writer.ToString();
+            }
+            Activity back;
+            using (StringReader reader = new StringReader(xml))
+            {
+                back = (Activity)serializer.Deserialize(reader);
+            }
+
+            TurnAnswer answer = Assert.Single(back.Answers);
+            Assert.Equal(Carol, answer.Responder);
+            Assert.Equal(ActivityState.Sent, answer.Status);
+            Assert.Equal(Dave, answer.SentTo);
+            Assert.Equal(Dave, back.LikelyHolder);
+            Assert.Equal(Dave, TurnQuery.LikelyHolder(back, new[] { Me }).To);
+
+            using (StringReader reader = new StringReader("<activity game_type=\"Aow1\" file_name=\"x.asg\" status=\"Sent\" ticks=\"1\" />"))
+            {
+                Assert.Empty(((Activity)serializer.Deserialize(reader)).Answers);
+            }
+        }
+
+        [Fact]
+        public void The_query_email_asks_who_has_the_turn()
+        {
+            MimeMessage query = TurnQuery.BuildQuery(Me, Bob, Game, TurnQuery.NewQueryId());
+
+            Assert.Contains("who has", query.Subject);
+            Assert.Contains("asking who has the turn", query.TextBody);
         }
 
         #endregion

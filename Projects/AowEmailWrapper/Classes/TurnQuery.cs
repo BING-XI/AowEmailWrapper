@@ -26,7 +26,16 @@ namespace AowEmailWrapper.Classes
         }
     }
 
-    /// <summary>A wrapper asking where a turn is.</summary>
+    /// <summary>A turn passed from one player to another, as the answers report it.</summary>
+    public class TurnSend
+    {
+        /// <summary>Who sent it; null when it was the player, whose own address is not known here.</summary>
+        public string From { get; set; }
+        public string To { get; set; }
+        public DateTimeOffset Date { get; set; }
+    }
+
+    /// <summary>A wrapper asking who has a turn.</summary>
     public class TurnQueryRequest
     {
         public string Game { get; set; }
@@ -51,7 +60,7 @@ namespace AowEmailWrapper.Classes
         public const string KindQuery = "query";
         public const string KindReply = "reply";
 
-        private const string QuerySubjectTemplate = "AoW Wrapper: where is {0}?";
+        private const string QuerySubjectTemplate = "AoW Wrapper: who has {0}?";
         private const string ReplySubjectTemplate = "AoW Wrapper: {0}";
 
         #region Recognising
@@ -111,7 +120,7 @@ namespace AowEmailWrapper.Classes
             message.Headers.Add("X-Auto-Response-Suppress", "All");
 
             StringBuilder body = new StringBuilder();
-            body.AppendFormat("The Age of Wonders Email Wrapper of {0} is asking where the turn for '{1}' is.", from, gameFileName);
+            body.AppendFormat("The Age of Wonders Email Wrapper of {0} is asking who has the turn for '{1}'.", from, gameFileName);
             body.AppendLine();
             body.AppendLine();
             body.AppendLine("If you run the Wrapper it answers automatically and removes this message. Otherwise you can reply by hand or ignore it.");
@@ -326,6 +335,15 @@ namespace AowEmailWrapper.Classes
             lines.Add(Describe(state, activity.FileName));
             activity.Whereabouts = string.Join(WhereaboutsSeparator, lines);
 
+            activity.Answers.RemoveAll(answer => SameAddress(answer.Responder, state.Responder));
+            activity.Answers.Add(new TurnAnswer
+            {
+                Responder = state.Responder,
+                Status = state.Status,
+                Date = state.Date.HasValue ? state.Date.Value.ToString("o", CultureInfo.InvariantCulture) : null,
+                SentTo = string.IsNullOrEmpty(state.SentTo) ? null : state.SentTo,
+            });
+
             if (state.Holds)
             {
                 activity.Holder = state.Responder;
@@ -334,6 +352,60 @@ namespace AowEmailWrapper.Classes
             {
                 activity.Holder = null;
             }
+        }
+
+        /// <summary>
+        /// Who most probably has the turn when no wrapper says it does: the recipient of the newest send
+        /// anyone knows about (the answers, and the player's own send), provided that recipient has not
+        /// answered. A player without the Wrapper, or whose Wrapper is not running, never answers, so the
+        /// turn is usually with them. Null when a wrapper holds it, when nothing was sent, when the newest
+        /// send went to several people, or when its recipient answered without claiming it.
+        /// </summary>
+        public static TurnSend LikelyHolder(Activity activity, IEnumerable<string> ownAddresses)
+        {
+            if (activity == null || activity.Answers.Any(answer => answer.Status == ActivityState.Received))
+            {
+                return null;
+            }
+
+            List<string> own = (ownAddresses ?? Enumerable.Empty<string>()).Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+            List<TurnSend> sends = new List<TurnSend>();
+            foreach (TurnAnswer answer in activity.Answers.Where(a => a.Status == ActivityState.Sent || a.Status == ActivityState.Pending))
+            {
+                DateTimeOffset when;
+                if (!string.IsNullOrEmpty(answer.SentTo) &&
+                    DateTimeOffset.TryParse(answer.Date, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out when))
+                {
+                    sends.Add(new TurnSend { From = answer.Responder, To = answer.SentTo, Date = when });
+                }
+            }
+
+            //What the player sent counts too: the chain starts there
+            long ticks;
+            if ((activity.Status == ActivityState.Sent || activity.Status == ActivityState.Pending) &&
+                !string.IsNullOrEmpty(activity.Recipients) && long.TryParse(activity.DateTicks, out ticks))
+            {
+                sends.Add(new TurnSend { From = null, To = activity.Recipients, Date = new DateTimeOffset(new DateTime(ticks, DateTimeKind.Local)) });
+            }
+
+            TurnSend newest = sends.OrderByDescending(send => send.Date).FirstOrDefault();
+            if (newest == null)
+            {
+                return null;
+            }
+
+            List<string> recipients = Split(newest.To)
+                .Select(address => address.Trim())
+                .Where(address => address.Contains("@") && !own.Any(mine => SameAddress(mine, address)) && !SameAddress(address, newest.From))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (recipients.Count != 1 || activity.Answers.Any(answer => SameAddress(answer.Responder, recipients[0])))
+            {
+                return null;
+            }
+
+            newest.To = recipients[0];
+            return newest;
         }
 
         #endregion
