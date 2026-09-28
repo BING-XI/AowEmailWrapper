@@ -514,6 +514,7 @@ namespace AowEmailWrapper.SmokeTests
         [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
         [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr h, int m, IntPtr w, IntPtr l);
         [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, IntPtr l);
+        [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT

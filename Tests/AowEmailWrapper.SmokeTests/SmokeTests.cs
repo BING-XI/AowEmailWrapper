@@ -35,11 +35,13 @@ namespace AowEmailWrapper.SmokeTests
                 for (int attempt = 1; attempt <= 2; attempt++)
                 {
                     app.DoubleClickTrayIcon();
-                    AppUnderTest.Until(() => app.MainWindow() != IntPtr.Zero && Native.IsWindowVisible(app.MainWindow()) && !Native.IsIconic(app.MainWindow()),
-                        TimeSpan.FromSeconds(10), $"Show #{attempt} did not bring the window up");
+                    //Judged once the window has settled: on the way back from the tray it is briefly at the size
+                    //Windows gives minimized windows, and its handle is recreated, and this test looks from another
+                    //process at its own pace. A window that stays small still fails, after ten seconds.
+                    AppUnderTest.Until(() => IsShownAtSize(app), TimeSpan.FromSeconds(10),
+                        $"Show #{attempt} did not bring the window up at a usable size:" + Environment.NewLine + app.DescribeWindows() + Environment.NewLine + WindowLogLines(app));
                     main = app.MainWindow();
                     Native.RECT bounds = Native.Rect(main);
-                    Assert.True(bounds.Width >= 400 && bounds.Height >= 400, $"Show #{attempt}: the window is only {bounds.Width}x{bounds.Height}");
                     Assert.True(Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(new System.Drawing.Rectangle(bounds.Left, bounds.Top, bounds.Width, bounds.Height))),
                         $"Show #{attempt}: the window is off every screen at {bounds}");
 
@@ -47,6 +49,61 @@ namespace AowEmailWrapper.SmokeTests
                     Native.PostMessage(main, 0x0112, (IntPtr)0xF020, IntPtr.Zero);
                     AppUnderTest.Until(() => !Native.IsWindowVisible(app.MainWindow()), TimeSpan.FromSeconds(10), $"after Show #{attempt} the window did not go back to the tray");
                 }
+            }
+        }
+
+        private static bool IsShownAtSize(AppUnderTest app)
+        {
+            IntPtr main = app.MainWindow();
+            if (main == IntPtr.Zero || !Native.IsWindowVisible(main) || Native.IsIconic(main))
+            {
+                return false;
+            }
+            Native.RECT bounds = Native.Rect(main);
+            return bounds.Width >= 400 && bounds.Height >= 400;
+        }
+
+        private static bool SameRect(Native.RECT a, Native.RECT b)
+        {
+            return a.Left == b.Left && a.Top == b.Top && a.Width == b.Width && a.Height == b.Height;
+        }
+
+        /// <summary>What the Wrapper logged about putting its window back, for a failure message.</summary>
+        private static string WindowLogLines(AppUnderTest app)
+        {
+            string[] lines = app.ReadLog().Split('\n');
+            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at")).Select(line => line.Trim()));
+            return string.IsNullOrEmpty(found) ? "The Wrapper logged no correction of its window." : "Wrapper log:" + Environment.NewLine + found;
+        }
+
+        /// <summary>
+        /// A window that comes back from the tray unusable, too small (at the size Windows gives minimized
+        /// windows, as happened on the build machine) or outside every screen, is put back where the player last
+        /// had it, not merely somewhere on screen. The window has a fixed border, so the test cannot make it
+        /// small; it moves it off every screen before it goes to the tray, which the same correction handles.
+        /// </summary>
+        [Fact]
+        public void A_window_that_comes_back_from_the_tray_unusable_is_put_back_where_it_was()
+        {
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                app.Start();
+                AppUnderTest.Until(() => !Native.IsWindowVisible(app.MainWindow()), TimeSpan.FromSeconds(20), "the Wrapper did not start in the tray");
+
+                //Settled, since bringing the window back recreates its handle and a move made before would be lost
+                IntPtr shown = app.ShowAndSettle();
+                Native.RECT good = Native.Rect(shown);
+
+                //SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
+                Native.SetWindowPos(shown, IntPtr.Zero, -20000, -20000, 0, 0, 0x0001 | 0x0004 | 0x0010);
+                AppUnderTest.Until(() => Native.Rect(app.MainWindow()).Left < -10000, TimeSpan.FromSeconds(5), "the window could not be moved for the test");
+                Native.PostMessage(app.MainWindow(), 0x0112, (IntPtr)0xF020, IntPtr.Zero);
+                AppUnderTest.Until(() => !Native.IsWindowVisible(app.MainWindow()), TimeSpan.FromSeconds(10), "the window did not go back to the tray");
+
+                app.DoubleClickTrayIcon();
+                AppUnderTest.Until(() => IsShownAtSize(app) && SameRect(Native.Rect(app.MainWindow()), good), TimeSpan.FromSeconds(10),
+                    $"the window did not come back where it was, {good}:" + Environment.NewLine + app.DescribeWindows() + Environment.NewLine + WindowLogLines(app));
+                Assert.Contains("put back at", WindowLogLines(app));
             }
         }
 

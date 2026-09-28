@@ -151,6 +151,9 @@ namespace AowEmailWrapper
         private bool _restoringFromTray = false;
         //The size the window was designed with, for a window that has to be put back on a screen
         private Size _normalSize;
+        //Where the player last had the window at a usable size, kept by the Wrapper itself: some versions of
+        //Windows and WinForms lose it when hiding to the tray recreates the window handle
+        private Rectangle _lastGoodBounds = Rectangle.Empty;
         private int _showingExceptionCount = 0;
 
         private ContextMenuStrip _contextMenu;
@@ -591,10 +594,32 @@ namespace AowEmailWrapper
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
+            RememberGoodBounds();
             if (!_restoringFromTray)
             {
                 Minimized();
             }
+        }
+
+        protected override void OnLocationChanged(EventArgs e)
+        {
+            base.OnLocationChanged(e);
+            RememberGoodBounds();
+        }
+
+        private void RememberGoodBounds()
+        {
+            if (!_restoringFromTray && Visible && WindowState == FormWindowState.Normal && IsUsable(Bounds))
+            {
+                _lastGoodBounds = Bounds;
+            }
+        }
+
+        /// <summary>At least half the designed size and on some screen.</summary>
+        private bool IsUsable(Rectangle bounds)
+        {
+            return bounds.Width >= _normalSize.Width / 2 && bounds.Height >= _normalSize.Height / 2 &&
+                Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(bounds));
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -660,6 +685,7 @@ namespace AowEmailWrapper
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            RememberGoodBounds();
 
             if (_isNewConfig &&
                 _wrapperConfig != null &&
@@ -1119,33 +1145,51 @@ namespace AowEmailWrapper
             }
 
             this.ShowInTaskbar = true;
-            EnsureOnScreen();
+            EnsureUsableBounds("restored");
+            //Windows can still move or size the window after these calls (the restore finishing, the taskbar
+            //button arriving); look once more when that has been processed
+            BeginInvoke(new Action(() => EnsureUsableBounds("settled")));
         }
 
         /// <summary>
-        /// A window that lies outside every screen (an unplugged monitor, or a restore that went wrong)
-        /// is moved to the middle of the primary screen at its designed size.
+        /// A restored window that came back too small (at the size Windows gives minimized windows) or outside
+        /// every screen (an unplugged monitor, or a restore that went wrong) is put back where the player last
+        /// had it, or in the middle of the primary screen at its designed size when that place is gone too.
         /// </summary>
-        private void EnsureOnScreen()
+        private void EnsureUsableBounds(string when)
         {
+            if (IsDisposed || !Visible || WindowState != FormWindowState.Normal)
+            {
+                return;
+            }
             Rectangle bounds = this.Bounds;
-            if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(bounds)))
+            if (IsUsable(bounds))
             {
+                //A restore that lands well fires no move or resize once it is over, so this is where the good
+                //place is learnt
+                _lastGoodBounds = bounds;
                 return;
             }
 
-            Screen primary = Screen.PrimaryScreen ?? Screen.AllScreens.FirstOrDefault();
-            if (primary == null)
+            Rectangle target = _lastGoodBounds;
+            if (target.IsEmpty || !IsUsable(target))
             {
-                return;
+                Screen primary = Screen.PrimaryScreen ?? Screen.AllScreens.FirstOrDefault();
+                if (primary == null)
+                {
+                    return;
+                }
+                Rectangle area = primary.WorkingArea;
+                target = new Rectangle(
+                    area.Left + Math.Max(0, (area.Width - _normalSize.Width) / 2),
+                    area.Top + Math.Max(0, (area.Height - _normalSize.Height) / 2),
+                    _normalSize.Width,
+                    _normalSize.Height);
             }
 
-            Rectangle area = primary.WorkingArea;
-            this.Bounds = new Rectangle(
-                area.Left + Math.Max(0, (area.Width - _normalSize.Width) / 2),
-                area.Top + Math.Max(0, (area.Height - _normalSize.Height) / 2),
-                _normalSize.Width,
-                _normalSize.Height);
+            Trace.TraceInformation("Window {0} at {1}; put back at {2}", when, bounds, target);
+            this.Bounds = target;
+            _lastGoodBounds = target;
         }
 
         private void OpenDocument(string fileName)
