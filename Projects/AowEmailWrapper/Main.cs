@@ -52,6 +52,8 @@ namespace AowEmailWrapper
         private const string WrapperCannotActivateAccountMessageBoxKey = "msgWrapperCannotActivateAccount";
         private const string WrapperGameStartFailedKey = "msgGameStartFailed";
         private const string WrapperUnsavedChangesKey = "msgWrapperUnsavedChanges";
+        private const string WrapperLocalPortInUseKey = "msgLocalPortInUse";
+        private const string WrapperLocalPortInUseFallback = "The Wrapper could not open port {0}, which the games send their turns to: another program, or another copy of the Wrapper, is using it.";
         private const string WrapperClickToStartKey = "msgWrapperClickToStart";
         //The text of the last "games waiting" notification, so a click on it can be told from a click on another
         private string _gamesWaitingBalloonText;
@@ -68,11 +70,11 @@ namespace AowEmailWrapper
         private const string WrapperTurnsRecoveredKey = "msgWrapperTurnsRecovered";
         private const string WrapperTurnsRecoveredFallback = "Found {0} unplayed turn(s) in your mailbox and added them to the activity log.";
         private const string WrapperWhereIsAskedKey = "msgWrapperWhereIsAsked";
-        private const string WrapperWhereIsAskedFallback = "Asked {0} player(s) where '{1}' is. Answers arrive with the next mail checks.";
+        private const string WrapperWhereIsAskedFallback = "Asked {0} player(s) who has '{1}'. Answers arrive with the next mail checks.";
         private const string WrapperWhereIsNobodyKey = "msgWrapperWhereIsNobody";
         private const string WrapperWhereIsNobodyFallback = "No other players are known for '{0}'.";
         private const string WrapperWhereIsTitleKey = "msgWrapperWhereIsTitle";
-        private const string WrapperWhereIsTitleFallback = "Where is the turn?";
+        private const string WrapperWhereIsTitleFallback = "Who has the turn?";
         private const string WrapperNewSenderFallback = "'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with.";
         private const string WrapperResendToKey = "msgWrapperResendTo";
         private const string WrapperUpdateAvailableKey = "msgWrapperUpdateAvailable";
@@ -151,6 +153,9 @@ namespace AowEmailWrapper
         private bool _restoringFromTray = false;
         //The size the window was designed with, for a window that has to be put back on a screen
         private Size _normalSize;
+        //Where the player last had the window at a usable size, kept by the Wrapper itself: some versions of
+        //Windows and WinForms lose it when hiding to the tray recreates the window handle
+        private Rectangle _lastGoodBounds = Rectangle.Empty;
         private int _showingExceptionCount = 0;
 
         private ContextMenuStrip _contextMenu;
@@ -229,6 +234,9 @@ namespace AowEmailWrapper
             LoadTranslations();
 
             InitializeComponent();
+            //Before LoadConfig starts the mail checkers and the local mail server, which report from their own threads
+            _windowThreadId = Environment.CurrentManagedThreadId;
+            _windowContext = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
             _normalSize = this.Size;
             ImageListLoader.Load(imageListIcons, "Main");
 
@@ -591,10 +599,48 @@ namespace AowEmailWrapper
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
+            RememberGoodBounds();
             if (!_restoringFromTray)
             {
                 Minimized();
             }
+        }
+
+        protected override void OnLocationChanged(EventArgs e)
+        {
+            base.OnLocationChanged(e);
+            RememberGoodBounds();
+        }
+
+        private void RememberGoodBounds()
+        {
+            if (!_restoringFromTray && Visible && WindowState == FormWindowState.Normal && IsUsable(Bounds))
+            {
+                _lastGoodBounds = Bounds;
+            }
+        }
+
+        /// <summary>Where the player last had the window, or the middle of the primary screen at its designed size.</summary>
+        private Rectangle UsableTarget()
+        {
+            if (!_lastGoodBounds.IsEmpty && IsUsable(_lastGoodBounds))
+            {
+                return _lastGoodBounds;
+            }
+            Screen primary = Screen.PrimaryScreen ?? Screen.AllScreens.FirstOrDefault();
+            Rectangle area = primary != null ? primary.WorkingArea : new Rectangle(0, 0, _normalSize.Width, _normalSize.Height);
+            return new Rectangle(
+                area.Left + Math.Max(0, (area.Width - _normalSize.Width) / 2),
+                area.Top + Math.Max(0, (area.Height - _normalSize.Height) / 2),
+                _normalSize.Width,
+                _normalSize.Height);
+        }
+
+        /// <summary>At least half the designed size and on some screen.</summary>
+        private bool IsUsable(Rectangle bounds)
+        {
+            return bounds.Width >= _normalSize.Width / 2 && bounds.Height >= _normalSize.Height / 2 &&
+                Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(bounds));
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -660,6 +706,7 @@ namespace AowEmailWrapper
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            RememberGoodBounds();
 
             if (_isNewConfig &&
                 _wrapperConfig != null &&
@@ -818,21 +865,33 @@ namespace AowEmailWrapper
             return true;
         }
 
+        /// <summary>
+        /// Raised on the watcher's own thread when the game it watches has ended. The game may already have
+        /// been started again from the tray (the click came before this report), and then the slot holds the
+        /// new watcher: clearing it would let the next click start a second copy of the running game.
+        /// </summary>
         private void StartedGameWatchCompleted(object sender, AowGameType gameType)
         {
+            StartedTaskWatcher ended = sender as StartedTaskWatcher;
             switch (gameType)
             {
                 case AowGameType.Aow1:
-                    _aow1GameWatcher = null;
+                    ReleaseWatcher(ref _aow1GameWatcher, ended);
                     break;
                 case AowGameType.Aow2:
-                    _aow2GameWatcher = null;
+                    ReleaseWatcher(ref _aow2GameWatcher, ended);
                     break;
                 case AowGameType.AowSm:
                 case AowGameType.AowMpe:
-                    _aowSmGameWatcher = null;
+                    ReleaseWatcher(ref _aowSmGameWatcher, ended);
                     break;
             }
+        }
+
+        /// <summary>Empties the slot only if it still holds <paramref name="ended"/>; returns true when it did.</summary>
+        internal static bool ReleaseWatcher(ref StartedTaskWatcher slot, StartedTaskWatcher ended)
+        {
+            return ended != null && ReferenceEquals(Interlocked.CompareExchange(ref slot, null, ended), ended);
         }
 
         private void OnConfigNeedsSave(object sender, EventArgs e)
@@ -911,13 +970,64 @@ namespace AowEmailWrapper
             }
         }
 
+        //The window's thread and its synchronization context, known from the start. InvokeRequired is false on
+        //every thread until the window has a handle, and the Wrapper starts in the tray, so during start-up a
+        //mail checker's report ran on the checker's own thread: it set the tray icon from the image list while
+        //the window thread built the tray menu from the same list, and the Wrapper crashed at start.
+        private int _windowThreadId;
+        private SynchronizationContext _windowContext;
+
+        private bool OnWindowThread
+        {
+            get { return Environment.CurrentManagedThreadId == _windowThreadId; }
+        }
+
+        /// <summary>Queues window code from another thread; it runs once the window thread pumps, handle or not.</summary>
+        private void PostToWindow(Action action)
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+            _windowContext.Post(state =>
+            {
+                if (!IsDisposed)
+                {
+                    action();
+                }
+            }, null);
+        }
+
+        /// <summary>Runs window code from another thread and waits for it.</summary>
+        private void SendToWindow(Action action)
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+            try
+            {
+                _windowContext.Send(state =>
+                {
+                    if (!IsDisposed)
+                    {
+                        action();
+                    }
+                }, null);
+            }
+            catch (InvalidAsynchronousStateException)
+            {
+                //The window's thread has ended: the Wrapper is closing
+            }
+        }
+
         private void RaiseEvent(EventHandler theDelegate, object sender, EventArgs e)
         {
             if (theDelegate != null)
             {
-                if (this.InvokeRequired)
+                if (!OnWindowThread)
                 {
-                    this.Invoke(theDelegate, sender, e);
+                    SendToWindow(() => theDelegate(sender, e));
                 }
                 else
                 {
@@ -929,12 +1039,9 @@ namespace AowEmailWrapper
         /// <summary>Runs window code from any thread; the local mail server calls this from its own thread.</summary>
         private void RunOnUiThread(Action action)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                    this.BeginInvoke(action);
-                }
+                PostToWindow(action);
             }
             else
             {
@@ -994,7 +1101,9 @@ namespace AowEmailWrapper
         {
             this.SuspendLayout();
 
-            if (this.WindowState == FormWindowState.Minimized)
+            //The window itself decides as well as the Form's idea of it, which can lag behind after the handle has
+            //been recreated; a minimize it missed would leave the window minimized instead of in the tray
+            if (this.WindowState == FormWindowState.Minimized || (IsHandleCreated && IsIconic(Handle)))
             {
                 this.ShowInTaskbar = false;
                 this.Visible = false;
@@ -1012,7 +1121,10 @@ namespace AowEmailWrapper
         {
             this.SuspendLayout();
 
-            if (this.WindowState == FormWindowState.Minimized || !this.Visible)
+            Trace.TraceInformation("Show: the form says {0} and {1}; the window is {2}", WindowState, Visible ? "visible" : "hidden", NativeState);
+            //The window itself decides as well as the Form's idea of it: on the build machine the Form believed a
+            //window in the tray was shown normally, and Show did nothing
+            if (this.WindowState == FormWindowState.Minimized || !this.Visible || IsAwayNatively)
             {
                 if (_activityLog != null && 
                     _activityLog.Activities != null && 
@@ -1056,49 +1168,148 @@ namespace AowEmailWrapper
             base.SetVisibleCore(value);
         }
 
+        private static bool HasExited(Process process)
+        {
+            try
+            {
+                return process.HasExited;
+            }
+            catch (InvalidOperationException)
+            {
+                return true;
+            }
+        }
+
+        /// <summary>Called on a pool thread when the Wrapper is started again while this one runs.</summary>
+        public void ShowFromAnotherStart()
+        {
+            if (!IsHandleCreated || IsDisposed)
+            {
+                return;
+            }
+            try
+            {
+                BeginInvoke(new Action(() =>
+                {
+                    Trace.TraceInformation("Started again while running: showing the window");
+                    Maximize();
+                }));
+            }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is ObjectDisposedException)
+            {
+                //The window went away between the check and the call (the Wrapper is closing). An exception
+                //leaving a thread-pool callback would end the process, so the request is simply dropped.
+                Trace.TraceInformation("Started again while closing: nothing to show");
+            }
+        }
+
         private void RestoreFromTray()
         {
+            //The whole restore is marked, the taskbar button included: its handle recreation resizes the window,
+            //and a resize seen as "minimized" while the Form's idea of its state lags behind would send the
+            //window straight back to the tray
             _restoringFromTray = true;
             try
             {
+                //Where WinForms will put the window back, fixed while it is still hidden: showing a window whose
+                //restore position lies off every screen stalled inside WinForms on the build machine (the call to
+                //show it never returned), and a restore that went wrong must not flash up in the wrong place
+                Rectangle restoreTo = RestoreBounds;
+                if (!IsUsable(restoreTo))
+                {
+                    Rectangle target = UsableTarget();
+                    Trace.TraceInformation("Window would come back at {0}; bringing it back at {1}", restoreTo, target);
+                    this.Bounds = target;
+                }
                 //Still minimized and without a taskbar button, so nothing shows yet
                 this.Visible = true;
                 //Windows restores the size and position it kept for the window
                 this.WindowState = FormWindowState.Normal;
+                this.ShowInTaskbar = true;
+                MakeUsable("restored");
             }
             finally
             {
                 _restoringFromTray = false;
             }
 
-            this.ShowInTaskbar = true;
-            EnsureOnScreen();
+            //Windows can still move or size the window after these calls (the restore finishing, the taskbar
+            //button arriving); look once more when that has been processed
+            BeginInvoke(new Action(() =>
+            {
+                _restoringFromTray = true;
+                try
+                {
+                    MakeUsable("settled");
+                }
+                finally
+                {
+                    _restoringFromTray = false;
+                }
+            }));
+        }
+
+        private const int SW_RESTORE = 9;
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsIconic(IntPtr hWnd);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        /// <summary>The window is minimized or hidden as Windows sees it, whatever the Form believes.</summary>
+        private bool IsAwayNatively
+        {
+            get { return IsHandleCreated && (IsIconic(Handle) || !IsWindowVisible(Handle)); }
+        }
+
+        private string NativeState
+        {
+            get { return !IsHandleCreated ? "no window" : IsIconic(Handle) ? "minimized" : IsWindowVisible(Handle) ? "shown" : "hidden"; }
         }
 
         /// <summary>
-        /// A window that lies outside every screen (an unplugged monitor, or a restore that went wrong)
-        /// is moved to the middle of the primary screen at its designed size.
+        /// The window as it really is, not as the Form last understood it: on the build machine setting
+        /// WindowState to Normal left the window minimized, since after the handle was recreated the Form
+        /// already believed it was Normal and so did nothing. A window still minimized is restored directly;
+        /// then one that came back too small or off every screen is put back.
         /// </summary>
-        private void EnsureOnScreen()
+        private void MakeUsable(string when)
         {
+            if (IsDisposed || !IsHandleCreated)
+            {
+                return;
+            }
+            if (IsAwayNatively)
+            {
+                Trace.TraceInformation("Window {0} still {1}; restoring it", when, NativeState);
+                ShowWindow(Handle, SW_RESTORE);
+            }
+            EnsureUsableBounds(when);
+        }
+
+        /// <summary>
+        /// A restored window that came back too small (at the size Windows gives minimized windows) or outside
+        /// every screen (an unplugged monitor, or a restore that went wrong) is put back where the player last
+        /// had it, or in the middle of the primary screen at its designed size when that place is gone too.
+        /// </summary>
+        private void EnsureUsableBounds(string when)
+        {
+            if (IsDisposed || IsAwayNatively)
+            {
+                return;
+            }
             Rectangle bounds = this.Bounds;
-            if (Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(bounds)))
+            if (IsUsable(bounds))
             {
+                //A restore that lands well fires no move or resize once it is over, so this is where the good
+                //place is learnt
+                _lastGoodBounds = bounds;
                 return;
             }
 
-            Screen primary = Screen.PrimaryScreen ?? Screen.AllScreens.FirstOrDefault();
-            if (primary == null)
-            {
-                return;
-            }
+            Rectangle target = UsableTarget();
 
-            Rectangle area = primary.WorkingArea;
-            this.Bounds = new Rectangle(
-                area.Left + Math.Max(0, (area.Width - _normalSize.Width) / 2),
-                area.Top + Math.Max(0, (area.Height - _normalSize.Height) / 2),
-                _normalSize.Width,
-                _normalSize.Height);
+            Trace.TraceInformation("Window {0} at {1}; put back at {2}", when, bounds, target);
+            this.Bounds = target;
+            _lastGoodBounds = target;
         }
 
         private void OpenDocument(string fileName)
@@ -1162,7 +1373,12 @@ namespace AowEmailWrapper
 
         private void ShowException(Exception ex)
         {
-            this.Invoke(new EventHandler(this.Maximize));
+            if (!OnWindowThread)
+            {
+                SendToWindow(() => ShowException(ex));
+                return;
+            }
+            Maximize();
 
             ShowExceptionDialog(ex, Translator.Translate(this.Name), MessageBoxIcon.Error, Translator.Translate(ButtonKeyOK));
         }
@@ -1175,9 +1391,11 @@ namespace AowEmailWrapper
             _showingExceptionCount++;
             try
             {
-                if (this.InvokeRequired)
+                if (!OnWindowThread)
                 {
-                    return (int)this.Invoke(new Func<int>(() => ExceptionDialog.Show(this, caption, ex, icon, buttons)));
+                    int result = -1;
+                    SendToWindow(() => result = ExceptionDialog.Show(this, caption, ex, icon, buttons));
+                    return result;
                 }
                 return ExceptionDialog.Show(this, caption, ex, icon, buttons);
             }
@@ -1213,7 +1431,22 @@ namespace AowEmailWrapper
         {
             if (watcher != null)
             {
-                return;
+                //Already running: bring it to the front rather than doing nothing
+                if (WindowHelper.BringToFront(watcher.Process))
+                {
+                    Trace.TraceInformation("{0} is running; brought it to the front", theGame.ExePath);
+                    return;
+                }
+                if (watcher.Process == null || HasExited(watcher.Process))
+                {
+                    //It ended and the watcher has not reported it yet; start it again
+                    watcher = null;
+                }
+                else
+                {
+                    //Still starting up, with no window to show yet
+                    return;
+                }
             }
 
             try
@@ -1470,9 +1703,9 @@ namespace AowEmailWrapper
         /// </summary>
         private void PollerHistoryImported(BasePoller poller, MailboxHistory history)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                this.Invoke(new PollerHistoryEventHandler(PollerHistoryImported), poller, history);
+                SendToWindow(() => PollerHistoryImported(poller, history));
                 return;
             }
 
@@ -1489,9 +1722,9 @@ namespace AowEmailWrapper
 
         private void PollerTurnsRecovered(BasePoller poller, int count)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                this.BeginInvoke(new PollerRecoveredEventHandler(PollerTurnsRecovered), poller, count);
+                PostToWindow(() => PollerTurnsRecovered(poller, count));
                 return;
             }
 
@@ -1505,14 +1738,14 @@ namespace AowEmailWrapper
             CheckNotifyIconState();
         }
 
-        #region Where is the turn
+        #region Who has the turn
 
         /// <summary>A query or reply from another player's wrapper, already removed from the mailbox by the poller.</summary>
         private void PollerWrapperMessage(BasePoller poller, MimeMessage message)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                this.BeginInvoke(new PollerWrapperMessageEventHandler(PollerWrapperMessage), poller, message);
+                PostToWindow(() => PollerWrapperMessage(poller, message));
                 return;
             }
 
@@ -1582,7 +1815,7 @@ namespace AowEmailWrapper
             ShowBalloon(15000, WhereIsTitle(), TurnQuery.Describe(state, activity.FileName), state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
 
-        /// <summary>"Where is the turn?" on the activity list: every other player of the game is asked by email.</summary>
+        /// <summary>"Who has the turn?" on the activity list: every other player of the game is asked by email.</summary>
         private void ActivityListViewWhereIs(object sender, List<Activity> activities)
         {
             foreach (Activity activity in activities)
@@ -1640,13 +1873,10 @@ namespace AowEmailWrapper
 
         private void PollerEmailEvent(object sender, PollerEventArgs e)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
                 //Raised on the poller thread; everything below touches the window
-                if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                    this.BeginInvoke(new PollerEmailEventHandler(PollerEmailEvent), sender, e);
-                }
+                PostToWindow(() => PollerEmailEvent(sender, e));
                 return;
             }
 
@@ -1745,19 +1975,50 @@ namespace AowEmailWrapper
 
         #region Outgoing Email
 
+        /// <summary>
+        /// Starts the local mail server the games hand their turns to. The port is bound here, on the window's
+        /// thread: bound on the server's own thread, a port another program held (a second Windows user's
+        /// Wrapper, an old copy still closing) threw there and ended the Wrapper without a word. A busy port is
+        /// now reported once the window exists, the Wrapper keeps running, and the next save tries again.
+        /// </summary>
         private void StartServer(int thePort)
         {
+            SimpleServer server = new SimpleServer(thePort, ProcessSMTPRequest);
             try
             {
-                _theServer = new SimpleServer(thePort, ProcessSMTPRequest);
-                new Thread(new ThreadStart(_theServer.Start)).Start();
+                server.Listen();
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.ToString());
+                Trace.TraceError("The local mail server could not listen on port {0}: {1}", thePort, ex);
                 Trace.Flush();
-                ShowException(ex);
+                string text = Translator.Translate(WrapperLocalPortInUseKey, thePort.ToString());
+                ReportOnceShown(new Exception(string.IsNullOrEmpty(text) ? string.Format(WrapperLocalPortInUseFallback, thePort) : text, ex));
+                return;
             }
+
+            _theServer = server;
+            Thread thread = new Thread(new ThreadStart(server.Start));
+            thread.IsBackground = true;
+            thread.Name = "Local mail server";
+            thread.Start();
+        }
+
+        /// <summary>Shows an error as soon as the window can own a dialog; during start-up it does not exist yet.</summary>
+        private void ReportOnceShown(Exception ex)
+        {
+            if (IsHandleCreated)
+            {
+                BeginInvoke(new Action(() => ShowException(ex)));
+                return;
+            }
+            EventHandler once = null;
+            once = (sender, e) =>
+            {
+                HandleCreated -= once;
+                BeginInvoke(new Action(() => ShowException(ex)));
+            };
+            HandleCreated += once;
         }
 
         private void StopServer()
@@ -1817,13 +2078,10 @@ namespace AowEmailWrapper
 
         private void SmtpSenderSent(object sender, SmtpSendResponse theResponse)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
                 //Raised on the sender thread; everything below touches the window
-                if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                    this.BeginInvoke(new SmtpSenderSentEventHandler(SmtpSenderSent), sender, theResponse);
-                }
+                PostToWindow(() => SmtpSenderSent(sender, theResponse));
                 return;
             }
 
@@ -2032,7 +2290,7 @@ namespace AowEmailWrapper
 
                 if (primary != null && primary.SmtpConfig != null)
                 {
-                    _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, _theServer.Port));
+                    _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, listenPort));
                 }
 
                 CreateAllSenders();
@@ -2069,14 +2327,14 @@ namespace AowEmailWrapper
         /// Raised on the mail checker's thread when a downloaded turn has been stored. The activity log
         /// is also read by the window (the list, the tray icon, saving), and a list changed on one thread
         /// while another reads it can throw or be saved half written, so the turn is recorded on the
-        /// window's thread. Invoke rather than BeginInvoke: the checker goes on to report the end of the
+        /// window's thread. It waits for it rather than queueing: the checker goes on to report the end of the
         /// check, and the turn must be in the log by then.
         /// </summary>
         private void OnAowGameSaved(object sender, AowGameSavedEventArgs e)
         {
-            if (this.InvokeRequired && this.IsHandleCreated && !this.IsDisposed)
+            if (!OnWindowThread)
             {
-                this.Invoke(new AowGameSavedEventHandler(OnAowGameSaved), sender, e);
+                SendToWindow(() => OnAowGameSaved(sender, e));
                 return;
             }
 

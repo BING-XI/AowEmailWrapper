@@ -42,13 +42,34 @@ namespace AowEmailWrapper.SmokeTests
             _thread.Start();
         }
 
+        private static readonly Random PortPicker = new Random();
+
+        /// <summary>
+        /// A port that is free now, taken from below Windows' dynamic range (49152 and up). A port found by
+        /// binding to port 0 comes from that range, and between the probe and the Wrapper binding it another
+        /// test running at the same time could be handed the same one.
+        /// </summary>
         public static int FreePort()
         {
-            TcpListener probe = new TcpListener(IPAddress.Loopback, 0);
-            probe.Start();
-            int port = ((IPEndPoint)probe.LocalEndpoint).Port;
-            probe.Stop();
-            return port;
+            for (int attempt = 0; attempt < 200; attempt++)
+            {
+                int port;
+                lock (PortPicker)
+                {
+                    port = PortPicker.Next(20000, 40000);
+                }
+                try
+                {
+                    TcpListener probe = new TcpListener(IPAddress.Loopback, port);
+                    probe.Start();
+                    probe.Stop();
+                    return port;
+                }
+                catch (SocketException)
+                {
+                }
+            }
+            throw new InvalidOperationException("no free port found between 20000 and 40000");
         }
 
         public void Add(MimeMessage message)

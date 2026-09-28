@@ -32,7 +32,7 @@ namespace AowEmailWrapper.Controls
         private const string NewSenderKey = "activityNewSender";
         private const string NewSenderFallback = "new sender";
         private const string Menu_WhereIs_Tag = "menuItemWhereIs";
-        private const string WhereIsFallback = "Where is the turn?";
+        private const string WhereIsFallback = "Who has the turn?";
         private const string HeldByKey = "activityHeldBy";
         private const string HeldByFallback = "held by {0}";
         private ToolStripMenuItem _whereIsMenuItem;

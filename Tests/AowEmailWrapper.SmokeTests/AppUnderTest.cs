@@ -107,9 +107,9 @@ namespace AowEmailWrapper.SmokeTests
             Config.AccountsList.StartUpAccountName = account.Name;
         }
 
-        private void CopyBuiltWrapper()
+        /// <summary>The output folder of a project in this repository, for the configuration these tests were built in.</summary>
+        private static string BuiltFolder(params string[] project)
         {
-            //The Wrapper's own output folder for the configuration these tests were built in
             string configuration = AppContext.BaseDirectory.Split(Path.DirectorySeparatorChar).Contains("Debug") ? "Debug" : "Release";
             string repository = AppContext.BaseDirectory;
             while (repository != null && !Directory.Exists(Path.Combine(repository, "Solution")))
@@ -117,17 +117,71 @@ namespace AowEmailWrapper.SmokeTests
                 repository = Path.GetDirectoryName(repository.TrimEnd(Path.DirectorySeparatorChar));
             }
             Assert.NotNull(repository);
-            string built = Path.Combine(repository, "Projects", "AowEmailWrapper", "bin", configuration, "net8.0-windows");
-            Assert.True(File.Exists(Path.Combine(built, "AowEmailWrapper.exe")), "the Wrapper has not been built: " + built);
+            return Path.Combine(new[] { repository }.Concat(project).Concat(new[] { "bin", configuration, "net8.0-windows" }).ToArray());
+        }
 
-            foreach (string file in Directory.GetFiles(built, "*", SearchOption.AllDirectories))
+        private static void CopyFolder(string from, string to)
+        {
+            foreach (string file in Directory.GetFiles(from, "*", SearchOption.AllDirectories))
             {
-                string target = Path.Combine(AppFolder, Path.GetRelativePath(built, file));
+                string target = Path.Combine(to, Path.GetRelativePath(from, file));
                 Directory.CreateDirectory(Path.GetDirectoryName(target));
-                File.Copy(file, target);
+                File.Copy(file, target, true);
             }
+        }
+
+        private void CopyBuiltWrapper()
+        {
+            string built = BuiltFolder("Projects", "AowEmailWrapper");
+            Assert.True(File.Exists(Path.Combine(built, "AowEmailWrapper.exe")), "the Wrapper has not been built: " + built);
+            CopyFolder(built, AppFolder);
             //Its own name, so it does not take a running Wrapper for itself and exit
             File.Move(Path.Combine(AppFolder, "AowEmailWrapper.exe"), Path.Combine(AppFolder, ExeName));
+        }
+
+        /// <summary>A copy of Age of Wonders whose AoW.exe is the stand-in game, a window that stays open.</summary>
+        public void AddStandInGameCopy(string label)
+        {
+            string built = BuiltFolder("Tests", "StandInGame");
+            Assert.True(File.Exists(Path.Combine(built, "StandInGame.exe")), "the stand-in game has not been built: " + built);
+            CopyFolder(built, GameFolder);
+            //The executable may be renamed: it finds StandInGame.dll by the name built into it
+            AddGameCopy(Path.Combine(GameFolder, "StandInGame.exe"), label);
+        }
+
+        /// <summary>A second start of the same executable with the same settings, as from the Start menu.</summary>
+        public Process StartAgain()
+        {
+            ProcessStartInfo start = new ProcessStartInfo(Path.Combine(AppFolder, ExeName)) { UseShellExecute = false, WorkingDirectory = AppFolder };
+            start.Environment["APPDATA"] = AppData;
+            string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT")) && !string.IsNullOrEmpty(host))
+            {
+                start.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(host);
+            }
+            return Process.Start(start);
+        }
+
+        /// <summary>The stand-in game's window, when the copy started from the tray is running.</summary>
+        public IntPtr GameWindow()
+        {
+            foreach (Process process in Process.GetProcessesByName("AoW"))
+            {
+                using (process)
+                {
+                    string path;
+                    try { path = process.MainModule.FileName; } catch { continue; }
+                    if (path.StartsWith(Root, StringComparison.OrdinalIgnoreCase))
+                    {
+                        IntPtr window = Native.TopWindows((uint)process.Id).FirstOrDefault(h => Native.Text(h) == "Stand-in game");
+                        if (window != IntPtr.Zero)
+                        {
+                            return window;
+                        }
+                    }
+                }
+            }
+            return IntPtr.Zero;
         }
 
         public void Start()
@@ -140,6 +194,9 @@ namespace AowEmailWrapper.SmokeTests
             {
                 UseShellExecute = false,
                 WorkingDirectory = AppFolder,
+                //.NET writes an unhandled exception to standard error before it ends the process, even one that
+                //happens before the Wrapper's own log can record it
+                RedirectStandardError = true,
             };
             start.Environment["APPDATA"] = AppData;
             string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
@@ -148,9 +205,20 @@ namespace AowEmailWrapper.SmokeTests
                 start.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(host);
             }
             _process = Process.Start(start);
+            _process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data != null)
+                {
+                    lock (_standardError)
+                    {
+                        _standardError.AppendLine(e.Data);
+                    }
+                }
+            };
+            _process.BeginErrorReadLine();
 
             //Up once its tray icon's window exists and the main window has been created
-            Until(() => NotifyWindows().Any() && MainWindow() != IntPtr.Zero, TimeSpan.FromSeconds(60), "the Wrapper did not start");
+            Until(() => NotifyWindows().Any() && MainWindow() != IntPtr.Zero, TimeSpan.FromSeconds(60), () => "the Wrapper did not start: " + StartFailureDetails());
             //and the splash screen has faded out, which it once failed to do when the main window was quicker
             Until(() => !TopWindows().Any(h => Native.IsWindowVisible(h) && Native.Text(h) == "Splash"), TimeSpan.FromSeconds(10),
                 "the splash screen stayed up:" + Environment.NewLine + DescribeWindows());
@@ -170,6 +238,59 @@ namespace AowEmailWrapper.SmokeTests
         public IEnumerable<IntPtr> TopWindows()
         {
             return Native.TopWindows((uint)_process.Id);
+        }
+
+        private readonly StringBuilder _standardError = new StringBuilder();
+
+        /// <summary>What the Wrapper wrote to standard error, where .NET reports an exception that ended it.</summary>
+        public string StandardError
+        {
+            get
+            {
+                lock (_standardError)
+                {
+                    return _standardError.ToString();
+                }
+            }
+        }
+
+        /// <summary>Why a start did not come up: the process's fate, its windows with any dialog's text, and its log.</summary>
+        private string StartFailureDetails()
+        {
+            StringBuilder details = new StringBuilder();
+            _process.Refresh();
+            details.AppendLine(_process.HasExited ? $"the process exited with code {_process.ExitCode}" : "the process is still running");
+            if (_process.HasExited)
+            {
+                //Standard error is read asynchronously; give the last of it a moment to arrive
+                _process.WaitForExit();
+                string errors = StandardError;
+                details.AppendLine(string.IsNullOrWhiteSpace(errors) ? "nothing on standard error" : "standard error:" + Environment.NewLine + errors);
+            }
+            details.AppendLine($"{Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ExeName)).Length} process(es) named {ExeName} are running");
+            if (!_process.HasExited)
+            {
+                foreach (IntPtr h in TopWindows())
+                {
+                    details.AppendLine($"  0x{h.ToInt64():X} class={Native.Class(h)} visible={Native.IsWindowVisible(h)} text='{Native.Text(h)}'");
+                    if (Native.Class(h) == "#32770")
+                    {
+                        foreach (IntPtr child in Native.Children(h))
+                        {
+                            string text = Native.Text(child);
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                details.AppendLine("      " + text);
+                            }
+                        }
+                    }
+                }
+            }
+            string log = ReadLog();
+            string[] lines = log.Split('\n');
+            details.AppendLine("log (last 25 lines):");
+            details.Append(string.Join("\n", lines.Skip(Math.Max(0, lines.Length - 25))));
+            return details.ToString();
         }
 
         /// <summary>Every window of the process, for failure messages.</summary>
@@ -325,6 +446,20 @@ namespace AowEmailWrapper.SmokeTests
 
         #endregion
 
+        /// <summary>Like Until with a message, but the message is only put together when it fails.</summary>
+        public static void Until(Func<bool> condition, TimeSpan timeout, Func<string> failure)
+        {
+            Stopwatch watch = Stopwatch.StartNew();
+            while (!condition())
+            {
+                if (watch.Elapsed >= timeout)
+                {
+                    Assert.Fail(failure());
+                }
+                Thread.Sleep(200);
+            }
+        }
+
         public static void Until(Func<bool> condition, TimeSpan timeout, string failure)
         {
             Stopwatch watch = Stopwatch.StartNew();
@@ -421,6 +556,24 @@ namespace AowEmailWrapper.SmokeTests
                 }
             }
             _process?.Dispose();
+            //Anything started from the test's folders, the stand-in game or a second start
+            foreach (Process process in Process.GetProcesses())
+            {
+                using (process)
+                {
+                    try
+                    {
+                        if (process.MainModule.FileName.StartsWith(Root, StringComparison.OrdinalIgnoreCase))
+                        {
+                            process.Kill();
+                            process.WaitForExit(5000);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
 
             List<string> changes = RestoreRegistry();
             try { Directory.Delete(Root, true); } catch { }
@@ -442,6 +595,7 @@ namespace AowEmailWrapper.SmokeTests
         [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
         [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr h, int m, IntPtr w, IntPtr l);
         [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h, int m, IntPtr w, IntPtr l);
+        [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT

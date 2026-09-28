@@ -26,6 +26,8 @@
   <ItemGroup>
     <!-- Builds the Wrapper first and gives the tests its configuration types and game detection -->
     <ProjectReference Include="..\..\Projects\AowEmailWrapper\AowEmailWrapper.csproj" />
+    <!-- Built first; the tests copy it in as a game's executable -->
+    <ProjectReference Include="..\StandInGame\StandInGame.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

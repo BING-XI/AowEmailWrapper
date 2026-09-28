@@ -62,10 +62,20 @@ namespace AowEmailWrapper
                 LogHelper.Start();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new Main());
+                Main main = new Main();
+                //A later start of the Wrapper shows this one instead of exiting without a word
+                using (SecondStartSignal.Listen(main.ShowFromAnotherStart))
+                {
+                    Application.Run(main);
+                }
 
                 //An update the player accepted is installed once the window is gone
                 UpdateHelper.RunPendingInstaller();
+            }
+            else if (!Array.Exists<string>(args, s => s.Equals(ConfigHelper.AUTOSTART_CMD_PARAM, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                //Already running, and the player started it again (from the Start menu, say): show that one
+                SecondStartSignal.AskRunningToShow();
             }
         }
     }

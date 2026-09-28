@@ -119,10 +119,10 @@
 		<lookup key="msgWrapperNewSender" value="'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with."/>
 		<lookup key="activityNewSender" value="new sender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Found {0} unplayed turn(s) in your mailbox and added them to the activity log."/>
-		<lookup key="menuItemWhereIs" value="Where is the turn?"/>
+		<lookup key="menuItemWhereIs" value="Who has the turn?"/>
 		<lookup key="activityHeldBy" value="held by {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Where is the turn?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Asked {0} player(s) where '{1}' is. Answers arrive with the next mail checks."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Who has the turn?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Asked {0} player(s) who has &apos;{1}&apos;. Answers arrive with the next mail checks."/>
 		<lookup key="msgWrapperWhereIsNobody" value="No other players are known for '{0}'."/>
 		<lookup key="msgInputEmailSettingsManual" value="You will enter the settings manually."/>
 		<lookup key="msgWrapperResendTo" value="Resend To:"/>
@@ -197,6 +197,7 @@
 		<lookup key="msgIgnoreInstalls" value="These copies were found automatically. Remove them from the list and ignore their folders from now on? Add folder... brings a copy back."/>
 		<lookup key="msgGameStartFailed" value="The game could not be started from {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Some changes on the Accounts or Settings tab have not been saved. Save them before the Wrapper closes?"/>
+		<lookup key="msgLocalPortInUse" value="The Wrapper could not open port {0}, which the games send their turns to: another program, or another copy of the Wrapper, is using it. No turn can be sent until it is free. Choose another port under &quot;Game to Wrapper data port&quot; on the Settings tab and save."/>
 		<lookup key="buttonRescan" value="Rescan"/>
 		<lookup key="buttonRescanning" value="Scanning..."/>
 		<lookup key="lblGamesHelp" value="Give each copy of a game a short label such as Vanilla, AoWx or Ziggurat. The label travels with the turns you send, so everyone in a game must use the same label. The default copy receives turns that carry no label."/>
@@ -457,6 +458,7 @@
 		<lookup key="msgIgnoreInstalls" value="Ces copies ont été trouvées automatiquement. Les retirer de la liste et ignorer leurs dossiers désormais ? Ajouter un dossier... fait revenir une copie."/>
 		<lookup key="msgGameStartFailed" value="Le jeu n&apos;a pas pu être lancé depuis {0} : {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Certaines modifications des onglets Comptes ou Paramètres n&apos;ont pas été enregistrées. Les enregistrer avant la fermeture du Wrapper ?"/>
+		<lookup key="msgLocalPortInUse" value="Le Wrapper n&apos;a pas pu ouvrir le port {0}, par lequel les jeux lui envoient leurs tours : un autre programme, ou un autre Wrapper, l&apos;utilise. Aucun tour ne peut être envoyé tant qu&apos;il n&apos;est pas libre. Choisissez un autre port dans « Jeu de Wrapper port de données » de l&apos;onglet Paramètres, puis enregistrez."/>
 		<lookup key="buttonRescan" value="Rechercher à nouveau"/>
 		<lookup key="buttonRescanning" value="Recherche..."/>
 		<lookup key="lblGamesHelp" value="Donnez à chaque copie d'un jeu une courte étiquette, par exemple Vanilla, AoWx ou Ziggurat. L'étiquette accompagne les tours que vous envoyez : tous les joueurs d'une partie doivent utiliser la même. La copie par défaut reçoit les tours sans étiquette."/>
@@ -522,10 +524,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; vient de {1}, qui ne vous a jamais envoyé de tour. N&apos;ouvrez que les tours des personnes avec qui vous jouez."/>
 		<lookup key="activityNewSender" value="nouvel expéditeur"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} tour(s) non joué(s) trouvé(s) dans votre boîte aux lettres et ajouté(s) au journal d&apos;activité."/>
-		<lookup key="menuItemWhereIs" value="Où est le tour ?"/>
+		<lookup key="menuItemWhereIs" value="Qui a le tour ?"/>
 		<lookup key="activityHeldBy" value="chez {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Où est le tour ?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="{0} joueur(s) interrogé(s) sur l&apos;emplacement de &apos;{1}&apos;. Les réponses arrivent avec les prochaines vérifications du courrier."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Qui a le tour ?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="{0} joueur(s) interrogé(s) pour savoir qui a &apos;{1}&apos;. Les réponses arrivent avec les prochaines vérifications du courrier."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Aucun autre joueur n&apos;est connu pour &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Des paramètres ont été trouvés pour cette adresse, mais ils enverraient votre mot de passe sans chiffrement ; le Wrapper ne les utilisera donc pas. Veuillez saisir les paramètres du serveur manuellement."/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -728,6 +730,7 @@
 		<lookup key="msgIgnoreInstalls" value="Diese Kopien wurden automatisch gefunden. Aus der Liste entfernen und ihre Ordner ab jetzt ignorieren? Ordner hinzufügen... holt eine Kopie zurück."/>
 		<lookup key="msgGameStartFailed" value="Das Spiel konnte nicht aus {0} gestartet werden: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Einige Änderungen auf den Registerkarten Konten oder Einstellungen wurden nicht gespeichert. Vor dem Schließen des Wrappers speichern?"/>
+		<lookup key="msgLocalPortInUse" value="Der Wrapper konnte Port {0} nicht öffnen, über den die Spiele ihm ihre Züge übergeben: ein anderes Programm oder ein anderer Wrapper benutzt ihn. Solange er belegt ist, kann kein Zug gesendet werden. Wählen Sie unter „Spiel um Wrapper datenport“ auf der Registerkarte Einstellungen einen anderen Port und speichern Sie."/>
 		<lookup key="buttonRescan" value="Erneut suchen"/>
 		<lookup key="buttonRescanning" value="Suche läuft..."/>
 		<lookup key="lblGamesHelp" value="Geben Sie jeder Kopie eines Spiels eine kurze Bezeichnung wie Vanilla, AoWx oder Ziggurat. Die Bezeichnung reist mit den gesendeten Zügen mit, daher müssen alle Spieler einer Partie dieselbe verwenden. Die Standardkopie erhält Züge ohne Bezeichnung."/>
@@ -794,10 +797,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kam von {1}, der Ihnen noch nie einen Zug geschickt hat. Öffnen Sie nur Züge von Leuten, mit denen Sie spielen."/>
 		<lookup key="activityNewSender" value="neuer Absender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} ungespielte(r) Zug/Züge im Postfach gefunden und dem Aktivitätsprotokoll hinzugefügt."/>
-		<lookup key="menuItemWhereIs" value="Wo ist der Zug?"/>
+		<lookup key="menuItemWhereIs" value="Wer hat den Zug?"/>
 		<lookup key="activityHeldBy" value="bei {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Wo ist der Zug?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="{0} Spieler gefragt, wo &apos;{1}&apos; ist. Die Antworten kommen mit den nächsten E-Mail-Abfragen."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Wer hat den Zug?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="{0} Spieler gefragt, wer &apos;{1}&apos; hat. Die Antworten kommen mit den nächsten E-Mail-Abfragen."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Für &apos;{0}&apos; sind keine anderen Spieler bekannt."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Für diese Adresse wurden Einstellungen gefunden, aber sie würden Ihr Passwort unverschlüsselt senden, daher verwendet der Wrapper sie nicht. Bitte geben Sie die Servereinstellungen manuell ein."/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -998,6 +1001,7 @@
 		<lookup key="msgIgnoreInstalls" value="Estas copias se encontraron automáticamente. ¿Quitarlas de la lista e ignorar sus carpetas a partir de ahora? Añadir carpeta... recupera una copia."/>
 		<lookup key="msgGameStartFailed" value="No se pudo iniciar el juego desde {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Algunos cambios en las pestañas Cuentas o Configuración no se han guardado. ¿Guardarlos antes de cerrar el Wrapper?"/>
+		<lookup key="msgLocalPortInUse" value="El Wrapper no pudo abrir el puerto {0}, por el que los juegos le entregan sus turnos: otro programa, u otro Wrapper, lo está usando. No se puede enviar ningún turno hasta que quede libre. Elige otro puerto en «Puerto de datos del Juego al Wrapper» de la pestaña Configuración y guarda."/>
 		<lookup key="buttonRescan" value="Volver a buscar"/>
 		<lookup key="buttonRescanning" value="Buscando..."/>
 		<lookup key="lblGamesHelp" value="Dé a cada copia de un juego una etiqueta corta, como Vanilla, AoWx o Ziggurat. La etiqueta viaja con los turnos que envía, así que todos los jugadores de una partida deben usar la misma. La copia predeterminada recibe los turnos sin etiqueta."/>
@@ -1065,10 +1069,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; viene de {1}, que nunca le ha enviado un turno. Abra solo turnos de personas con las que juega."/>
 		<lookup key="activityNewSender" value="remitente nuevo"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Se encontraron {0} turno(s) sin jugar en su buzón y se añadieron al registro de actividad."/>
-		<lookup key="menuItemWhereIs" value="¿Dónde está el turno?"/>
+		<lookup key="menuItemWhereIs" value="¿Quién tiene el turno?"/>
 		<lookup key="activityHeldBy" value="lo tiene {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="¿Dónde está el turno?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Se preguntó a {0} jugador(es) dónde está &apos;{1}&apos;. Las respuestas llegan con las próximas comprobaciones del correo."/>
+		<lookup key="msgWrapperWhereIsTitle" value="¿Quién tiene el turno?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Se preguntó a {0} jugador(es) quién tiene &apos;{1}&apos;. Las respuestas llegan con las próximas comprobaciones del correo."/>
 		<lookup key="msgWrapperWhereIsNobody" value="No se conocen otros jugadores de &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Se encontró una configuración para esta dirección, pero enviaría su contraseña sin cifrar, así que el Wrapper no la usará. Introduzca la configuración del servidor manualmente."/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -1269,6 +1273,7 @@
 		<lookup key="msgIgnoreInstalls" value="Deze kopieën zijn automatisch gevonden. Uit de lijst verwijderen en hun mappen voortaan negeren? Map toevoegen... haalt een kopie terug."/>
 		<lookup key="msgGameStartFailed" value="Het spel kon niet worden gestart vanuit {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Sommige wijzigingen op de tabbladen Accounts of Instellingen zijn niet opgeslagen. Opslaan voordat de Wrapper sluit?"/>
+		<lookup key="msgLocalPortInUse" value="De Wrapper kon poort {0} niet openen, waarlangs de spellen hun beurten doorgeven: een ander programma, of een andere Wrapper, gebruikt hem. Zolang hij bezet is, kan geen beurt worden verstuurd. Kies een andere poort bij &quot;Spel om Wrapper data poort&quot; op het tabblad Instellingen en sla op."/>
 		<lookup key="buttonRescan" value="Opnieuw zoeken"/>
 		<lookup key="buttonRescanning" value="Bezig met zoeken..."/>
 		<lookup key="lblGamesHelp" value="Geef elke kopie van een spel een kort label, zoals Vanilla, AoWx of Ziggurat. Het label reist mee met de beurten die u verstuurt, dus iedereen in een partij moet hetzelfde label gebruiken. De standaardkopie ontvangt beurten zonder label."/>
@@ -1340,10 +1345,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; komt van {1}, die u nog nooit een beurt heeft gestuurd. Open alleen beurten van mensen met wie u speelt."/>
 		<lookup key="activityNewSender" value="nieuwe afzender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} ongespeelde beurt(en) gevonden in uw postvak en toegevoegd aan het activiteitenlogboek."/>
-		<lookup key="menuItemWhereIs" value="Waar is de beurt?"/>
+		<lookup key="menuItemWhereIs" value="Wie heeft de beurt?"/>
 		<lookup key="activityHeldBy" value="bij {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Waar is de beurt?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="{0} speler(s) gevraagd waar &apos;{1}&apos; is. De antwoorden komen met de volgende e-mailcontroles."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Wie heeft de beurt?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="{0} speler(s) gevraagd wie &apos;{1}&apos; heeft. De antwoorden komen met de volgende e-mailcontroles."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Er zijn geen andere spelers bekend voor &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Er zijn instellingen voor dit adres gevonden, maar die zouden uw wachtwoord onversleuteld versturen, dus de Wrapper gebruikt ze niet. Voer de serverinstellingen handmatig in."/>
 		<lookup key="enumEmailIn" value="EmailIn"/>
@@ -1535,6 +1540,7 @@
 		<lookup key="msgIgnoreInstalls" value="Disse kopier blev fundet automatisk. Fjern dem fra listen og ignorer deres mapper fremover? Tilføj mappe... henter en kopi tilbage."/>
 		<lookup key="msgGameStartFailed" value="Spillet kunne ikke startes fra {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Nogle ændringer på fanerne Konti eller Indstillinger er ikke gemt. Gem dem, før Wrapperen lukker?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapperen kunne ikke åbne port {0}, som spillene sender deres ture til: et andet program, eller en anden Wrapper, bruger den. Ingen tur kan sendes, før den er ledig. Vælg en anden port under &quot;Spil til Wrapper dataport&quot; på fanen Indstillinger, og gem."/>
 		<lookup key="buttonRescan" value="Søg igen"/>
 		<lookup key="buttonRescanning" value="Søger..."/>
 		<lookup key="lblGamesHelp" value="Giv hver kopi af et spil en kort mærkat som Vanilla, AoWx eller Ziggurat. Mærkaten følger med de ture du sender, så alle i et spil skal bruge den samme. Standardkopien modtager ture uden mærkat."/>
@@ -1605,10 +1611,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kom fra {1}, som ikke har sendt dig en tur før. Åbn kun ture fra folk, du spiller med."/>
 		<lookup key="activityNewSender" value="ny afsender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Fandt {0} uspillede ture i din postkasse og føjede dem til aktivitetsloggen."/>
-		<lookup key="menuItemWhereIs" value="Hvor er turen?"/>
+		<lookup key="menuItemWhereIs" value="Hvem har turen?"/>
 		<lookup key="activityHeldBy" value="hos {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Hvor er turen?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Spurgte {0} spiller(e), hvor &apos;{1}&apos; er. Svarene kommer med de næste posttjek."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Hvem har turen?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Spurgte {0} spiller(e), hvem der har &apos;{1}&apos;. Svarene kommer med de næste posttjek."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Der kendes ingen andre spillere til &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Der blev fundet indstillinger for denne adresse, men de ville sende din adgangskode ukrypteret, så Wrapperen bruger dem ikke. Indtast serverindstillingerne manuelt."/>
 		<lookup key="menuItemExit" value="&amp;Afslut"/>
@@ -1812,6 +1818,7 @@
 		<lookup key="msgIgnoreInstalls" value="De här kopiorna hittades automatiskt. Ta bort dem från listan och ignorera deras mappar från och med nu? Lägg till mapp... tar tillbaka en kopia."/>
 		<lookup key="msgGameStartFailed" value="Spelet kunde inte startas från {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Vissa ändringar på flikarna Konton eller Inställningar har inte sparats. Spara dem innan Wrappern stängs?"/>
+		<lookup key="msgLocalPortInUse" value="Wrappern kunde inte öppna port {0}, som spelen skickar sina drag till: ett annat program, eller en annan Wrapper, använder den. Inget drag kan skickas förrän den är ledig. Välj en annan port under &quot;Spel till Wrapperns data port&quot; på fliken Inställningar och spara."/>
 		<lookup key="buttonRescan" value="Sök igen"/>
 		<lookup key="buttonRescanning" value="Söker..."/>
 		<lookup key="lblGamesHelp" value="Ge varje kopia av ett spel en kort etikett, till exempel Vanilla, AoWx eller Ziggurat. Etiketten följer med de drag du skickar, så alla i ett parti måste använda samma etikett. Standardkopian tar emot drag utan etikett."/>
@@ -1884,10 +1891,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kom från {1}, som inte har skickat ett drag till dig tidigare. Öppna bara drag från personer du spelar med."/>
 		<lookup key="activityNewSender" value="ny avsändare"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Hittade {0} ospelade drag i din brevlåda och lade till dem i aktivitetsloggen."/>
-		<lookup key="menuItemWhereIs" value="Var är draget?"/>
+		<lookup key="menuItemWhereIs" value="Vem har draget?"/>
 		<lookup key="activityHeldBy" value="hos {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Var är draget?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Frågade {0} spelare var &apos;{1}&apos; är. Svaren kommer med nästa e-postkontroll."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Vem har draget?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Frågade {0} spelare vem som har &apos;{1}&apos;. Svaren kommer med nästa e-postkontroll."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Inga andra spelare är kända för &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Inställningar hittades för den här adressen, men de skulle skicka ditt lösenord okrypterat, så Wrappern använder dem inte. Ange serverinställningarna manuellt."/>
 		<lookup key="buttonDetailsShow" value="Detaljer &gt;&gt;"/>
@@ -2083,6 +2090,7 @@
 		<lookup key="msgIgnoreInstalls" value="Te kopie zostały znalezione automatycznie. Usunąć je z listy i odtąd ignorować ich foldery? Dodaj folder... przywraca kopię."/>
 		<lookup key="msgGameStartFailed" value="Nie udało się uruchomić gry z {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Niektóre zmiany na kartach Konta lub Ustawienia nie zostały zapisane. Zapisać je przed zamknięciem Wrappera?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper nie mógł otworzyć portu {0}, przez który gry przekazują mu tury: używa go inny program albo inny Wrapper. Dopóki port jest zajęty, żadna tura nie zostanie wysłana. Wybierz inny port w polu „Port danych przesyłanych z gry do Wrappera” na karcie Ustawienia i zapisz."/>
 		<lookup key="buttonRescan" value="Szukaj ponownie"/>
 		<lookup key="buttonRescanning" value="Szukanie..."/>
 		<lookup key="lblGamesHelp" value="Nadaj każdej kopii gry krótką etykietę, np. Vanilla, AoWx lub Ziggurat. Etykieta podróżuje z wysyłanymi turami, więc wszyscy gracze w rozgrywce muszą używać tej samej. Kopia domyślna odbiera tury bez etykiety."/>
@@ -2149,10 +2157,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; przyszła od {1}, który nigdy wcześniej nie przysłał ci tury. Otwieraj tylko tury od osób, z którymi grasz."/>
 		<lookup key="activityNewSender" value="nowy nadawca"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Znaleziono {0} nierozegranych tur w skrzynce i dodano je do dziennika aktywności."/>
-		<lookup key="menuItemWhereIs" value="Gdzie jest tura?"/>
+		<lookup key="menuItemWhereIs" value="Kto ma turę?"/>
 		<lookup key="activityHeldBy" value="ma {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Gdzie jest tura?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Zapytano {0} graczy, gdzie jest &apos;{1}&apos;. Odpowiedzi przyjdą przy kolejnych sprawdzeniach poczty."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Kto ma turę?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Zapytano {0} graczy, kto ma &apos;{1}&apos;. Odpowiedzi przyjdą przy kolejnych sprawdzeniach poczty."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Nie są znani inni gracze dla &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Znaleziono ustawienia dla tego adresu, ale wysyłałyby hasło bez szyfrowania, więc Wrapper ich nie użyje. Wprowadź ustawienia serwera ręcznie."/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -2354,6 +2362,7 @@
 		<lookup key="msgIgnoreInstalls" value="Nämä kopiot löytyivät automaattisesti. Poistetaanko ne luettelosta ja ohitetaanko niiden kansiot tästä lähtien? Lisää kansio... tuo kopion takaisin."/>
 		<lookup key="msgGameStartFailed" value="Peliä ei voitu käynnistää kansiosta {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Joitakin Tilit- tai Asetukset-välilehden muutoksia ei ole tallennettu. Tallennetaanko ne ennen Wrapperin sulkemista?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper ei voinut avata porttia {0}, jonka kautta pelit antavat sille vuoronsa: toinen ohjelma tai toinen Wrapper käyttää sitä. Vuoroja ei voi lähettää, ennen kuin portti vapautuu. Valitse toinen portti kohdassa &quot;Pelin Wrapper Data portti&quot; Asetukset-välilehdellä ja tallenna."/>
 		<lookup key="buttonRescan" value="Etsi uudelleen"/>
 		<lookup key="buttonRescanning" value="Etsitään..."/>
 		<lookup key="lblGamesHelp" value="Anna jokaiselle pelin kopiolle lyhyt tunniste, kuten Vanilla, AoWx tai Ziggurat. Tunniste kulkee lähettämiesi vuorojen mukana, joten kaikkien saman pelin pelaajien on käytettävä samaa tunnistetta. Oletuskopio vastaanottaa tunnisteettomat vuorot."/>
@@ -2422,10 +2431,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; tuli osoitteesta {1}, joka ei ole lähettänyt sinulle vuoroa aiemmin. Avaa vain niiden vuoroja, joiden kanssa pelaat."/>
 		<lookup key="activityNewSender" value="uusi lähettäjä"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Postilaatikosta löytyi {0} pelaamatonta vuoroa, ja ne lisättiin toimintalokiin."/>
-		<lookup key="menuItemWhereIs" value="Missä vuoro on?"/>
+		<lookup key="menuItemWhereIs" value="Kenellä vuoro on?"/>
 		<lookup key="activityHeldBy" value="pelaajalla {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Missä vuoro on?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Kysyttiin {0} pelaajalta, missä &apos;{1}&apos; on. Vastaukset saapuvat seuraavien postitarkistusten mukana."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Kenellä vuoro on?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Kysyttiin {0} pelaajalta, kenellä &apos;{1}&apos; on. Vastaukset saapuvat seuraavien postitarkistusten mukana."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Pelille &apos;{0}&apos; ei tunneta muita pelaajia."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Tälle osoitteelle löytyi asetukset, mutta ne lähettäisivät salasanasi salaamattomana, joten Wrapper ei käytä niitä. Syötä palvelimen asetukset käsin."/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -2625,6 +2634,7 @@
 		<lookup key="msgIgnoreInstalls" value="Aceste copii au fost găsite automat. Le eliminați din listă și ignorați dosarele lor de acum înainte? Adăugare dosar... aduce o copie înapoi."/>
 		<lookup key="msgGameStartFailed" value="Jocul nu a putut fi pornit din {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Unele modificări din filele Conturi sau Setări nu au fost salvate. Le salvați înainte de închiderea Wrapperului?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper-ul nu a putut deschide portul {0}, prin care jocurile îi predau turele: îl folosește alt program sau alt Wrapper. Nicio tură nu poate fi trimisă până nu se eliberează. Alegeți alt port la „Port comunicare dintre joc şi Wrapper” în fila Setări și salvați."/>
 		<lookup key="buttonRescan" value="Caută din nou"/>
 		<lookup key="buttonRescanning" value="Se caută..."/>
 		<lookup key="lblGamesHelp" value="Dați fiecărei copii a unui joc o etichetă scurtă, de exemplu Vanilla, AoWx sau Ziggurat. Eticheta călătorește cu turele trimise, așa că toți jucătorii dintr-o partidă trebuie să folosească aceeași etichetă. Copia implicită primește turele fără etichetă."/>
@@ -2690,10 +2700,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; a venit de la {1}, care nu v-a mai trimis o tură. Deschideți doar ture de la persoanele cu care jucați."/>
 		<lookup key="activityNewSender" value="expeditor nou"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Am găsit {0} ture nejucate în căsuța poștală și le-am adăugat în jurnalul de activitate."/>
-		<lookup key="menuItemWhereIs" value="Unde este tura?"/>
+		<lookup key="menuItemWhereIs" value="Cine are tura?"/>
 		<lookup key="activityHeldBy" value="la {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Unde este tura?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Am întrebat {0} jucător(i) unde este &apos;{1}&apos;. Răspunsurile sosesc la următoarele verificări ale poștei."/>
+		<lookup key="msgWrapperWhereIsTitle" value="Cine are tura?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Am întrebat {0} jucător(i) cine are &apos;{1}&apos;. Răspunsurile sosesc la următoarele verificări ale poștei."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Nu se cunosc alți jucători pentru &apos;{0}&apos;."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Au fost găsite setări pentru această adresă, dar ar trimite parola necriptată, așa că Wrapperul nu le va folosi. Introduceți manual setările serverului."/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -2896,6 +2906,7 @@
 		<lookup key="msgIgnoreInstalls" value="Эти копии найдены автоматически. Убрать их из списка и впредь игнорировать их папки? «Добавить папку...» вернёт копию."/>
 		<lookup key="msgGameStartFailed" value="Не удалось запустить игру из {0}: {1}"/>
 		<lookup key="msgWrapperUnsavedChanges" value="Некоторые изменения на вкладках «Учётные записи» или «Настройки» не сохранены. Сохранить их перед закрытием Wrapper?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper не смог открыть порт {0}, через который игры передают ему ходы: его занимает другая программа или другой Wrapper. Пока порт занят, ходы не отправляются. Выберите другой порт в поле «Порт сообщения игры и Wrapper&apos;а» на вкладке «Настройки» и сохраните."/>
 		<lookup key="buttonRescan" value="Искать снова"/>
 		<lookup key="buttonRescanning" value="Поиск..."/>
 		<lookup key="lblGamesHelp" value="Дайте каждой копии игры короткую метку, например Vanilla, AoWx или Ziggurat. Метка передаётся вместе с отправляемыми ходами, поэтому все участники партии должны использовать одну и ту же метку. Копия по умолчанию получает ходы без метки."/>
@@ -2962,10 +2973,10 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; пришёл от {1}, который раньше не присылал вам ходов. Открывайте только ходы от тех, с кем играете."/>
 		<lookup key="activityNewSender" value="новый отправитель"/>
 		<lookup key="msgWrapperTurnsRecovered" value="В почтовом ящике найдено несыгранных ходов: {0}. Они добавлены в журнал активности."/>
-		<lookup key="menuItemWhereIs" value="Где ход?"/>
+		<lookup key="menuItemWhereIs" value="У кого ход?"/>
 		<lookup key="activityHeldBy" value="у {0}"/>
-		<lookup key="msgWrapperWhereIsTitle" value="Где ход?"/>
-		<lookup key="msgWrapperWhereIsAsked" value="Спросили игроков ({0}), где &apos;{1}&apos;. Ответы придут при следующих проверках почты."/>
+		<lookup key="msgWrapperWhereIsTitle" value="У кого ход?"/>
+		<lookup key="msgWrapperWhereIsAsked" value="Спросили игроков ({0}), у кого &apos;{1}&apos;. Ответы придут при следующих проверках почты."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Другие игроки для &apos;{0}&apos; неизвестны."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Для этого адреса найдены настройки, но с ними пароль передавался бы без шифрования, поэтому Wrapper их не использует. Введите настройки сервера вручную."/>
 		<lookup key="enumIMAP" value="IMAP"/>
