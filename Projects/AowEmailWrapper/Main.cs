@@ -1131,6 +1131,9 @@ namespace AowEmailWrapper
 
         private void RestoreFromTray()
         {
+            //The whole restore is marked, the taskbar button included: its handle recreation resizes the window,
+            //and a resize seen as "minimized" while the Form's idea of its state lags behind would send the
+            //window straight back to the tray
             _restoringFromTray = true;
             try
             {
@@ -1138,17 +1141,52 @@ namespace AowEmailWrapper
                 this.Visible = true;
                 //Windows restores the size and position it kept for the window
                 this.WindowState = FormWindowState.Normal;
+                this.ShowInTaskbar = true;
+                MakeUsable("restored");
             }
             finally
             {
                 _restoringFromTray = false;
             }
 
-            this.ShowInTaskbar = true;
-            EnsureUsableBounds("restored");
             //Windows can still move or size the window after these calls (the restore finishing, the taskbar
             //button arriving); look once more when that has been processed
-            BeginInvoke(new Action(() => EnsureUsableBounds("settled")));
+            BeginInvoke(new Action(() =>
+            {
+                _restoringFromTray = true;
+                try
+                {
+                    MakeUsable("settled");
+                }
+                finally
+                {
+                    _restoringFromTray = false;
+                }
+            }));
+        }
+
+        private const int SW_RESTORE = 9;
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsIconic(IntPtr hWnd);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        /// <summary>
+        /// The window as it really is, not as the Form last understood it: on the build machine setting
+        /// WindowState to Normal left the window minimized, since after the handle was recreated the Form
+        /// already believed it was Normal and so did nothing. A window still minimized is restored directly;
+        /// then one that came back too small or off every screen is put back.
+        /// </summary>
+        private void MakeUsable(string when)
+        {
+            if (IsDisposed || !IsHandleCreated || !Visible)
+            {
+                return;
+            }
+            if (IsIconic(Handle))
+            {
+                Trace.TraceInformation("Window {0} still minimized; restoring it", when);
+                ShowWindow(Handle, SW_RESTORE);
+            }
+            EnsureUsableBounds(when);
         }
 
         /// <summary>
@@ -1158,7 +1196,7 @@ namespace AowEmailWrapper
         /// </summary>
         private void EnsureUsableBounds(string when)
         {
-            if (IsDisposed || !Visible || WindowState != FormWindowState.Normal)
+            if (IsDisposed || !IsHandleCreated || !Visible || IsIconic(Handle))
             {
                 return;
             }

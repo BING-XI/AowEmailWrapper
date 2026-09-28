@@ -34,10 +34,10 @@ namespace AowEmailWrapper.SmokeTests
 
                 for (int attempt = 1; attempt <= 2; attempt++)
                 {
-                    app.DoubleClickTrayIcon();
                     //Judged once the window has settled: on the way back from the tray it is briefly at the size
-                    //Windows gives minimized windows, and its handle is recreated, and this test looks from another
-                    //process at its own pace. A window that stays small still fails, after ten seconds.
+                    //Windows gives minimized windows and its handle is recreated, and this test looks from another
+                    //process at its own pace. The settled handle is also the one the minimize below must reach.
+                    main = app.ShowAndSettle();
                     AppUnderTest.Until(() => IsShownAtSize(app), TimeSpan.FromSeconds(10),
                         $"Show #{attempt} did not bring the window up at a usable size:" + Environment.NewLine + app.DescribeWindows() + Environment.NewLine + WindowLogLines(app));
                     main = app.MainWindow();
@@ -72,7 +72,7 @@ namespace AowEmailWrapper.SmokeTests
         private static string WindowLogLines(AppUnderTest app)
         {
             string[] lines = app.ReadLog().Split('\n');
-            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at")).Select(line => line.Trim()));
+            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at") || line.Contains("still minimized")).Select(line => line.Trim()));
             return string.IsNullOrEmpty(found) ? "The Wrapper logged no correction of its window." : "Wrapper log:" + Environment.NewLine + found;
         }
 
