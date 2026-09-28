@@ -67,13 +67,25 @@ namespace EricDaugherty.CSES.Net
 		/// Listens for new connections and starts a new thread to handle each
 		/// new connection.  Loops infinitely.
 		/// </summary>
+        /// <summary>
+        /// Binds the port. Called by the owner on its own thread, so a port another program holds is an
+        /// exception it can catch; thrown on the thread that runs Start, it would end the process.
+        /// </summary>
+        public void Listen()
+        {
+            IPEndPoint endPoint = new IPEndPoint( IPAddress.Loopback, port );
+            TcpListener bound = new TcpListener( endPoint );
+            bound.Start();
+            listener = bound;
+            isRunning = true;
+        }
+
         public void Start()
 		{
-			IPEndPoint endPoint = new IPEndPoint( IPAddress.Loopback, port );
-			listener = new TcpListener( endPoint );
-			listener.Start();
-
-			isRunning = true;
+			if( listener == null )
+			{
+				Listen();
+			}
 
 			while( isRunning )
 			{

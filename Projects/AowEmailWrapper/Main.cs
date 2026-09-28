@@ -52,6 +52,8 @@ namespace AowEmailWrapper
         private const string WrapperCannotActivateAccountMessageBoxKey = "msgWrapperCannotActivateAccount";
         private const string WrapperGameStartFailedKey = "msgGameStartFailed";
         private const string WrapperUnsavedChangesKey = "msgWrapperUnsavedChanges";
+        private const string WrapperLocalPortInUseKey = "msgLocalPortInUse";
+        private const string WrapperLocalPortInUseFallback = "The Wrapper could not open port {0}, which the games send their turns to: another program, or another copy of the Wrapper, is using it.";
         private const string WrapperClickToStartKey = "msgWrapperClickToStart";
         //The text of the last "games waiting" notification, so a click on it can be told from a click on another
         private string _gamesWaitingBalloonText;
@@ -1918,19 +1920,50 @@ namespace AowEmailWrapper
 
         #region Outgoing Email
 
+        /// <summary>
+        /// Starts the local mail server the games hand their turns to. The port is bound here, on the window's
+        /// thread: bound on the server's own thread, a port another program held (a second Windows user's
+        /// Wrapper, an old copy still closing) threw there and ended the Wrapper without a word. A busy port is
+        /// now reported once the window exists, the Wrapper keeps running, and the next save tries again.
+        /// </summary>
         private void StartServer(int thePort)
         {
+            SimpleServer server = new SimpleServer(thePort, ProcessSMTPRequest);
             try
             {
-                _theServer = new SimpleServer(thePort, ProcessSMTPRequest);
-                new Thread(new ThreadStart(_theServer.Start)).Start();
+                server.Listen();
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.ToString());
+                Trace.TraceError("The local mail server could not listen on port {0}: {1}", thePort, ex);
                 Trace.Flush();
-                ShowException(ex);
+                string text = Translator.Translate(WrapperLocalPortInUseKey, thePort.ToString());
+                ReportOnceShown(new Exception(string.IsNullOrEmpty(text) ? string.Format(WrapperLocalPortInUseFallback, thePort) : text, ex));
+                return;
             }
+
+            _theServer = server;
+            Thread thread = new Thread(new ThreadStart(server.Start));
+            thread.IsBackground = true;
+            thread.Name = "Local mail server";
+            thread.Start();
+        }
+
+        /// <summary>Shows an error as soon as the window can own a dialog; during start-up it does not exist yet.</summary>
+        private void ReportOnceShown(Exception ex)
+        {
+            if (IsHandleCreated)
+            {
+                BeginInvoke(new Action(() => ShowException(ex)));
+                return;
+            }
+            EventHandler once = null;
+            once = (sender, e) =>
+            {
+                HandleCreated -= once;
+                BeginInvoke(new Action(() => ShowException(ex)));
+            };
+            HandleCreated += once;
         }
 
         private void StopServer()
@@ -2205,7 +2238,7 @@ namespace AowEmailWrapper
 
                 if (primary != null && primary.SmtpConfig != null)
                 {
-                    _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, _theServer.Port));
+                    _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, listenPort));
                 }
 
                 CreateAllSenders();

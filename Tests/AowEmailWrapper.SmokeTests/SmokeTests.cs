@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 using MimeKit;
@@ -105,6 +107,41 @@ namespace AowEmailWrapper.SmokeTests
                     $"the window did not come back where it was, {good}:" + Environment.NewLine + app.DescribeWindows() + Environment.NewLine + WindowLogLines(app));
                 string corrections = WindowLogLines(app);
                 Assert.True(corrections.Contains("put back at") || corrections.Contains("bringing it back at"), "the Wrapper logged no correction:" + Environment.NewLine + corrections);
+            }
+        }
+
+        /// <summary>
+        /// The port the games hand their turns to may already be taken: a second Windows user's Wrapper, or an
+        /// old copy still closing. The Wrapper used to bind it on a thread of its own, where the failure ended
+        /// the process before any window appeared. It must come up, say which port is busy, and keep running.
+        /// </summary>
+        [Fact]
+        public void A_busy_mail_port_is_reported_and_the_Wrapper_keeps_running()
+        {
+            int port = FakePop3Server.FreePort();
+            TcpListener squatter = new TcpListener(IPAddress.Loopback, port);
+            squatter.Start();
+            try
+            {
+                using (FakePop3Server mail = new FakePop3Server())
+                using (AppUnderTest app = new AppUnderTest())
+                {
+                    app.Config.PreferencesConfig.GameWrapperDataPort = port;
+                    app.AddPop3Account(mail.Port);
+                    app.Start();
+
+                    string portText = port.ToString();
+                    IntPtr dialog = IntPtr.Zero;
+                    //Any visible window of the Wrapper: the dialog's title is the Wrapper's name, so it can pass for the main window
+                    AppUnderTest.Until(() => (dialog = app.TopWindows().FirstOrDefault(h => Native.IsWindowVisible(h) && Native.Children(h).Any(child => Native.Text(child).Contains(portText)))) != IntPtr.Zero,
+                        TimeSpan.FromSeconds(20), "no message about the busy port:" + Environment.NewLine + app.DescribeWindows() + Environment.NewLine + app.ReadLog());
+                    Assert.Contains("could not listen on port " + portText, app.ReadLog());
+                    Assert.False(app.HasExited, "the Wrapper ended after reporting the busy port");
+                }
+            }
+            finally
+            {
+                squatter.Stop();
             }
         }
 
