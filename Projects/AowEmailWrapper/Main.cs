@@ -234,6 +234,9 @@ namespace AowEmailWrapper
             LoadTranslations();
 
             InitializeComponent();
+            //Before LoadConfig starts the mail checkers and the local mail server, which report from their own threads
+            _windowThreadId = Environment.CurrentManagedThreadId;
+            _windowContext = SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
             _normalSize = this.Size;
             ImageListLoader.Load(imageListIcons, "Main");
 
@@ -967,13 +970,64 @@ namespace AowEmailWrapper
             }
         }
 
+        //The window's thread and its synchronization context, known from the start. InvokeRequired is false on
+        //every thread until the window has a handle, and the Wrapper starts in the tray, so during start-up a
+        //mail checker's report ran on the checker's own thread: it set the tray icon from the image list while
+        //the window thread built the tray menu from the same list, and the Wrapper crashed at start.
+        private int _windowThreadId;
+        private SynchronizationContext _windowContext;
+
+        private bool OnWindowThread
+        {
+            get { return Environment.CurrentManagedThreadId == _windowThreadId; }
+        }
+
+        /// <summary>Queues window code from another thread; it runs once the window thread pumps, handle or not.</summary>
+        private void PostToWindow(Action action)
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+            _windowContext.Post(state =>
+            {
+                if (!IsDisposed)
+                {
+                    action();
+                }
+            }, null);
+        }
+
+        /// <summary>Runs window code from another thread and waits for it.</summary>
+        private void SendToWindow(Action action)
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+            try
+            {
+                _windowContext.Send(state =>
+                {
+                    if (!IsDisposed)
+                    {
+                        action();
+                    }
+                }, null);
+            }
+            catch (InvalidAsynchronousStateException)
+            {
+                //The window's thread has ended: the Wrapper is closing
+            }
+        }
+
         private void RaiseEvent(EventHandler theDelegate, object sender, EventArgs e)
         {
             if (theDelegate != null)
             {
-                if (this.InvokeRequired)
+                if (!OnWindowThread)
                 {
-                    this.Invoke(theDelegate, sender, e);
+                    SendToWindow(() => theDelegate(sender, e));
                 }
                 else
                 {
@@ -985,12 +1039,9 @@ namespace AowEmailWrapper
         /// <summary>Runs window code from any thread; the local mail server calls this from its own thread.</summary>
         private void RunOnUiThread(Action action)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                    this.BeginInvoke(action);
-                }
+                PostToWindow(action);
             }
             else
             {
@@ -1322,7 +1373,12 @@ namespace AowEmailWrapper
 
         private void ShowException(Exception ex)
         {
-            this.Invoke(new EventHandler(this.Maximize));
+            if (!OnWindowThread)
+            {
+                SendToWindow(() => ShowException(ex));
+                return;
+            }
+            Maximize();
 
             ShowExceptionDialog(ex, Translator.Translate(this.Name), MessageBoxIcon.Error, Translator.Translate(ButtonKeyOK));
         }
@@ -1335,9 +1391,11 @@ namespace AowEmailWrapper
             _showingExceptionCount++;
             try
             {
-                if (this.InvokeRequired)
+                if (!OnWindowThread)
                 {
-                    return (int)this.Invoke(new Func<int>(() => ExceptionDialog.Show(this, caption, ex, icon, buttons)));
+                    int result = -1;
+                    SendToWindow(() => result = ExceptionDialog.Show(this, caption, ex, icon, buttons));
+                    return result;
                 }
                 return ExceptionDialog.Show(this, caption, ex, icon, buttons);
             }
@@ -1645,9 +1703,9 @@ namespace AowEmailWrapper
         /// </summary>
         private void PollerHistoryImported(BasePoller poller, MailboxHistory history)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                this.Invoke(new PollerHistoryEventHandler(PollerHistoryImported), poller, history);
+                SendToWindow(() => PollerHistoryImported(poller, history));
                 return;
             }
 
@@ -1664,9 +1722,9 @@ namespace AowEmailWrapper
 
         private void PollerTurnsRecovered(BasePoller poller, int count)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                this.BeginInvoke(new PollerRecoveredEventHandler(PollerTurnsRecovered), poller, count);
+                PostToWindow(() => PollerTurnsRecovered(poller, count));
                 return;
             }
 
@@ -1685,9 +1743,9 @@ namespace AowEmailWrapper
         /// <summary>A query or reply from another player's wrapper, already removed from the mailbox by the poller.</summary>
         private void PollerWrapperMessage(BasePoller poller, MimeMessage message)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
-                this.BeginInvoke(new PollerWrapperMessageEventHandler(PollerWrapperMessage), poller, message);
+                PostToWindow(() => PollerWrapperMessage(poller, message));
                 return;
             }
 
@@ -1815,13 +1873,10 @@ namespace AowEmailWrapper
 
         private void PollerEmailEvent(object sender, PollerEventArgs e)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
                 //Raised on the poller thread; everything below touches the window
-                if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                    this.BeginInvoke(new PollerEmailEventHandler(PollerEmailEvent), sender, e);
-                }
+                PostToWindow(() => PollerEmailEvent(sender, e));
                 return;
             }
 
@@ -2023,13 +2078,10 @@ namespace AowEmailWrapper
 
         private void SmtpSenderSent(object sender, SmtpSendResponse theResponse)
         {
-            if (this.InvokeRequired)
+            if (!OnWindowThread)
             {
                 //Raised on the sender thread; everything below touches the window
-                if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                    this.BeginInvoke(new SmtpSenderSentEventHandler(SmtpSenderSent), sender, theResponse);
-                }
+                PostToWindow(() => SmtpSenderSent(sender, theResponse));
                 return;
             }
 
@@ -2275,14 +2327,14 @@ namespace AowEmailWrapper
         /// Raised on the mail checker's thread when a downloaded turn has been stored. The activity log
         /// is also read by the window (the list, the tray icon, saving), and a list changed on one thread
         /// while another reads it can throw or be saved half written, so the turn is recorded on the
-        /// window's thread. Invoke rather than BeginInvoke: the checker goes on to report the end of the
+        /// window's thread. It waits for it rather than queueing: the checker goes on to report the end of the
         /// check, and the turn must be in the log by then.
         /// </summary>
         private void OnAowGameSaved(object sender, AowGameSavedEventArgs e)
         {
-            if (this.InvokeRequired && this.IsHandleCreated && !this.IsDisposed)
+            if (!OnWindowThread)
             {
-                this.Invoke(new AowGameSavedEventHandler(OnAowGameSaved), sender, e);
+                SendToWindow(() => OnAowGameSaved(sender, e));
                 return;
             }
 
