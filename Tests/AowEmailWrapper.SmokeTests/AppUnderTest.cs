@@ -204,7 +204,7 @@ namespace AowEmailWrapper.SmokeTests
             _process = Process.Start(start);
 
             //Up once its tray icon's window exists and the main window has been created
-            Until(() => NotifyWindows().Any() && MainWindow() != IntPtr.Zero, TimeSpan.FromSeconds(60), "the Wrapper did not start");
+            Until(() => NotifyWindows().Any() && MainWindow() != IntPtr.Zero, TimeSpan.FromSeconds(60), () => "the Wrapper did not start: " + StartFailureDetails());
             //and the splash screen has faded out, which it once failed to do when the main window was quicker
             Until(() => !TopWindows().Any(h => Native.IsWindowVisible(h) && Native.Text(h) == "Splash"), TimeSpan.FromSeconds(10),
                 "the splash screen stayed up:" + Environment.NewLine + DescribeWindows());
@@ -224,6 +224,38 @@ namespace AowEmailWrapper.SmokeTests
         public IEnumerable<IntPtr> TopWindows()
         {
             return Native.TopWindows((uint)_process.Id);
+        }
+
+        /// <summary>Why a start did not come up: the process's fate, its windows with any dialog's text, and its log.</summary>
+        private string StartFailureDetails()
+        {
+            StringBuilder details = new StringBuilder();
+            _process.Refresh();
+            details.AppendLine(_process.HasExited ? $"the process exited with code {_process.ExitCode}" : "the process is still running");
+            details.AppendLine($"{Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ExeName)).Length} process(es) named {ExeName} are running");
+            if (!_process.HasExited)
+            {
+                foreach (IntPtr h in TopWindows())
+                {
+                    details.AppendLine($"  0x{h.ToInt64():X} class={Native.Class(h)} visible={Native.IsWindowVisible(h)} text='{Native.Text(h)}'");
+                    if (Native.Class(h) == "#32770")
+                    {
+                        foreach (IntPtr child in Native.Children(h))
+                        {
+                            string text = Native.Text(child);
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                details.AppendLine("      " + text);
+                            }
+                        }
+                    }
+                }
+            }
+            string log = ReadLog();
+            string[] lines = log.Split('\n');
+            details.AppendLine("log (last 25 lines):");
+            details.Append(string.Join("\n", lines.Skip(Math.Max(0, lines.Length - 25))));
+            return details.ToString();
         }
 
         /// <summary>Every window of the process, for failure messages.</summary>
@@ -378,6 +410,20 @@ namespace AowEmailWrapper.SmokeTests
         }
 
         #endregion
+
+        /// <summary>Like Until with a message, but the message is only put together when it fails.</summary>
+        public static void Until(Func<bool> condition, TimeSpan timeout, Func<string> failure)
+        {
+            Stopwatch watch = Stopwatch.StartNew();
+            while (!condition())
+            {
+                if (watch.Elapsed >= timeout)
+                {
+                    Assert.Fail(failure());
+                }
+                Thread.Sleep(200);
+            }
+        }
 
         public static void Until(Func<bool> condition, TimeSpan timeout, string failure)
         {
