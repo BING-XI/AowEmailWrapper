@@ -72,7 +72,7 @@ namespace AowEmailWrapper.SmokeTests
         private static string WindowLogLines(AppUnderTest app)
         {
             string[] lines = app.ReadLog().Split('\n');
-            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at") || line.Contains("still minimized")).Select(line => line.Trim()));
+            string found = string.Join(Environment.NewLine, lines.Where(line => line.Contains("put back at") || line.Contains("; restoring it") || line.Contains("Show: ")).Select(line => line.Trim()));
             return string.IsNullOrEmpty(found) ? "The Wrapper logged no correction of its window." : "Wrapper log:" + Environment.NewLine + found;
         }
 

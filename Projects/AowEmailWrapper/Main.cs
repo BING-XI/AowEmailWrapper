@@ -1032,7 +1032,9 @@ namespace AowEmailWrapper
         {
             this.SuspendLayout();
 
-            if (this.WindowState == FormWindowState.Minimized)
+            //The window itself decides as well as the Form's idea of it, which can lag behind after the handle has
+            //been recreated; a minimize it missed would leave the window minimized instead of in the tray
+            if (this.WindowState == FormWindowState.Minimized || (IsHandleCreated && IsIconic(Handle)))
             {
                 this.ShowInTaskbar = false;
                 this.Visible = false;
@@ -1050,7 +1052,10 @@ namespace AowEmailWrapper
         {
             this.SuspendLayout();
 
-            if (this.WindowState == FormWindowState.Minimized || !this.Visible)
+            Trace.TraceInformation("Show: the form says {0} and {1}; the window is {2}", WindowState, Visible ? "visible" : "hidden", NativeState);
+            //The window itself decides as well as the Form's idea of it: on the build machine the Form believed a
+            //window in the tray was shown normally, and Show did nothing
+            if (this.WindowState == FormWindowState.Minimized || !this.Visible || IsAwayNatively)
             {
                 if (_activityLog != null && 
                     _activityLog.Activities != null && 
@@ -1168,6 +1173,18 @@ namespace AowEmailWrapper
         private const int SW_RESTORE = 9;
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsIconic(IntPtr hWnd);
         [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        /// <summary>The window is minimized or hidden as Windows sees it, whatever the Form believes.</summary>
+        private bool IsAwayNatively
+        {
+            get { return IsHandleCreated && (IsIconic(Handle) || !IsWindowVisible(Handle)); }
+        }
+
+        private string NativeState
+        {
+            get { return !IsHandleCreated ? "no window" : IsIconic(Handle) ? "minimized" : IsWindowVisible(Handle) ? "shown" : "hidden"; }
+        }
 
         /// <summary>
         /// The window as it really is, not as the Form last understood it: on the build machine setting
@@ -1177,13 +1194,13 @@ namespace AowEmailWrapper
         /// </summary>
         private void MakeUsable(string when)
         {
-            if (IsDisposed || !IsHandleCreated || !Visible)
+            if (IsDisposed || !IsHandleCreated)
             {
                 return;
             }
-            if (IsIconic(Handle))
+            if (IsAwayNatively)
             {
-                Trace.TraceInformation("Window {0} still minimized; restoring it", when);
+                Trace.TraceInformation("Window {0} still {1}; restoring it", when, NativeState);
                 ShowWindow(Handle, SW_RESTORE);
             }
             EnsureUsableBounds(when);
@@ -1196,7 +1213,7 @@ namespace AowEmailWrapper
         /// </summary>
         private void EnsureUsableBounds(string when)
         {
-            if (IsDisposed || !IsHandleCreated || !Visible || IsIconic(Handle))
+            if (IsDisposed || IsAwayNatively)
             {
                 return;
             }
