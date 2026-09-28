@@ -818,21 +818,33 @@ namespace AowEmailWrapper
             return true;
         }
 
+        /// <summary>
+        /// Raised on the watcher's own thread when the game it watches has ended. The game may already have
+        /// been started again from the tray (the click came before this report), and then the slot holds the
+        /// new watcher: clearing it would let the next click start a second copy of the running game.
+        /// </summary>
         private void StartedGameWatchCompleted(object sender, AowGameType gameType)
         {
+            StartedTaskWatcher ended = sender as StartedTaskWatcher;
             switch (gameType)
             {
                 case AowGameType.Aow1:
-                    _aow1GameWatcher = null;
+                    ReleaseWatcher(ref _aow1GameWatcher, ended);
                     break;
                 case AowGameType.Aow2:
-                    _aow2GameWatcher = null;
+                    ReleaseWatcher(ref _aow2GameWatcher, ended);
                     break;
                 case AowGameType.AowSm:
                 case AowGameType.AowMpe:
-                    _aowSmGameWatcher = null;
+                    ReleaseWatcher(ref _aowSmGameWatcher, ended);
                     break;
             }
+        }
+
+        /// <summary>Empties the slot only if it still holds <paramref name="ended"/>; returns true when it did.</summary>
+        internal static bool ReleaseWatcher(ref StartedTaskWatcher slot, StartedTaskWatcher ended)
+        {
+            return ended != null && ReferenceEquals(Interlocked.CompareExchange(ref slot, null, ended), ended);
         }
 
         private void OnConfigNeedsSave(object sender, EventArgs e)
@@ -1071,13 +1083,23 @@ namespace AowEmailWrapper
         /// <summary>Called on a pool thread when the Wrapper is started again while this one runs.</summary>
         public void ShowFromAnotherStart()
         {
-            if (IsHandleCreated && !IsDisposed)
+            if (!IsHandleCreated || IsDisposed)
+            {
+                return;
+            }
+            try
             {
                 BeginInvoke(new Action(() =>
                 {
                     Trace.TraceInformation("Started again while running: showing the window");
                     Maximize();
                 }));
+            }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is ObjectDisposedException)
+            {
+                //The window went away between the check and the call (the Wrapper is closing). An exception
+                //leaving a thread-pool callback would end the process, so the request is simply dropped.
+                Trace.TraceInformation("Started again while closing: nothing to show");
             }
         }
 

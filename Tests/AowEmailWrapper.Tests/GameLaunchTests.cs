@@ -70,5 +70,25 @@ namespace AowEmailWrapper.Tests
                 Assert.Equal(AowGameType.Aow1, reported);
             }
         }
+
+        [Fact]
+        public void A_late_report_from_an_ended_game_does_not_free_the_slot_of_its_restart()
+        {
+            //The game ended and was started again from the tray before its watcher reported the end; the
+            //old report must leave the new watcher in place, or the next click starts a second copy
+            AowGame game = new AowGame(AowGameType.Aow1, _root, InstallSource.Manual);
+            StartedTaskWatcher ended = new StartedTaskWatcher(game, null);
+            StartedTaskWatcher restarted = new StartedTaskWatcher(game, null);
+            StartedTaskWatcher slot = restarted;
+
+            Assert.False(Main.ReleaseWatcher(ref slot, ended));
+            Assert.Same(restarted, slot);
+
+            Assert.False(Main.ReleaseWatcher(ref slot, null));
+            Assert.Same(restarted, slot);
+
+            Assert.True(Main.ReleaseWatcher(ref slot, restarted));
+            Assert.Null(slot);
+        }
     }
 }
