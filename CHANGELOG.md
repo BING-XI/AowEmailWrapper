@@ -3,14 +3,19 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
-## Unreleased
+## 2.1.2
 
 - Column widths you drag on the Activity Log and the account list are remembered, and come back the next
   time the Wrapper starts.
+- Ziggurat copies and their turns show Ziggurat's own purple dragon on the tray menu and in the Activity
+  Log. Thanks to BING-XI for the contribution.
 
 ### Fixed
 
 - Dragging a column edge or resizing the window no longer makes the text in the lists flash.
+
+Run `AowEmailWrapper-2.1.2-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
+*Check for updates* on the Settings tab. Accounts and settings carry over.
 
 ## 2.1.1
 
