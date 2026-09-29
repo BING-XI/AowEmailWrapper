@@ -3,6 +3,15 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- Column widths you drag on the Activity Log and the account list are remembered, and come back the next
+  time the Wrapper starts.
+
+### Fixed
+
+- Dragging a column edge or resizing the window no longer makes the text in the lists flash.
+
 ## 2.1.1
 
 - Choosing a game on the tray menu while it is already running brings it to the front, restoring it

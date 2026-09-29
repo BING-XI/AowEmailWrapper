@@ -1,4 +1,6 @@
+using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using AowEmailWrapper.ConfigFramework;
 using AowEmailWrapper.Controls;
@@ -80,6 +82,32 @@ namespace AowEmailWrapper.Tests
                 Assert.False(list.OwnerDraw);
                 Assert.Null(form.BackgroundImage);
                 Assert.Equal(formBefore, form.Size);
+            }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        private static bool IsNativelyDoubleBuffered(ListView list)
+        {
+            const int LvmGetExtendedListViewStyle = 0x1037, LvsExDoubleBuffer = 0x10000;
+            return (SendMessage(list.Handle, LvmGetExtendedListViewStyle, IntPtr.Zero, IntPtr.Zero).ToInt64() & LvsExDoubleBuffer) != 0;
+        }
+
+        [Fact]
+        public void ListsPaintOffScreenInEitherLook()
+        {
+            // Without it, dragging a column edge repaints every owner-drawn row on each mouse move and the text flashes.
+            using (Form form = BuildForm(out Button button, out TextBox text, out Label label, out ListView list, out ThemedTabControl tabs))
+            {
+                form.CreateControl();
+                Assert.False(IsNativelyDoubleBuffered(list));
+
+                Theme.Select(Theme.AgeOfWondersName, form);
+                Assert.True(IsNativelyDoubleBuffered(list));
+
+                Theme.Select(Theme.ClassicName, form);
+                Assert.True(IsNativelyDoubleBuffered(list));
             }
         }
 

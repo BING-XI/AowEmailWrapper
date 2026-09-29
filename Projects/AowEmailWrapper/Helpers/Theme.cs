@@ -198,6 +198,7 @@ namespace AowEmailWrapper.Helpers
             if (!_enabled)
             {
                 original.Restore(control);
+                PaintOffScreen(control as ListView);
                 return;
             }
 
@@ -318,6 +319,15 @@ namespace AowEmailWrapper.Helpers
         /// container makes every one of its children repaint the whole chain of parents above it, which is
         /// what made a page take so long to draw; an opaque one is painted once, double-buffered.
         /// </summary>
+        /// <summary>
+        /// Lists draw into a buffer in either look. Without it, dragging a column edge or resizing the window erases
+        /// and redraws every row on each mouse move, and the text flashes.
+        /// </summary>
+        private static void PaintOffScreen(ListView listView)
+        {
+            if (listView != null) SetDoubleBuffered(listView, true);
+        }
+
         private static void Opaque(Control control, Image texture, Color colour)
         {
             control.BackColor = colour;
@@ -380,6 +390,7 @@ namespace AowEmailWrapper.Helpers
             // redistributes its columns on every client size change, losing a little to rounding each time.
             listView.BackColor = ParchmentLight;
             listView.ForeColor = Ink;
+            PaintOffScreen(listView);
             ListViewHooks hooks;
             if (!_listViewHooks.TryGetValue(listView, out hooks))
             {
