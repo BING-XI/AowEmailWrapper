@@ -271,6 +271,13 @@ namespace AowEmailWrapper.Games
             return GetGameByFolder(activity.GameType, activity.InstallFolder) ?? GetGameByType(activity.GameType);
         }
 
+        /// <summary>The icon for an activity log entry: its copy's, or the one its label calls for when the copy is unknown.</summary>
+        public string ImageKeyFor(ConfigFramework.Activity activity)
+        {
+            AowGame game = GetGameByFolder(activity.GameType, activity.InstallFolder);
+            return game != null ? game.ImageKey : AowGame.ImageKeyFor(activity.GameType, activity.ModLabel);
+        }
+
         #endregion
 
         #region Routing

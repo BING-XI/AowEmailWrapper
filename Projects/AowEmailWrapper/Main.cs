@@ -2795,7 +2795,7 @@ namespace AowEmailWrapper
                             string newToAddress = MailHelper.GetFirstToAddress(theEmail);
 
                             Image gameTypeImage = null;
-                            string gameType = activity.GameType.ToString();
+                            string gameType = _gameManager.ImageKeyFor(activity);
                             if (imageListIcons.Images.IndexOfKey(gameType) >= 0)
                             {
                                 gameTypeImage = imageListIcons.Images[gameType];
@@ -2944,9 +2944,7 @@ namespace AowEmailWrapper
             {
                 if (game.IsInstalled)
                 {
-                    string gameType = game.GameType.ToString();
-
-                    IconMenuItem menuItem = new IconMenuItem(game.DisplayName, imageListIcons.Images[gameType], emailImage);
+                    IconMenuItem menuItem = new IconMenuItem(game.DisplayName, imageListIcons.Images[game.ImageKey], emailImage);
                     
                     menuItem.Name = game.Id;
                     menuItem.Tag = GameMenuTagPrefix + game.Id;
