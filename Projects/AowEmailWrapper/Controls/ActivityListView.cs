@@ -149,9 +149,11 @@ namespace AowEmailWrapper.Controls
                     switch (activity.GameType)
                     {
                         case AowGameType.Aow1:
-                            if (ImageKeyFor(activity) == AowGame.ZigguratIcon)
+                            //A mod with its own dragon (Ziggurat, AoWx) by key, the stock game by index
+                            string imageKey = ImageKeyFor(activity);
+                            if (imageKey != AowGameType.Aow1.ToString())
                             {
-                                item.ImageKey = AowGame.ZigguratIcon;
+                                item.ImageKey = imageKey;
                             }
                             else
                             {

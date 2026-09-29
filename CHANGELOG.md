@@ -3,6 +3,11 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- AoWx copies and their turns show AoWx's own grey dragon on the tray menu and in the Activity Log, as
+  Ziggurat's do with its purple one.
+
 ## 2.1.2
 
 - Column widths you drag on the Activity Log and the account list are remembered, and come back the next

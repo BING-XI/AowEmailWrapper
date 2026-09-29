@@ -71,6 +71,8 @@ namespace AowEmailWrapper.Games
 
         /// <summary>Key of Ziggurat's purple dragon in the Main image list, AoWz.exe's own icon at 16 px.</summary>
         public const string ZigguratIcon = "AoW1Zig";
+        /// <summary>Key of AoWx's grey dragon in the Main image list, the icon of the AoWx-branded executable at 16 px.</summary>
+        public const string AowXIcon = "AoW1X";
 
         private const string DummyTestFileTemplate = "{0}.asg";
         private const string FileSearchTemplate = "*{0}*.asg";
@@ -242,8 +244,8 @@ namespace AowEmailWrapper.Games
 
         /// <summary>
         /// This copy's icon in the Main image list: the purple dragon for a copy started through AoWz.exe
-        /// or labelled Ziggurat. Not from the files alone: the game folder Ziggurat was installed into
-        /// may carry Ziggurat text tables, but it is the vanilla game.
+        /// or labelled Ziggurat, the grey one for a copy labelled AoWx. Not from the files alone: the game
+        /// folder Ziggurat was installed into may carry Ziggurat text tables, but it is the vanilla game.
         /// </summary>
         public string ImageKey
         {
@@ -362,10 +364,21 @@ namespace AowEmailWrapper.Games
             return types;
         }
 
-        /// <summary>The Main image list key for a game type and copy label; Ziggurat has its own icon.</summary>
+        /// <summary>The Main image list key for a game type and copy label; Ziggurat and AoWx have their own icons.</summary>
         public static string ImageKeyFor(AowGameType gameType, string label)
         {
-            return gameType == AowGameType.Aow1 && SameLabel(label, ModDetector.Ziggurat) ? ZigguratIcon : gameType.ToString();
+            if (gameType == AowGameType.Aow1)
+            {
+                if (SameLabel(label, ModDetector.Ziggurat))
+                {
+                    return ZigguratIcon;
+                }
+                if (SameLabel(label, ModDetector.AowX))
+                {
+                    return AowXIcon;
+                }
+            }
+            return gameType.ToString();
         }
 
         /// <summary>"Zig Mod" and "zigmod" are the same label: players only have to agree on the spelling.</summary>
