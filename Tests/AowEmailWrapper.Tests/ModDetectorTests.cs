@@ -149,6 +149,44 @@ namespace AowEmailWrapper.Tests
         }
 
         [Fact]
+        public void An_AoWx_copy_and_its_turns_show_the_grey_dragon_and_a_stock_copy_does_not()
+        {
+            string aowx = GameFolder("aowxicon", resStrVersion: "Version: Evolved %s");
+            WriteExe(Path.Combine(aowx, "AoW.exe"), "Age of Wonders X mod by IniochReborn");
+            string stock = GameFolder("stockicon", resStrVersion: "Version: %s");
+            WriteExe(Path.Combine(stock, "AoW.exe"), "Copyright (C) 1999,2000 Triumph Studios");
+
+            //Neither copy is labelled yet: the manager labels each by its contents, and the label picks the icon
+            AowGameManager manager = new AowGameManager(_root, new[]
+            {
+                new AowGame(AowGameType.Aow1, stock, InstallSource.Folder),
+                new AowGame(AowGameType.Aow1, aowx, InstallSource.Folder),
+            }, null);
+
+            List<AowGame> installs = manager.GetInstalls(AowGameType.Aow1);
+            Assert.Equal(AowGame.AowXIcon, installs.Single(game => game.IsFolder(aowx)).ImageKey);
+            Assert.Equal(AowGameType.Aow1.ToString(), installs.Single(game => game.IsFolder(stock)).ImageKey);
+
+            Activity inAowx = new Activity(ActivityState.Sent, AowGameType.Aow1, "a.asg", "Map", "1") { InstallFolder = aowx };
+            Activity inStock = new Activity(ActivityState.Sent, AowGameType.Aow1, "b.asg", "Map", "1") { InstallFolder = stock };
+            Activity labelOnly = new Activity(ActivityState.Received, AowGameType.Aow1, "c.asg", "Map", "1") { ModLabel = "AoW X" };
+            Assert.Equal(AowGame.AowXIcon, manager.ImageKeyFor(inAowx));
+            Assert.Equal(AowGameType.Aow1.ToString(), manager.ImageKeyFor(inStock));
+            Assert.Equal(AowGame.AowXIcon, manager.ImageKeyFor(labelOnly));
+        }
+
+        [Theory]
+        [InlineData(AowGameType.Aow1, "AoWx", AowGame.AowXIcon)]
+        [InlineData(AowGameType.Aow1, "aow-x", AowGame.AowXIcon)]
+        [InlineData(AowGameType.Aow1, "Ziggurat", AowGame.ZigguratIcon)]
+        [InlineData(AowGameType.Aow1, "Evolved", "Aow1")]
+        [InlineData(AowGameType.AowSm, "AoWx", "AowSm")]
+        public void Only_an_Age_of_Wonders_1_label_of_AoWx_picks_the_grey_dragon(AowGameType type, string label, string key)
+        {
+            Assert.Equal(key, AowGame.ImageKeyFor(type, label));
+        }
+
+        [Fact]
         public void Every_unlabelled_copy_is_labelled_by_its_contents_once_per_label()
         {
             string first = GameFolder("label1", resStrVersion: "Version: Ziggurat %s");
