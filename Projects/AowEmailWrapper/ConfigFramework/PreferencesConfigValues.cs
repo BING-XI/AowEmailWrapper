@@ -92,6 +92,14 @@ namespace AowEmailWrapper.ConfigFramework
             set { _theme = string.IsNullOrEmpty(value) ? Helpers.Theme.DefaultName : value; }
         }
 
+        /// <summary>Activity log column widths the player has dragged, as ListViewColumnResizer.SavedWidths gives them.</summary>
+        [XmlAttribute("activityColumns")]
+        public string ActivityColumnWidths { get; set; }
+
+        /// <summary>Account list column widths the player has dragged, as ListViewColumnResizer.SavedWidths gives them.</summary>
+        [XmlAttribute("accountsColumns")]
+        public string AccountsColumnWidths { get; set; }
+
         public PreferencesConfigValues()
             : this(false)
         { }

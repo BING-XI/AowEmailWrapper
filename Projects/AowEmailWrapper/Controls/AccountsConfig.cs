@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -56,6 +57,24 @@ namespace AowEmailWrapper.Controls
         #endregion
 
         #region Public Properties
+
+        /// <summary>The column widths the player has dragged, kept in the preferences between runs.</summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ColumnWidths
+        {
+            get
+            {
+                return ListViewColumnResizer.SavedWidths(listViewAccounts);
+            }
+            set
+            {
+                ListViewColumnResizer.RestoreWidths(listViewAccounts, value);
+                listViewAccounts.BeginUpdate();
+                ListViewColumnResizer.ResizeColumns(listViewAccounts);
+                listViewAccounts.EndUpdate();
+            }
+        }
 
         public AccountConfigValuesList Config
         {

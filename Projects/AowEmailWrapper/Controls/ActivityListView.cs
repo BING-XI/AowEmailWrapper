@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -64,6 +65,24 @@ namespace AowEmailWrapper.Controls
             { 
                 _activityLog = value;
                 Populate();
+            }
+        }
+
+        /// <summary>The column widths the player has dragged, kept in the preferences between runs.</summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string ColumnWidths
+        {
+            get
+            {
+                return ListViewColumnResizer.SavedWidths(listView);
+            }
+            set
+            {
+                ListViewColumnResizer.RestoreWidths(listView, value);
+                listView.BeginUpdate();
+                ListViewColumnResizer.ResizeColumns(listView);
+                listView.EndUpdate();
             }
         }
 

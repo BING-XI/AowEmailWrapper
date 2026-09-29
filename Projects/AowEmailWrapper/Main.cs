@@ -581,6 +581,7 @@ namespace AowEmailWrapper
                 }
 
                 StopAllPolling();
+                SaveColumnWidths();
 
                 if (_aow1GameWatcher != null)
                 {
@@ -687,6 +688,8 @@ namespace AowEmailWrapper
                     if (_wrapperConfig.PreferencesConfig != null)
                     {
                         preferencesConfig.Config = _wrapperConfig.PreferencesConfig;
+                        activityListView.ColumnWidths = _wrapperConfig.PreferencesConfig.ActivityColumnWidths;
+                        accountsConfig.ColumnWidths = _wrapperConfig.PreferencesConfig.AccountsColumnWidths;
                     }
 
                     gamesConfig.Config = _wrapperConfig.GamesConfig;
@@ -719,6 +722,37 @@ namespace AowEmailWrapper
             {
                 _isNewConfig = false;
                 accountsConfig.Add();
+            }
+        }
+
+        /// <summary>Copies the column widths the player has dragged into the preferences; true when they changed.</summary>
+        private bool KeepColumnWidths(PreferencesConfigValues preferences)
+        {
+            string activity = activityListView.ColumnWidths;
+            string accounts = accountsConfig.ColumnWidths;
+            bool changed = !string.Equals(activity, preferences.ActivityColumnWidths, StringComparison.Ordinal) ||
+                !string.Equals(accounts, preferences.AccountsColumnWidths, StringComparison.Ordinal);
+            preferences.ActivityColumnWidths = activity;
+            preferences.AccountsColumnWidths = accounts;
+            return changed;
+        }
+
+        /// <summary>
+        /// On the way out, stores dragged column widths in the saved preferences only, so settings that were
+        /// edited but not saved stay unsaved.
+        /// </summary>
+        private void SaveColumnWidths()
+        {
+            try
+            {
+                if (_wrapperConfig != null && _wrapperConfig.PreferencesConfig != null && KeepColumnWidths(_wrapperConfig.PreferencesConfig))
+                {
+                    DataManagerHelper.SaveConfig(_wrapperConfig);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.ToString());
             }
         }
 
@@ -772,6 +806,10 @@ namespace AowEmailWrapper
                     CreateContextMenu();
                 }
 
+                if (preferencesConfigValues != null)
+                {
+                    KeepColumnWidths(preferencesConfigValues);
+                }
                 _wrapperConfig.PreferencesConfig = preferencesConfigValues;
 
                 DataManagerHelper.SaveConfig(_wrapperConfig);
