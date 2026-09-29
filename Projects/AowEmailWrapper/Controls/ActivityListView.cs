@@ -130,7 +130,14 @@ namespace AowEmailWrapper.Controls
                     switch (activity.GameType)
                     {
                         case AowGameType.Aow1:
-                            item.ImageIndex = 3;
+                            if (ImageKeyFor(activity) == AowGame.ZigguratIcon)
+                            {
+                                item.ImageKey = AowGame.ZigguratIcon;
+                            }
+                            else
+                            {
+                                item.ImageIndex = 3;
+                            }
                             break;
                         case AowGameType.Aow2:
                             item.ImageIndex = 4;
@@ -224,6 +231,11 @@ namespace AowEmailWrapper.Controls
                 }
             }
             return activity.ModLabel ?? string.Empty;
+        }
+
+        private string ImageKeyFor(Activity activity)
+        {
+            return GameManager != null ? GameManager.ImageKeyFor(activity) : AowGame.ImageKeyFor(activity.GameType, activity.ModLabel);
         }
 
         private void RaiseListChanged()

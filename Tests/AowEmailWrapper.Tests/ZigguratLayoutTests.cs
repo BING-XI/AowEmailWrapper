@@ -142,5 +142,41 @@ namespace AowEmailWrapper.Tests
             Assert.Equal(ModDetector.Ziggurat, mod.Label);
             Assert.NotEqual(ModDetector.Ziggurat, vanilla.Label);
         }
+
+        [Fact]
+        public void The_Ziggurat_copy_and_its_turns_show_the_purple_dragon_and_the_host_does_not()
+        {
+            //The host carries Ziggurat's tables, so detection alone would call it Ziggurat too
+            string host = HostFolder(true);
+            string zig = ZigguratFolder(host);
+
+            AowGameManager manager = new AowGameManager(_root, new[]
+            {
+                new AowGame(AowGameType.Aow1, host, InstallSource.Folder),
+                new AowGame(AowGameType.Aow1, zig, InstallSource.Folder),
+            }, null);
+
+            List<AowGame> installs = manager.GetInstalls(AowGameType.Aow1);
+            Assert.Equal(AowGame.ZigguratIcon, installs.Single(game => game.IsFolder(zig)).ImageKey);
+            Assert.Equal(AowGameType.Aow1.ToString(), installs.Single(game => game.IsFolder(host)).ImageKey);
+
+            ConfigFramework.Activity inZig = new ConfigFramework.Activity(ConfigFramework.ActivityState.Sent, AowGameType.Aow1, "a.asg", "Map", "1") { InstallFolder = zig };
+            ConfigFramework.Activity inHost = new ConfigFramework.Activity(ConfigFramework.ActivityState.Sent, AowGameType.Aow1, "b.asg", "Map", "1") { InstallFolder = host };
+            ConfigFramework.Activity labelOnly = new ConfigFramework.Activity(ConfigFramework.ActivityState.Received, AowGameType.Aow1, "c.asg", "Map", "1") { ModLabel = "zig gurat" };
+            Assert.Equal(AowGame.ZigguratIcon, manager.ImageKeyFor(inZig));
+            Assert.Equal(AowGameType.Aow1.ToString(), manager.ImageKeyFor(inHost));
+            Assert.Equal(AowGame.ZigguratIcon, manager.ImageKeyFor(labelOnly));
+        }
+
+        [Theory]
+        [InlineData(AowGameType.Aow1, "Ziggurat", AowGame.ZigguratIcon)]
+        [InlineData(AowGameType.Aow1, "Vanilla 1.36", "Aow1")]
+        [InlineData(AowGameType.Aow1, "Dark Lord", "Aow1")]
+        [InlineData(AowGameType.Aow1, null, "Aow1")]
+        [InlineData(AowGameType.AowSm, "Ziggurat", "AowSm")]
+        public void Only_an_Age_of_Wonders_1_label_of_Ziggurat_picks_the_purple_dragon(AowGameType type, string label, string key)
+        {
+            Assert.Equal(key, AowGame.ImageKeyFor(type, label));
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace AowEmailWrapper.Tests
     public class ImageListTests
     {
         [Theory]
-        [InlineData("Main", 8, "EmailWaiting", "CheckEmail")]
+        [InlineData("Main", 9, "EmailWaiting", AowEmailWrapper.Games.AowGame.ZigguratIcon)]
         [InlineData("AccountsConfig", 21, "Other", "abv.bg")]
         [InlineData("MessageStoreList", 1, "Open", "Open")]
         public void EmbeddedImageListsLoadInDesignerOrderWithKeys(string listName, int count, string firstKey, string lastKey)
