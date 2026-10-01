@@ -36,10 +36,10 @@ namespace AowEmailWrapper.Controls
         private const string WhereIsFallback = "Who has the turn? (emails every player)";
         private const string Menu_TurnServer_Tag = "menuItemTurnServer";
         private const string TurnServerFallback = "Who has the turn? (turn server)";
-        private const string HeldByKey = "activityHeldBy";
-        private const string HeldByFallback = "held by {0}";
         private const string ProbablyWithKey = "activityProbablyWith";
         private const string ProbablyWithFallback = "probably with {0}";
+        private const string PlayerYouKey = "activityPlayerYou";
+        private const string PlayerYouFallback = "you";
         private ToolStripMenuItem _whereIsMenuItem;
         private ToolStripMenuItem _turnServerMenuItem;
 
@@ -145,6 +145,7 @@ namespace AowEmailWrapper.Controls
                     item.SubItems.Add(new ListViewItem.ListViewSubItem(item, activity.TurnNumber));
                     item.SubItems.Add(new ListViewItem.ListViewSubItem(item, (age > 0) ? age.ToString() : string.Empty));
                     item.SubItems.Add(new ListViewItem.ListViewSubItem(item, StatusLabel(activity)));
+                    item.SubItems.Add(new ListViewItem.ListViewSubItem(item, PlayerLabel(activity)));
                     item.SubItems.Add(new ListViewItem.ListViewSubItem(item, CopyLabel(activity)));
                     item.SubItems.Add(new ListViewItem.ListViewSubItem(item, activity.DateTicks));
 
@@ -181,7 +182,7 @@ namespace AowEmailWrapper.Controls
                     listView.Items.Add(item);
                 }
 
-                _lvwColumnSorter.SortColumn = 6;
+                _lvwColumnSorter.SortColumn = colTicks.Index;
                 listView.Sort();
 
                 ListViewColumnResizer.ResizeColumns(listView);
@@ -194,10 +195,7 @@ namespace AowEmailWrapper.Controls
             listView.EndUpdate();
         }
 
-        /// <summary>
-        /// The status text, with a "new sender" tag on a received turn from an address not seen before,
-        /// or the player whose wrapper says it holds a sent turn.
-        /// </summary>
+        /// <summary>The status text, with a "new sender" tag on a received turn from an address not seen before.</summary>
         private static string StatusLabel(Activity activity)
         {
             string label = activity.Status.Equals(ActivityState.None) ? string.Empty : Translator.TranslateEnum(activity.Status);
@@ -206,17 +204,41 @@ namespace AowEmailWrapper.Controls
                 string tag = Translator.Translate(NewSenderKey);
                 label = string.Format("{0} ({1})", label, string.IsNullOrEmpty(tag) ? NewSenderFallback : tag);
             }
-            else if (activity.Status == ActivityState.Sent && !string.IsNullOrEmpty(activity.Holder))
-            {
-                string held = Translator.Translate(HeldByKey, activity.Holder);
-                label = string.Format("{0} ({1})", label, string.IsNullOrEmpty(held) ? string.Format(HeldByFallback, activity.Holder) : held);
-            }
-            else if (activity.Status == ActivityState.Sent && !string.IsNullOrEmpty(activity.LikelyHolder))
-            {
-                string probably = Translator.Translate(ProbablyWithKey, activity.LikelyHolder);
-                label = string.Format("{0} ({1})", label, string.IsNullOrEmpty(probably) ? string.Format(ProbablyWithFallback, activity.LikelyHolder) : probably);
-            }
             return label;
+        }
+
+        /// <summary>
+        /// Who has the turn: "you" for a turn waiting here; for a sent turn, the player whose Wrapper says
+        /// it holds it, or else the one it probably went on to, which before anyone has been heard from
+        /// is whoever the player sent it to.
+        /// </summary>
+        internal static string PlayerLabel(Activity activity)
+        {
+            switch (activity.Status)
+            {
+                case ActivityState.Received:
+                    string you = Translator.Translate(PlayerYouKey);
+                    return string.IsNullOrEmpty(you) ? PlayerYouFallback : you;
+                case ActivityState.Sent:
+                    if (!string.IsNullOrEmpty(activity.Holder))
+                    {
+                        return activity.Holder;
+                    }
+                    string likely = activity.LikelyHolder;
+                    if (string.IsNullOrEmpty(likely) && activity.Answers.Count == 0)
+                    {
+                        TurnSend send = TurnQuery.LikelyHolder(activity, null);
+                        likely = send != null ? send.To : null;
+                    }
+                    if (string.IsNullOrEmpty(likely))
+                    {
+                        return string.Empty;
+                    }
+                    string probably = Translator.Translate(ProbablyWithKey, likely);
+                    return string.IsNullOrEmpty(probably) ? string.Format(ProbablyWithFallback, likely) : probably;
+                default:
+                    return string.Empty;
+            }
         }
 
         private static string ToolTipFor(Activity activity)

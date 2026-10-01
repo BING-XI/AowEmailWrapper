@@ -49,8 +49,9 @@
 		<lookup key="activityListViewlistView2" value="Turn"/>
 		<lookup key="activityListViewlistView3" value="Age"/>
 		<lookup key="activityListViewlistView4" value="Status"/>
-		<lookup key="activityListViewlistView5" value="Copy"/>
-		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="activityListViewlistView5" value="Player"/>
+		<lookup key="activityListViewlistView6" value="Copy"/>
+		<lookup key="activityListViewlistView7" value="Ticks"/>
 		<lookup key="tabAbout" value="About"/>
 		<lookup key="groupBetaTesters" value="Beta Testers"/>
 		<lookup key="groupTranslators" value="Translators"/>
@@ -120,11 +121,11 @@
 		<lookup key="activityNewSender" value="new sender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Found {0} unplayed turn(s) in your mailbox and added them to the activity log."/>
 		<lookup key="menuItemWhereIs" value="Who has the turn? (emails every player)"/>
-		<lookup key="activityHeldBy" value="held by {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Who has the turn?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Asked {0} player(s) who has &apos;{1}&apos;. Answers arrive with the next mail checks."/>
 		<lookup key="msgWrapperWhereIsNobody" value="No other players are known for '{0}'."/>
 		<lookup key="activityProbablyWith" value="probably with {0}"/>
+		<lookup key="activityPlayerYou" value="you"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} probably has &apos;{1}&apos;: {2} sent it to them on {3}, and they have not answered."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} probably has &apos;{1}&apos;: you sent it to them on {2}, and they have not answered."/>
 		<lookup key="menuItemTurnServer" value="Who has the turn? (turn server)"/>
@@ -339,8 +340,9 @@
 		<lookup key="activityListViewlistView2" value="Tour"/>
 		<lookup key="activityListViewlistView3" value="Ancienneté"/>
 		<lookup key="activityListViewlistView4" value="Statut"/>
-		<lookup key="activityListViewlistView5" value="Copie"/>
-		<lookup key="activityListViewlistView6" value="Coches"/>
+		<lookup key="activityListViewlistView5" value="Joueur"/>
+		<lookup key="activityListViewlistView6" value="Copie"/>
+		<lookup key="activityListViewlistView7" value="Coches"/>
 		<lookup key="tabAbout" value="A propos"/>
 		<lookup key="groupBetaTesters" value="Béta Testeurs"/>
 		<lookup key="groupTranslators" value="Traducteurs"/>
@@ -545,11 +547,11 @@
 		<lookup key="activityNewSender" value="nouvel expéditeur"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} tour(s) non joué(s) trouvé(s) dans votre boîte aux lettres et ajouté(s) au journal d&apos;activité."/>
 		<lookup key="menuItemWhereIs" value="Qui a le tour ? (écrit à tous les joueurs)"/>
-		<lookup key="activityHeldBy" value="chez {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Qui a le tour ?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} joueur(s) interrogé(s) pour savoir qui a &apos;{1}&apos;. Les réponses arrivent avec les prochaines vérifications du courrier."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Aucun autre joueur n&apos;est connu pour &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="probablement chez {0}"/>
+		<lookup key="activityPlayerYou" value="vous"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} a probablement &apos;{1}&apos; : {2} le lui a envoyé le {3}, et il n&apos;a pas répondu."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} a probablement &apos;{1}&apos; : vous le lui avez envoyé le {2}, et il n&apos;a pas répondu."/>
 		<lookup key="menuItemTurnServer" value="Qui a le tour ? (serveur de tours)"/>
@@ -631,8 +633,9 @@
 		<lookup key="activityListViewlistView2" value="Zug"/>
 		<lookup key="activityListViewlistView3" value="Alter"/>
 		<lookup key="activityListViewlistView4" value="Status"/>
-		<lookup key="activityListViewlistView5" value="Kopie"/>
-		<lookup key="activityListViewlistView6" value="Zeiteinheit"/>
+		<lookup key="activityListViewlistView5" value="Spieler"/>
+		<lookup key="activityListViewlistView6" value="Kopie"/>
+		<lookup key="activityListViewlistView7" value="Zeiteinheit"/>
 		<lookup key="tabAbout" value="Über"/>
 		<lookup key="groupBetaTesters" value="Beta Tester"/>
 		<lookup key="groupTranslators" value="Übersetzer"/>
@@ -838,11 +841,11 @@
 		<lookup key="activityNewSender" value="neuer Absender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} ungespielte(r) Zug/Züge im Postfach gefunden und dem Aktivitätsprotokoll hinzugefügt."/>
 		<lookup key="menuItemWhereIs" value="Wer hat den Zug? (schreibt allen Spielern)"/>
-		<lookup key="activityHeldBy" value="bei {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Wer hat den Zug?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} Spieler gefragt, wer &apos;{1}&apos; hat. Die Antworten kommen mit den nächsten E-Mail-Abfragen."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Für &apos;{0}&apos; sind keine anderen Spieler bekannt."/>
 		<lookup key="activityProbablyWith" value="vermutlich bei {0}"/>
+		<lookup key="activityPlayerYou" value="Sie"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} hat &apos;{1}&apos; vermutlich: {2} hat es am {3} an ihn geschickt, und er hat nicht geantwortet."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} hat &apos;{1}&apos; vermutlich: Sie haben es am {2} an ihn geschickt, und er hat nicht geantwortet."/>
 		<lookup key="menuItemTurnServer" value="Wer hat den Zug? (Zugserver)"/>
@@ -923,7 +926,8 @@
 		<lookup key="activityListViewlistView2" value="Turno"/>
 		<lookup key="activityListViewlistView3" value="Edad"/>
 		<lookup key="activityListViewlistView4" value="Estado"/>
-		<lookup key="activityListViewlistView5" value="Copia"/>
+		<lookup key="activityListViewlistView5" value="Jugador"/>
+		<lookup key="activityListViewlistView6" value="Copia"/>
 		<lookup key="tabAbout" value="Acerca de"/>
 		<lookup key="groupBetaTesters" value="Beta Testers"/>
 		<lookup key="groupTranslators" value="Traductores"/>
@@ -1125,16 +1129,16 @@
 		<!-- END: Misc -->
 		<!-- Added in 2.1: keys this language was missing -->
 		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
-		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="activityListViewlistView7" value="Ticks"/>
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; viene de {1}, que nunca le ha enviado un turno. Abra solo turnos de personas con las que juega."/>
 		<lookup key="activityNewSender" value="remitente nuevo"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Se encontraron {0} turno(s) sin jugar en su buzón y se añadieron al registro de actividad."/>
 		<lookup key="menuItemWhereIs" value="¿Quién tiene el turno? (escribe a todos los jugadores)"/>
-		<lookup key="activityHeldBy" value="lo tiene {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="¿Quién tiene el turno?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Se preguntó a {0} jugador(es) quién tiene &apos;{1}&apos;. Las respuestas llegan con las próximas comprobaciones del correo."/>
 		<lookup key="msgWrapperWhereIsNobody" value="No se conocen otros jugadores de &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="probablemente lo tiene {0}"/>
+		<lookup key="activityPlayerYou" value="tú"/>
 		<lookup key="msgWrapperProbablyWith" value="Probablemente {0} tiene &apos;{1}&apos;: {2} se lo envió el {3} y no ha respondido."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="Probablemente {0} tiene &apos;{1}&apos;: se lo enviaste el {2} y no ha respondido."/>
 		<lookup key="menuItemTurnServer" value="¿Quién tiene el turno? (servidor de turnos)"/>
@@ -1215,7 +1219,8 @@
 		<lookup key="activityListViewlistView2" value="Beurt"/>
 		<lookup key="activityListViewlistView3" value="Leeftijd"/>
 		<lookup key="activityListViewlistView4" value="Staat"/>
-		<lookup key="activityListViewlistView5" value="Kopie"/>
+		<lookup key="activityListViewlistView5" value="Speler"/>
+		<lookup key="activityListViewlistView6" value="Kopie"/>
 		<lookup key="tabAbout" value="Programma Informatie"/>
 		<lookup key="groupBetaTesters" value="Beta testers "/>
 		<lookup key="groupTranslators" value="Vertalers"/>
@@ -1421,16 +1426,16 @@
 		<!-- END: Misc -->
 		<!-- Added in 2.1: keys this language was missing -->
 		<lookup key="Main" value="Age of Wonders Email Wrapper"/>
-		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="activityListViewlistView7" value="Ticks"/>
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; komt van {1}, die u nog nooit een beurt heeft gestuurd. Open alleen beurten van mensen met wie u speelt."/>
 		<lookup key="activityNewSender" value="nieuwe afzender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} ongespeelde beurt(en) gevonden in uw postvak en toegevoegd aan het activiteitenlogboek."/>
 		<lookup key="menuItemWhereIs" value="Wie heeft de beurt? (mailt alle spelers)"/>
-		<lookup key="activityHeldBy" value="bij {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Wie heeft de beurt?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} speler(s) gevraagd wie &apos;{1}&apos; heeft. De antwoorden komen met de volgende e-mailcontroles."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Er zijn geen andere spelers bekend voor &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="waarschijnlijk bij {0}"/>
+		<lookup key="activityPlayerYou" value="u"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} heeft &apos;{1}&apos; waarschijnlijk: {2} stuurde het op {3} en er is geen antwoord gekomen."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} heeft &apos;{1}&apos; waarschijnlijk: u stuurde het op {2} en er is geen antwoord gekomen."/>
 		<lookup key="menuItemTurnServer" value="Wie heeft de beurt? (beurtenserver)"/>
@@ -1501,8 +1506,9 @@
 		<lookup key="activityListViewlistView2" value="Tur"/>
 		<lookup key="activityListViewlistView3" value="Alder"/>
 		<lookup key="activityListViewlistView4" value="Status"/>
-		<lookup key="activityListViewlistView5" value="Kopi"/>
-		<lookup key="activityListViewlistView6" value="Tidsenheder"/>
+		<lookup key="activityListViewlistView5" value="Spiller"/>
+		<lookup key="activityListViewlistView6" value="Kopi"/>
+		<lookup key="activityListViewlistView7" value="Tidsenheder"/>
 		<lookup key="tabAbout" value="Om"/>
 		<lookup key="groupBetaTesters" value="Betatestere"/>
 		<lookup key="groupTranslators" value="Oversættere"/>
@@ -1712,11 +1718,11 @@
 		<lookup key="activityNewSender" value="ny afsender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Fandt {0} uspillede ture i din postkasse og føjede dem til aktivitetsloggen."/>
 		<lookup key="menuItemWhereIs" value="Hvem har turen? (mailer alle spillere)"/>
-		<lookup key="activityHeldBy" value="hos {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Hvem har turen?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Spurgte {0} spiller(e), hvem der har &apos;{1}&apos;. Svarene kommer med de næste posttjek."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Der kendes ingen andre spillere til &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="sandsynligvis hos {0}"/>
+		<lookup key="activityPlayerYou" value="dig"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} har sandsynligvis &apos;{1}&apos;: {2} sendte den til dem den {3}, og de har ikke svaret."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} har sandsynligvis &apos;{1}&apos;: du sendte den til dem den {2}, og de har ikke svaret."/>
 		<lookup key="menuItemTurnServer" value="Hvem har turen? (turserver)"/>
@@ -1799,8 +1805,9 @@
 		<lookup key="activityListViewlistView2" value="Tur"/>
 		<lookup key="activityListViewlistView3" value="Ålder"/>
 		<lookup key="activityListViewlistView4" value="Status"/>
-		<lookup key="activityListViewlistView5" value="Kopia"/>
-		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="activityListViewlistView5" value="Spelare"/>
+		<lookup key="activityListViewlistView6" value="Kopia"/>
+		<lookup key="activityListViewlistView7" value="Ticks"/>
 		<lookup key="tabAbout" value="Om"/>
 		<lookup key="groupBetaTesters" value="Beta Testare"/>
 		<lookup key="groupTranslators" value="Översättare"/>
@@ -2012,11 +2019,11 @@
 		<lookup key="activityNewSender" value="ny avsändare"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Hittade {0} ospelade drag i din brevlåda och lade till dem i aktivitetsloggen."/>
 		<lookup key="menuItemWhereIs" value="Vem har draget? (mejlar alla spelare)"/>
-		<lookup key="activityHeldBy" value="hos {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Vem har draget?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Frågade {0} spelare vem som har &apos;{1}&apos;. Svaren kommer med nästa e-postkontroll."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Inga andra spelare är kända för &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="troligen hos {0}"/>
+		<lookup key="activityPlayerYou" value="du"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} har troligen &apos;{1}&apos;: {2} skickade det till dem den {3}, och de har inte svarat."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} har troligen &apos;{1}&apos;: du skickade det till dem den {2}, och de har inte svarat."/>
 		<lookup key="menuItemTurnServer" value="Vem har draget? (dragserver)"/>
@@ -2091,8 +2098,9 @@
 		<lookup key="activityListViewlistView2" value="Tura"/>
 		<lookup key="activityListViewlistView3" value="Dni"/>
 		<lookup key="activityListViewlistView4" value="Stan"/>
-		<lookup key="activityListViewlistView5" value="Kopia"/>
-		<lookup key="activityListViewlistView6" value="Czas"/>
+		<lookup key="activityListViewlistView5" value="Gracz"/>
+		<lookup key="activityListViewlistView6" value="Kopia"/>
+		<lookup key="activityListViewlistView7" value="Czas"/>
 		<lookup key="tabAbout" value="O Programie"/>
 		<lookup key="groupBetaTesters" value="Betatesterzy"/>
 		<lookup key="groupTranslators" value="Tłumacze"/>
@@ -2298,11 +2306,11 @@
 		<lookup key="activityNewSender" value="nowy nadawca"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Znaleziono {0} nierozegranych tur w skrzynce i dodano je do dziennika aktywności."/>
 		<lookup key="menuItemWhereIs" value="Kto ma turę? (pisze do wszystkich graczy)"/>
-		<lookup key="activityHeldBy" value="ma {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Kto ma turę?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Zapytano {0} graczy, kto ma &apos;{1}&apos;. Odpowiedzi przyjdą przy kolejnych sprawdzeniach poczty."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Nie są znani inni gracze dla &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="prawdopodobnie u {0}"/>
+		<lookup key="activityPlayerYou" value="ty"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} prawdopodobnie ma &apos;{1}&apos;: {2} wysłał mu je {3} i nie odpowiedział."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} prawdopodobnie ma &apos;{1}&apos;: wysłałeś mu je {2} i nie odpowiedział."/>
 		<lookup key="menuItemTurnServer" value="Kto ma turę? (serwer tur)"/>
@@ -2383,8 +2391,9 @@
 		<lookup key="activityListViewlistView2" value="Vuoro"/>
 		<lookup key="activityListViewlistView3" value="Ikä"/>
 		<lookup key="activityListViewlistView4" value="Tila"/>
-		<lookup key="activityListViewlistView5" value="Kopio"/>
-		<lookup key="activityListViewlistView6" value="Ticks"/>
+		<lookup key="activityListViewlistView5" value="Pelaaja"/>
+		<lookup key="activityListViewlistView6" value="Kopio"/>
+		<lookup key="activityListViewlistView7" value="Ticks"/>
 		<lookup key="tabAbout" value="Tietoa Wrapperista"/>
 		<lookup key="groupBetaTesters" value="Beta-testaajat"/>
 		<lookup key="groupTranslators" value="Kääntäjät"/>
@@ -2592,11 +2601,11 @@
 		<lookup key="activityNewSender" value="uusi lähettäjä"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Postilaatikosta löytyi {0} pelaamatonta vuoroa, ja ne lisättiin toimintalokiin."/>
 		<lookup key="menuItemWhereIs" value="Kenellä vuoro on? (lähettää sähköpostia kaikille pelaajille)"/>
-		<lookup key="activityHeldBy" value="pelaajalla {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Kenellä vuoro on?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Kysyttiin {0} pelaajalta, kenellä &apos;{1}&apos; on. Vastaukset saapuvat seuraavien postitarkistusten mukana."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Pelille &apos;{0}&apos; ei tunneta muita pelaajia."/>
 		<lookup key="activityProbablyWith" value="luultavasti pelaajalla {0}"/>
+		<lookup key="activityPlayerYou" value="sinä"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} luultavasti pitää vuoroa &apos;{1}&apos;: {2} lähetti sen hänelle {3}, eikä hän ole vastannut."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} luultavasti pitää vuoroa &apos;{1}&apos;: lähetit sen hänelle {2}, eikä hän ole vastannut."/>
 		<lookup key="menuItemTurnServer" value="Kenellä vuoro on? (vuoropalvelin)"/>
@@ -2675,8 +2684,9 @@
 		<lookup key="activityListViewlistView2" value="Tură"/>
 		<lookup key="activityListViewlistView3" value="Vârstă"/>
 		<lookup key="activityListViewlistView4" value="Status"/>
-		<lookup key="activityListViewlistView5" value="Copie"/>
-		<lookup key="activityListViewlistView6" value="Bătăi"/>
+		<lookup key="activityListViewlistView5" value="Jucător"/>
+		<lookup key="activityListViewlistView6" value="Copie"/>
+		<lookup key="activityListViewlistView7" value="Bătăi"/>
 		<lookup key="tabAbout" value="Despre"/>
 		<lookup key="groupBetaTesters" value="Beta Testeri"/>
 		<lookup key="groupTranslators" value="Traducători"/>
@@ -2881,11 +2891,11 @@
 		<lookup key="activityNewSender" value="expeditor nou"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Am găsit {0} ture nejucate în căsuța poștală și le-am adăugat în jurnalul de activitate."/>
 		<lookup key="menuItemWhereIs" value="Cine are tura? (scrie tuturor jucătorilor)"/>
-		<lookup key="activityHeldBy" value="la {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Cine are tura?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Am întrebat {0} jucător(i) cine are &apos;{1}&apos;. Răspunsurile sosesc la următoarele verificări ale poștei."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Nu se cunosc alți jucători pentru &apos;{0}&apos;."/>
 		<lookup key="activityProbablyWith" value="probabil la {0}"/>
+		<lookup key="activityPlayerYou" value="dumneavoastră"/>
 		<lookup key="msgWrapperProbablyWith" value="Probabil {0} are &apos;{1}&apos;: {2} i l-a trimis pe {3}, iar acesta nu a răspuns."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="Probabil {0} are &apos;{1}&apos;: i l-ați trimis pe {2}, iar acesta nu a răspuns."/>
 		<lookup key="menuItemTurnServer" value="Cine are tura? (server de ture)"/>
@@ -2967,8 +2977,9 @@
 		<lookup key="activityListViewlistView2" value="Ход"/>
 		<lookup key="activityListViewlistView3" value="Дней"/>
 		<lookup key="activityListViewlistView4" value="Статус"/>
-		<lookup key="activityListViewlistView5" value="Копия"/>
-		<lookup key="activityListViewlistView6" value="Время"/>
+		<lookup key="activityListViewlistView5" value="Игрок"/>
+		<lookup key="activityListViewlistView6" value="Копия"/>
+		<lookup key="activityListViewlistView7" value="Время"/>
 		<lookup key="tabAbout" value="О программе"/>
 		<lookup key="groupBetaTesters" value="Бета-тестеры"/>
 		<lookup key="groupTranslators" value="Переводчики"/>
@@ -3174,11 +3185,11 @@
 		<lookup key="activityNewSender" value="новый отправитель"/>
 		<lookup key="msgWrapperTurnsRecovered" value="В почтовом ящике найдено несыгранных ходов: {0}. Они добавлены в журнал активности."/>
 		<lookup key="menuItemWhereIs" value="У кого ход? (письмо всем игрокам)"/>
-		<lookup key="activityHeldBy" value="у {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="У кого ход?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Спросили игроков ({0}), у кого &apos;{1}&apos;. Ответы придут при следующих проверках почты."/>
 		<lookup key="msgWrapperWhereIsNobody" value="Другие игроки для &apos;{0}&apos; неизвестны."/>
 		<lookup key="activityProbablyWith" value="вероятно, у {0}"/>
+		<lookup key="activityPlayerYou" value="вы"/>
 		<lookup key="msgWrapperProbablyWith" value="Вероятно, &apos;{1}&apos; у {0}: {2} отправил ход {3}, а ответа нет."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="Вероятно, &apos;{1}&apos; у {0}: вы отправили ход {2}, а ответа нет."/>
 		<lookup key="menuItemTurnServer" value="У кого ход? (сервер ходов)"/>

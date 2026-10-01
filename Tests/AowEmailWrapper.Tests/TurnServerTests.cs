@@ -357,6 +357,27 @@ namespace AowEmailWrapper.Tests
             Assert.Equal(Bob, Assert.Single(activity.Answers).Responder);
         }
 
+        [Fact]
+        public void The_player_column_says_who_has_the_turn()
+        {
+            Activity waiting = new Activity(ActivityState.Received, AowGameType.Aow1, Game, "Highpass", "4");
+            Assert.False(string.IsNullOrEmpty(Controls.ActivityListView.PlayerLabel(waiting)));
+
+            //Before anyone else's Wrapper is heard from, whoever it was sent to
+            Activity sent = SentToBob();
+            Assert.Contains(Bob, Controls.ActivityListView.PlayerLabel(sent));
+            Assert.NotEqual(Bob, Controls.ActivityListView.PlayerLabel(sent));
+
+            TurnQuery.ApplyServerRecords(sent, new[] { Record(Bob, ActivityState.Sent, 2, Carol), Record(Carol, ActivityState.Received, 2) }, new[] { Me });
+            Assert.Equal(Carol, Controls.ActivityListView.PlayerLabel(sent));
+
+            TurnQuery.ApplyServerRecords(sent, new[] { Record(Bob, ActivityState.Sent, 2, Carol), Record(Carol, ActivityState.Sent, 3, Dave) }, new[] { Me });
+            Assert.Contains(Dave, Controls.ActivityListView.PlayerLabel(sent));
+
+            sent.Status = ActivityState.Ended;
+            Assert.Equal(string.Empty, Controls.ActivityListView.PlayerLabel(sent));
+        }
+
         #endregion
     }
 }

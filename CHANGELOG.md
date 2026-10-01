@@ -11,6 +11,9 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
   Tailscale Funnel; the server's address travels with the turns, so the other players' Wrappers use it too.
 - The email version is now called *Who has the turn? (emails every player)*, since every player gets the
   question in their inbox.
+- New *Player* column on the Activity Log: who has the turn. For games with a turn server it keeps itself
+  up to date. The Status column no longer repeats the holder. Column widths dragged on the Activity Log
+  go back to automatic once, since the list has a column more.
 - AoWx copies and their turns show AoWx's own grey dragon on the tray menu and in the Activity Log, as
   Ziggurat's do with its purple one.
 

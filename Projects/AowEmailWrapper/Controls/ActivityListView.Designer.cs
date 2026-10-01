@@ -34,6 +34,7 @@
             this.colTurn = new System.Windows.Forms.ColumnHeader();
             this.colAge = new System.Windows.Forms.ColumnHeader();
             this.colStatus = new System.Windows.Forms.ColumnHeader();
+            this.colPlayer = new System.Windows.Forms.ColumnHeader();
             this.colTicks = new System.Windows.Forms.ColumnHeader();
             this.colInstall = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
@@ -46,6 +47,7 @@
             this.colTurn,
             this.colAge,
             this.colStatus,
+            this.colPlayer,
             this.colInstall,
             this.colTicks});
             this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -86,6 +88,11 @@
             // 
             this.colStatus.Tag = "ContentHeaderMax";
             this.colStatus.Text = "Status";
+            //
+            // colPlayer
+            //
+            this.colPlayer.Tag = "ContentHeaderMax";
+            this.colPlayer.Text = "Player";
             // 
             // colInstall
             // 
@@ -117,6 +124,7 @@
         private System.Windows.Forms.ColumnHeader colTurn;
         private System.Windows.Forms.ColumnHeader colAge;
         private System.Windows.Forms.ColumnHeader colStatus;
+        private System.Windows.Forms.ColumnHeader colPlayer;
         private System.Windows.Forms.ColumnHeader colTicks;
         private System.Windows.Forms.ColumnHeader colInstall;
     }

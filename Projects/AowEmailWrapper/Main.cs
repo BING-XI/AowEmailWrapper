@@ -1959,9 +1959,13 @@ namespace AowEmailWrapper
                 _turnServerClient = new TurnServerClient(Path.Combine(AppDataHelper.TurnServer.FullName, TurnServerOutboxFile));
                 _turnServerTimer = new System.Windows.Forms.Timer();
                 _turnServerTimer.Interval = TurnServerRetryMilliseconds;
-                _turnServerTimer.Tick += (sender, e) => _ = _turnServerClient.FlushAsync();
+                _turnServerTimer.Tick += async (sender, e) =>
+                {
+                    await _turnServerClient.FlushAsync();
+                    RefreshFromTurnServers();
+                };
                 _turnServerTimer.Start();
-                _ = _turnServerClient.FlushAsync();
+                _ = _turnServerClient.FlushAsync().ContinueWith(task => PostToWindow(RefreshFromTurnServers));
 
                 ApplyTurnServerHosting(false);
             }
@@ -2059,6 +2063,59 @@ namespace AowEmailWrapper
                 activityListView.Refresh();
 
                 ShowBalloon(15000, WhereIsTitle(), TurnServerAnswer(activity, newest), activity.Holder != null ? ToolTipIcon.Warning : ToolTipIcon.Info);
+            }
+        }
+
+        private bool _refreshingFromTurnServers;
+
+        /// <summary>
+        /// Keeps the Player column current: reads every sent game's records from its turn server, quietly.
+        /// Runs at start-up and every few minutes; reading a turn server bothers nobody.
+        /// </summary>
+        private async void RefreshFromTurnServers()
+        {
+            if (_turnServerClient == null || _activityLog == null || _refreshingFromTurnServers)
+            {
+                return;
+            }
+
+            _refreshingFromTurnServers = true;
+            try
+            {
+                bool changed = false;
+                foreach (Activity activity in _activityLog.Activities.Where(a => a.Status == ActivityState.Sent).ToList())
+                {
+                    string server = TurnServerFor(activity);
+                    if (server == null)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        List<TurnRecord> records = await _turnServerClient.GetAsync(server, activity.FileName);
+                        //The turn may have come back while the server was asked
+                        if (activity.Status == ActivityState.Sent && _activityLog.Activities.Contains(activity))
+                        {
+                            TurnQuery.ApplyServerRecords(activity, records, OwnAddresses());
+                            changed = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceInformation("Turn server {0} not read for '{1}': {2}", server, activity.FileName, ex.Message);
+                    }
+                }
+
+                if (changed)
+                {
+                    DataManagerHelper.SaveActivityLog(_activityLog);
+                    activityListView.Refresh();
+                }
+            }
+            finally
+            {
+                _refreshingFromTurnServers = false;
             }
         }
 
