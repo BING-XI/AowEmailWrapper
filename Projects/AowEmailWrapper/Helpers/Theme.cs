@@ -33,6 +33,10 @@ namespace AowEmailWrapper.Helpers
         public static readonly Color GoldLight = Color.FromArgb(236, 206, 128);
         public static readonly Color GoldDark = Color.FromArgb(150, 116, 46);
         public static readonly Color Crimson = Color.FromArgb(128, 34, 26);
+        /// <summary>Text on leather: white reads more crisply on the dark brown than gold does.</summary>
+        public static readonly Color TextOnLeather = Color.White;
+        /// <summary>Text of a disabled button or menu item on leather: plainly dimmer than white, still legible.</summary>
+        public static readonly Color TextOnLeatherDisabled = Color.FromArgb(150, 138, 124);
 
         private const string HeadingFontFamily = "Palatino Linotype";
         private const int DwmUseImmersiveDarkMode = 20;
@@ -270,7 +274,7 @@ namespace AowEmailWrapper.Helpers
             {
                 bool isBanner = original.BackColor == SystemColors.Highlight;
                 label.BackColor = isBanner ? Leather : Color.Transparent;
-                label.ForeColor = isBanner ? GoldLight : (original.ForeColor == SystemColors.GrayText ? InkFaded : Ink);
+                label.ForeColor = isBanner ? TextOnLeather : (original.ForeColor == SystemColors.GrayText ? InkFaded : Ink);
                 if (!label.AutoSize && label.Dock == DockStyle.Top && label.Text.Length > 60 && label.Width > 0)
                 {
                     // Paragraph labels were sized for the system font; give them the height the serif needs.
@@ -370,7 +374,7 @@ namespace AowEmailWrapper.Helpers
             button.FlatStyle = FlatStyle.Flat;
             button.UseVisualStyleBackColor = false;
             button.BackColor = Leather;
-            button.ForeColor = GoldLight;
+            button.ForeColor = TextOnLeather;
             button.FlatAppearance.BorderColor = Gold;
             button.FlatAppearance.BorderSize = 1;
             button.FlatAppearance.MouseOverBackColor = LeatherLight;
@@ -448,7 +452,7 @@ namespace AowEmailWrapper.Helpers
                 {
                     // Windows 11 lets the caption take the leather colour; Windows 10 has no such attributes.
                     int caption = dark ? ToColorRef(Leather) : unchecked((int)0xFFFFFFFF);
-                    int text = dark ? ToColorRef(GoldLight) : unchecked((int)0xFFFFFFFF);
+                    int text = dark ? ToColorRef(TextOnLeather) : unchecked((int)0xFFFFFFFF);
                     DwmSetWindowAttribute(handle, DwmCaptionColor, ref caption, sizeof(int));
                     DwmSetWindowAttribute(handle, DwmTextColor, ref text, sizeof(int));
                 }
@@ -639,7 +643,7 @@ namespace AowEmailWrapper.Helpers
                     ControlPaint.DrawImageDisabled(e.Graphics, _button.Image,
                         bounds.X + (bounds.Width - _button.Image.Width) / 2, bounds.Y + (bounds.Height - _button.Image.Height) / 2, LeatherDark);
                 }
-                TextRenderer.DrawText(e.Graphics, _button.Text, _button.Font, bounds, GoldDark,
+                TextRenderer.DrawText(e.Graphics, _button.Text, _button.Font, bounds, TextOnLeatherDisabled,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix);
             }
         }
@@ -754,7 +758,7 @@ namespace AowEmailWrapper.Helpers
                 TextFormatFlags flags = TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix;
                 if (e.Header.TextAlign == HorizontalAlignment.Right) flags |= TextFormatFlags.Right;
                 else if (e.Header.TextAlign == HorizontalAlignment.Center) flags |= TextFormatFlags.HorizontalCenter;
-                TextRenderer.DrawText(e.Graphics, e.Header.Text, HeadingFont, textBounds, GoldLight, flags);
+                TextRenderer.DrawText(e.Graphics, e.Header.Text, HeadingFont, textBounds, TextOnLeather, flags);
             }
 
             private static void DrawDefault(object sender, DrawListViewItemEventArgs e)
@@ -832,8 +836,18 @@ namespace AowEmailWrapper.Helpers
 
             protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
             {
-                e.TextColor = e.Item.Enabled ? (e.Item.Selected ? Ink : GoldLight) : GoldDark;
+                e.TextColor = e.Item.Enabled ? (e.Item.Selected ? Ink : TextOnLeather) : TextOnLeatherDisabled;
                 base.OnRenderItemText(e);
+            }
+
+            /// <summary>The arrow to a submenu in the colour of the text beside it; the default black hardly shows on leather.</summary>
+            protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
+            {
+                if (e.Item != null)
+                {
+                    e.ArrowColor = e.Item.Enabled ? (e.Item.Selected ? Ink : TextOnLeather) : TextOnLeatherDisabled;
+                }
+                base.OnRenderArrow(e);
             }
 
             protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)

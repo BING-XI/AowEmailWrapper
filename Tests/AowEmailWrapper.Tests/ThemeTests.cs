@@ -63,7 +63,7 @@ namespace AowEmailWrapper.Tests
                 Assert.True(Theme.Enabled);
                 Assert.True(tabs.Themed);
                 Assert.Equal(FlatStyle.Flat, button.FlatStyle);
-                Assert.Equal(Theme.GoldLight, button.ForeColor);
+                Assert.Equal(Theme.TextOnLeather, button.ForeColor);
                 Assert.Equal(Theme.Leather, button.BackColor);
                 Assert.Equal(Theme.Ink, text.ForeColor);
                 Assert.Equal("Palatino Linotype", label.Font.Name);
@@ -128,7 +128,7 @@ namespace AowEmailWrapper.Tests
 
                 Theme.Select(Theme.AgeOfWondersName, form);
                 Theme.Select(Theme.AgeOfWondersName, form);
-                Assert.Equal(Theme.GoldLight, button.ForeColor);
+                Assert.Equal(Theme.TextOnLeather, button.ForeColor);
                 Assert.Equal(Color.Transparent, label.BackColor);
                 Theme.Select(Theme.ClassicName, form);
             }

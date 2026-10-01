@@ -145,7 +145,7 @@ namespace AowEmailWrapper.Controls
                 g.DrawLine(border, tab.Right - 1, tab.Top, tab.Right - 1, tab.Bottom - 1);
             }
 
-            DrawTabContent(g, index, tab, selected ? Theme.Ink : Theme.GoldLight, Theme.HeadingFont);
+            DrawTabContent(g, index, tab, selected ? Theme.Ink : Theme.TextOnLeather, Theme.HeadingFont);
         }
 
         private void DrawTabContent(Graphics g, int index, Rectangle tab, Color textColor, Font font)
