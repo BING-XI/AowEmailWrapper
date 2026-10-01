@@ -38,6 +38,7 @@
   <li><a href="#wizard">Adding an account</a></li>
   <li><a href="#providers">Email providers</a></li>
   <li><a href="#activity">Activity Log tab</a></li>
+  <li><a href="#aliases">Aliases tab</a></li>
   <li><a href="#games">Games tab</a></li>
   <li><a href="#preferences">Settings tab</a></li>
   <li><a href="#playing">Playing a game</a></li>
@@ -176,6 +177,15 @@
   <li><strong>Move to</strong> appears when you have several copies of that game and moves the game's files into the copy you pick, for a turn that landed in the wrong one. Later turns of that game follow it.</li>
   <li><strong>Who has the turn?</strong> on a turn you sent emails every other player of the game a small question. A player who runs version 2 of the Wrapper answers automatically, and only if they have exchanged turns with you and have that game; the answer never reaches their inbox. Each answer is shown in the line's tooltip, and the Status column says <em>held by</em> the player who has the turn. When nobody claims it, the Wrapper follows the chain of answers: the newest send anyone reports, yours included, went to someone, and if that player has not answered the column says <em>probably with</em> them. That is a guess, and it is usually right, because a player without the Wrapper, or whose PC is off, never answers. A player without the Wrapper sees the question as an ordinary email and can ignore it.</li>
 </ul>
+
+<h2 id="aliases">Aliases tab</h2>
+<p>Your own list of the people you play with: each email address with the name you know its owner by, such as their name on Discord or the forums. Wherever the Wrapper would show one of these addresses, it shows the name instead: in the Status column of the <a href="#activity">Activity Log</a>, in the tooltip of a line (as <em>Bob (bob@example.com)</em>), and in its messages, such as the one saying a turn was sent. The list is kept in the Wrapper's settings folder on this PC and is never sent to anyone.</p>
+<ul>
+  <li><strong>Add...</strong> asks for a name and one email address. While you type the address, the ones turns have come from or gone to are offered. Someone who plays from two addresses gets two lines with the same name.</li>
+  <li><strong>Edit...</strong>, or a double-click, changes the selected line's name or address.</li>
+  <li><strong>Remove</strong>, or the Delete key, removes the selected lines.</li>
+</ul>
+<p>An address can be on the list only once. Changes take effect, and are saved, at once; <em>Save Settings</em> is not needed. A turn from an address on the list is never marked as coming from a <em>new sender</em>, since you have said who it is.</p>
 
 <h2 id="games">Games tab</h2>
 <p>Every copy of Age of Wonders, Age of Wonders II, Shadow Magic and MP Evolution the Wrapper could find is listed here, with the folder it lives in and how it was found: the games' own registry entries, Steam (every library, including copies placed beside or inside the Steam copy), GOG, <em>Apps and Features</em>, or a scan of your fixed drives a few folders deep, which follows anything named like the game much deeper. The full drive scan runs in the background the first time the Wrapper starts and whenever you click <em>Rescan</em>; it can take a minute on large drives, and the list fills in when it is done. A normal start only re-checks the copies it already knows. Every change on this tab takes effect at once and is kept; <em>Save Settings</em> is not needed for it.</p>

@@ -5,6 +5,9 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
 
 ## Unreleased
 
+- New *Aliases* tab: your own list of the people you play with, each email address with the name you know
+  them by. The Activity Log and the Wrapper's messages show the name instead of the address. A turn from an
+  address on the list is not marked as coming from a new sender.
 - AoWx copies and their turns show AoWx's own grey dragon on the tray menu and in the Activity Log, as
   Ziggurat's do with its purple one.
 

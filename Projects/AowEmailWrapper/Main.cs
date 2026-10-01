@@ -537,6 +537,8 @@ namespace AowEmailWrapper
         /// <summary>Every notification goes through here, so a click can be matched to the one it was on.</summary>
         private void ShowBalloon(int timeout, string title, string text, ToolTipIcon icon)
         {
+            //Players named on the Aliases tab appear by name in every message
+            text = AliasHelper.InText(text);
             _lastBalloonText = text;
             notifyIcon.ShowBalloonTip(timeout, title, text, icon);
         }
@@ -2423,14 +2425,19 @@ namespace AowEmailWrapper
         }
 
         /// <summary>
-        /// A sender is known when a turn has come from or gone to that address before, or when it is
-        /// one of the player's own accounts.
+        /// A sender is known when a turn has come from or gone to that address before, when the player
+        /// has named it on the Aliases tab, or when it is one of the player's own accounts.
         /// </summary>
         private bool IsKnownSender(string sender)
         {
             if (string.IsNullOrWhiteSpace(sender))
             {
                 return false;
+            }
+
+            if (AliasHelper.Current.Find(sender) != null)
+            {
+                return true;
             }
 
             if (_activityLog != null && _activityLog.IsKnownAddress(sender))
@@ -2701,6 +2708,12 @@ namespace AowEmailWrapper
                 activityListView.SmallImageList = imageListIcons;
                 _activityLog = DataManagerHelper.LoadActivityLog();
 
+                //Before the list is shown, so it shows the names
+                AliasHelper.Current = DataManagerHelper.LoadAliases();
+                aliasesConfig.Aliases = AliasHelper.Current;
+                aliasesConfig.KnownAddresses = KnownPlayerAddresses;
+                aliasesConfig.AliasesChanged += new EventHandler(AliasesChanged);
+
                 if (!_activityLog.HistoryImported)
                 {
                     //Turns waiting to be resent name the people the player is playing with
@@ -2718,6 +2731,42 @@ namespace AowEmailWrapper
                 Trace.Flush();
                 ShowException(ex);
             }
+        }
+
+        /// <summary>The Aliases tab changed the list: it is saved and the names show at once.</summary>
+        private void AliasesChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                AliasHelper.Current = aliasesConfig.Aliases;
+                DataManagerHelper.SaveAliases(AliasHelper.Current);
+                activityListView.Refresh();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.ToString());
+                Trace.Flush();
+                ShowException(ex);
+            }
+        }
+
+        /// <summary>Every other player's address the activity log knows, offered while an alias is typed in.</summary>
+        private IEnumerable<string> KnownPlayerAddresses()
+        {
+            if (_activityLog == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            List<string> own = OwnAddresses();
+            return _activityLog.Contacts
+                .Concat(_activityLog.Activities.SelectMany(activity => new[] { activity.Sender, activity.Recipients, activity.Players }))
+                .SelectMany(list => (list ?? string.Empty).Split(ActivityList.AddressSeparator))
+                .Select(address => address.Trim())
+                .Where(address => address.Contains("@") && !own.Any(mine => string.Equals(mine, address, StringComparison.OrdinalIgnoreCase)))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(address => address, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         private void ActivityListViewDoubleClicked(object sender, List<Activity> list)

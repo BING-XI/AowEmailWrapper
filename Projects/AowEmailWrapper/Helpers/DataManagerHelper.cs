@@ -9,6 +9,7 @@ namespace AowEmailWrapper.Helpers
     {        
         private const string CONFIG_FILE_NAME = "config.xml";
         private const string ACTIVITY_FILE_NAME = "activity.xml";
+        private const string ALIASES_FILE_NAME = "aliases.xml";
         private const string LOCALIZATION_FILE_NAME = "Localization.xml";
         private const string MessageStoreFileTemplate = "{0}@{1}.xml";
         private const string TurnLogFilenameTemplate = "{0}.log";
@@ -123,6 +124,21 @@ namespace AowEmailWrapper.Helpers
         {
             string activityFilePath = Path.Combine(AppDataHelper.ActivityLog.FullName, ACTIVITY_FILE_NAME);
             FileHelper.SaveXmlFile(activityFilePath, toSave);
+        }
+
+        #endregion
+
+        #region Aliases
+
+        public static AliasList LoadAliases()
+        {
+            AliasList returnVal = FileHelper.LoadXmlFile<AliasList>(Path.Combine(AppDataHelper.Config.FullName, ALIASES_FILE_NAME));
+            return returnVal ?? new AliasList();
+        }
+
+        public static void SaveAliases(AliasList toSave)
+        {
+            FileHelper.SaveXmlFile(Path.Combine(AppDataHelper.Config.FullName, ALIASES_FILE_NAME), toSave);
         }
 
         #endregion

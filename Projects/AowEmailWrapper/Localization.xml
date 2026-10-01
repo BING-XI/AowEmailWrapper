@@ -204,6 +204,20 @@
 		<lookup key="buttonRescan" value="Rescan"/>
 		<lookup key="buttonRescanning" value="Scanning..."/>
 		<lookup key="lblGamesHelp" value="Give each copy of a game a short label such as Vanilla, AoWx or Ziggurat. The label travels with the turns you send, so everyone in a game must use the same label. The default copy receives turns that carry no label."/>
+		<lookup key="tabAliases" value="Aliases"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Name"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Email address"/>
+		<lookup key="buttonAddAlias" value="Add..."/>
+		<lookup key="buttonEditAlias" value="Edit..."/>
+		<lookup key="buttonRemoveAlias" value="Remove"/>
+		<lookup key="lblAliasesHelp" value="Give the players you play with the names you know them by. The Activity Log and the Wrapper&apos;s messages show the name instead of the email address, and a turn from an address on this list is not marked as coming from a new sender. The list stays on this PC."/>
+		<lookup key="titleAddAlias" value="Add alias"/>
+		<lookup key="titleEditAlias" value="Edit alias"/>
+		<lookup key="lblAliasName" value="Name:"/>
+		<lookup key="lblAliasAddress" value="Email address:"/>
+		<lookup key="msgAliasNoName" value="Enter the name you know the player by."/>
+		<lookup key="msgAliasBadAddress" value="Enter one email address, such as player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} is already listed as {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Label for this copy, for example Vanilla, AoWx or Ziggurat. Leave it empty for no label:"/>
 		<lookup key="radioNoLabel" value="No label"/>
 		<lookup key="radioOtherLabel" value="Other:"/>
@@ -465,6 +479,20 @@
 		<lookup key="buttonRescan" value="Rechercher à nouveau"/>
 		<lookup key="buttonRescanning" value="Recherche..."/>
 		<lookup key="lblGamesHelp" value="Donnez à chaque copie d'un jeu une courte étiquette, par exemple Vanilla, AoWx ou Ziggurat. L'étiquette accompagne les tours que vous envoyez : tous les joueurs d'une partie doivent utiliser la même. La copie par défaut reçoit les tours sans étiquette."/>
+		<lookup key="tabAliases" value="Alias"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Nom"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Adresse e-mail"/>
+		<lookup key="buttonAddAlias" value="Ajouter..."/>
+		<lookup key="buttonEditAlias" value="Modifier..."/>
+		<lookup key="buttonRemoveAlias" value="Retirer"/>
+		<lookup key="lblAliasesHelp" value="Donnez aux joueurs avec qui vous jouez les noms sous lesquels vous les connaissez. L&apos;Historique et les messages du Wrapper affichent le nom au lieu de l&apos;adresse e-mail, et un tour venant d&apos;une adresse de cette liste n&apos;est pas marqué comme venant d&apos;un nouvel expéditeur. La liste reste sur ce PC."/>
+		<lookup key="titleAddAlias" value="Ajouter un alias"/>
+		<lookup key="titleEditAlias" value="Modifier l&apos;alias"/>
+		<lookup key="lblAliasName" value="Nom :"/>
+		<lookup key="lblAliasAddress" value="Adresse e-mail :"/>
+		<lookup key="msgAliasNoName" value="Saisissez le nom sous lequel vous connaissez le joueur."/>
+		<lookup key="msgAliasBadAddress" value="Saisissez une seule adresse e-mail, par exemple player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} figure déjà sous le nom {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Étiquette de cette copie, par exemple Vanilla, AoWx ou Ziggurat. Laissez vide pour aucune :"/>
 		<lookup key="radioNoLabel" value="Aucune étiquette"/>
 		<lookup key="radioOtherLabel" value="Autre :"/>
@@ -740,6 +768,20 @@
 		<lookup key="buttonRescan" value="Erneut suchen"/>
 		<lookup key="buttonRescanning" value="Suche läuft..."/>
 		<lookup key="lblGamesHelp" value="Geben Sie jeder Kopie eines Spiels eine kurze Bezeichnung wie Vanilla, AoWx oder Ziggurat. Die Bezeichnung reist mit den gesendeten Zügen mit, daher müssen alle Spieler einer Partie dieselbe verwenden. Die Standardkopie erhält Züge ohne Bezeichnung."/>
+		<lookup key="tabAliases" value="Aliasnamen"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Name"/>
+		<lookup key="panelAliaseslistViewAliases1" value="E-Mail-Adresse"/>
+		<lookup key="buttonAddAlias" value="Hinzufügen..."/>
+		<lookup key="buttonEditAlias" value="Bearbeiten..."/>
+		<lookup key="buttonRemoveAlias" value="Entfernen"/>
+		<lookup key="lblAliasesHelp" value="Geben Sie den Spielern, mit denen Sie spielen, die Namen, unter denen Sie sie kennen. Der Aktivitätsreport und die Meldungen des Wrappers zeigen den Namen statt der E-Mail-Adresse, und ein Zug von einer Adresse auf dieser Liste wird nicht als von einem neuen Absender markiert. Die Liste bleibt auf diesem PC."/>
+		<lookup key="titleAddAlias" value="Aliasnamen hinzufügen"/>
+		<lookup key="titleEditAlias" value="Aliasnamen bearbeiten"/>
+		<lookup key="lblAliasName" value="Name:"/>
+		<lookup key="lblAliasAddress" value="E-Mail-Adresse:"/>
+		<lookup key="msgAliasNoName" value="Geben Sie den Namen ein, unter dem Sie den Spieler kennen."/>
+		<lookup key="msgAliasBadAddress" value="Geben Sie eine einzelne E-Mail-Adresse ein, zum Beispiel player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} ist bereits als {1} eingetragen."/>
 		<lookup key="msgInstallLabelPrompt" value="Bezeichnung für diese Kopie, z. B. Vanilla, AoWx oder Ziggurat. Leer lassen für keine:"/>
 		<lookup key="radioNoLabel" value="Keine Bezeichnung"/>
 		<lookup key="radioOtherLabel" value="Andere:"/>
@@ -1014,6 +1056,20 @@
 		<lookup key="buttonRescan" value="Volver a buscar"/>
 		<lookup key="buttonRescanning" value="Buscando..."/>
 		<lookup key="lblGamesHelp" value="Dé a cada copia de un juego una etiqueta corta, como Vanilla, AoWx o Ziggurat. La etiqueta viaja con los turnos que envía, así que todos los jugadores de una partida deben usar la misma. La copia predeterminada recibe los turnos sin etiqueta."/>
+		<lookup key="tabAliases" value="Alias"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Nombre"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Dirección de correo"/>
+		<lookup key="buttonAddAlias" value="Añadir..."/>
+		<lookup key="buttonEditAlias" value="Editar..."/>
+		<lookup key="buttonRemoveAlias" value="Quitar"/>
+		<lookup key="lblAliasesHelp" value="Dé a los jugadores con los que juega los nombres por los que los conoce. El Registro de Actividades y los mensajes del Wrapper muestran el nombre en lugar de la dirección de correo, y un turno de una dirección de esta lista no se marca como de un remitente nuevo. La lista se queda en este PC."/>
+		<lookup key="titleAddAlias" value="Añadir alias"/>
+		<lookup key="titleEditAlias" value="Editar alias"/>
+		<lookup key="lblAliasName" value="Nombre:"/>
+		<lookup key="lblAliasAddress" value="Dirección de correo:"/>
+		<lookup key="msgAliasNoName" value="Escriba el nombre por el que conoce al jugador."/>
+		<lookup key="msgAliasBadAddress" value="Escriba una sola dirección de correo, por ejemplo player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} ya figura como {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Etiqueta de esta copia, por ejemplo Vanilla, AoWx o Ziggurat. Déjela vacía para ninguna:"/>
 		<lookup key="radioNoLabel" value="Sin etiqueta"/>
 		<lookup key="radioOtherLabel" value="Otra:"/>
@@ -1289,6 +1345,20 @@
 		<lookup key="buttonRescan" value="Opnieuw zoeken"/>
 		<lookup key="buttonRescanning" value="Bezig met zoeken..."/>
 		<lookup key="lblGamesHelp" value="Geef elke kopie van een spel een kort label, zoals Vanilla, AoWx of Ziggurat. Het label reist mee met de beurten die u verstuurt, dus iedereen in een partij moet hetzelfde label gebruiken. De standaardkopie ontvangt beurten zonder label."/>
+		<lookup key="tabAliases" value="Aliassen"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Naam"/>
+		<lookup key="panelAliaseslistViewAliases1" value="E-mailadres"/>
+		<lookup key="buttonAddAlias" value="Toevoegen..."/>
+		<lookup key="buttonEditAlias" value="Bewerken..."/>
+		<lookup key="buttonRemoveAlias" value="Verwijderen"/>
+		<lookup key="lblAliasesHelp" value="Geef de spelers met wie u speelt de namen waaronder u ze kent. Het Activiteiten log en de berichten van de Wrapper tonen de naam in plaats van het e-mailadres, en een beurt van een adres op deze lijst wordt niet gemarkeerd als afkomstig van een nieuwe afzender. De lijst blijft op deze pc."/>
+		<lookup key="titleAddAlias" value="Alias toevoegen"/>
+		<lookup key="titleEditAlias" value="Alias bewerken"/>
+		<lookup key="lblAliasName" value="Naam:"/>
+		<lookup key="lblAliasAddress" value="E-mailadres:"/>
+		<lookup key="msgAliasNoName" value="Vul de naam in waaronder u de speler kent."/>
+		<lookup key="msgAliasBadAddress" value="Vul één e-mailadres in, bijvoorbeeld player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} staat al in de lijst als {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Label voor deze kopie, bijvoorbeeld Vanilla, AoWx of Ziggurat. Laat leeg voor geen label:"/>
 		<lookup key="radioNoLabel" value="Geen label"/>
 		<lookup key="radioOtherLabel" value="Anders:"/>
@@ -1559,6 +1629,20 @@
 		<lookup key="buttonRescan" value="Søg igen"/>
 		<lookup key="buttonRescanning" value="Søger..."/>
 		<lookup key="lblGamesHelp" value="Giv hver kopi af et spil en kort mærkat som Vanilla, AoWx eller Ziggurat. Mærkaten følger med de ture du sender, så alle i et spil skal bruge den samme. Standardkopien modtager ture uden mærkat."/>
+		<lookup key="tabAliases" value="Aliasser"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Navn"/>
+		<lookup key="panelAliaseslistViewAliases1" value="E-mailadresse"/>
+		<lookup key="buttonAddAlias" value="Tilføj..."/>
+		<lookup key="buttonEditAlias" value="Rediger..."/>
+		<lookup key="buttonRemoveAlias" value="Fjern"/>
+		<lookup key="lblAliasesHelp" value="Giv de spillere, du spiller med, de navne, du kender dem under. Aktivitetslisten og Wrapperens beskeder viser navnet i stedet for e-mailadressen, og en tur fra en adresse på denne liste markeres ikke som fra en ny afsender. Listen bliver på denne pc."/>
+		<lookup key="titleAddAlias" value="Tilføj alias"/>
+		<lookup key="titleEditAlias" value="Rediger alias"/>
+		<lookup key="lblAliasName" value="Navn:"/>
+		<lookup key="lblAliasAddress" value="E-mailadresse:"/>
+		<lookup key="msgAliasNoName" value="Skriv det navn, du kender spilleren under."/>
+		<lookup key="msgAliasBadAddress" value="Skriv én e-mailadresse, for eksempel player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} står allerede på listen som {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Mærkat for denne kopi, f.eks. Vanilla, AoWx eller Ziggurat. Lad den være tom for ingen:"/>
 		<lookup key="radioNoLabel" value="Ingen mærkat"/>
 		<lookup key="radioOtherLabel" value="Anden:"/>
@@ -1840,6 +1924,20 @@
 		<lookup key="buttonRescan" value="Sök igen"/>
 		<lookup key="buttonRescanning" value="Söker..."/>
 		<lookup key="lblGamesHelp" value="Ge varje kopia av ett spel en kort etikett, till exempel Vanilla, AoWx eller Ziggurat. Etiketten följer med de drag du skickar, så alla i ett parti måste använda samma etikett. Standardkopian tar emot drag utan etikett."/>
+		<lookup key="tabAliases" value="Alias"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Namn"/>
+		<lookup key="panelAliaseslistViewAliases1" value="E-postadress"/>
+		<lookup key="buttonAddAlias" value="Lägg till..."/>
+		<lookup key="buttonEditAlias" value="Redigera..."/>
+		<lookup key="buttonRemoveAlias" value="Ta bort"/>
+		<lookup key="lblAliasesHelp" value="Ge spelarna du spelar med de namn du känner dem under. Aktivitetsloggen och Wrapperns meddelanden visar namnet i stället för e-postadressen, och ett drag från en adress på den här listan markeras inte som från en ny avsändare. Listan stannar på den här datorn."/>
+		<lookup key="titleAddAlias" value="Lägg till alias"/>
+		<lookup key="titleEditAlias" value="Redigera alias"/>
+		<lookup key="lblAliasName" value="Namn:"/>
+		<lookup key="lblAliasAddress" value="E-postadress:"/>
+		<lookup key="msgAliasNoName" value="Skriv namnet du känner spelaren under."/>
+		<lookup key="msgAliasBadAddress" value="Skriv en enda e-postadress, till exempel player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} finns redan i listan som {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Etikett för den här kopian, t.ex. Vanilla, AoWx eller Ziggurat. Lämna tomt för ingen:"/>
 		<lookup key="radioNoLabel" value="Ingen etikett"/>
 		<lookup key="radioOtherLabel" value="Annan:"/>
@@ -2115,6 +2213,20 @@
 		<lookup key="buttonRescan" value="Szukaj ponownie"/>
 		<lookup key="buttonRescanning" value="Szukanie..."/>
 		<lookup key="lblGamesHelp" value="Nadaj każdej kopii gry krótką etykietę, np. Vanilla, AoWx lub Ziggurat. Etykieta podróżuje z wysyłanymi turami, więc wszyscy gracze w rozgrywce muszą używać tej samej. Kopia domyślna odbiera tury bez etykiety."/>
+		<lookup key="tabAliases" value="Aliasy"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Nazwa"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Adres e-mail"/>
+		<lookup key="buttonAddAlias" value="Dodaj..."/>
+		<lookup key="buttonEditAlias" value="Edytuj..."/>
+		<lookup key="buttonRemoveAlias" value="Usuń"/>
+		<lookup key="lblAliasesHelp" value="Nadaj graczom, z którymi grasz, nazwy, pod którymi ich znasz. Dziennik Aktywności i komunikaty Wrappera pokazują nazwę zamiast adresu e-mail, a tura z adresu z tej listy nie jest oznaczana jako tura od nowego nadawcy. Lista zostaje na tym komputerze."/>
+		<lookup key="titleAddAlias" value="Dodaj alias"/>
+		<lookup key="titleEditAlias" value="Edytuj alias"/>
+		<lookup key="lblAliasName" value="Nazwa:"/>
+		<lookup key="lblAliasAddress" value="Adres e-mail:"/>
+		<lookup key="msgAliasNoName" value="Wpisz nazwę, pod którą znasz gracza."/>
+		<lookup key="msgAliasBadAddress" value="Wpisz jeden adres e-mail, np. player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} jest już na liście jako {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Etykieta tej kopii, np. Vanilla, AoWx lub Ziggurat. Pozostaw puste, aby nie ustawiać:"/>
 		<lookup key="radioNoLabel" value="Bez etykiety"/>
 		<lookup key="radioOtherLabel" value="Inna:"/>
@@ -2390,6 +2502,20 @@
 		<lookup key="buttonRescan" value="Etsi uudelleen"/>
 		<lookup key="buttonRescanning" value="Etsitään..."/>
 		<lookup key="lblGamesHelp" value="Anna jokaiselle pelin kopiolle lyhyt tunniste, kuten Vanilla, AoWx tai Ziggurat. Tunniste kulkee lähettämiesi vuorojen mukana, joten kaikkien saman pelin pelaajien on käytettävä samaa tunnistetta. Oletuskopio vastaanottaa tunnisteettomat vuorot."/>
+		<lookup key="tabAliases" value="Aliakset"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Nimi"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Sähköpostiosoite"/>
+		<lookup key="buttonAddAlias" value="Lisää..."/>
+		<lookup key="buttonEditAlias" value="Muokkaa..."/>
+		<lookup key="buttonRemoveAlias" value="Poista"/>
+		<lookup key="lblAliasesHelp" value="Anna pelaajille, joiden kanssa pelaat, nimet, joilla tunnet heidät. Pelit käynnissä -välilehti ja Wrapperin viestit näyttävät nimen sähköpostiosoitteen sijaan, eikä tämän listan osoitteesta tullutta vuoroa merkitä uuden lähettäjän vuoroksi. Lista pysyy tällä tietokoneella."/>
+		<lookup key="titleAddAlias" value="Lisää alias"/>
+		<lookup key="titleEditAlias" value="Muokkaa aliasta"/>
+		<lookup key="lblAliasName" value="Nimi:"/>
+		<lookup key="lblAliasAddress" value="Sähköpostiosoite:"/>
+		<lookup key="msgAliasNoName" value="Kirjoita nimi, jolla tunnet pelaajan."/>
+		<lookup key="msgAliasBadAddress" value="Kirjoita yksi sähköpostiosoite, esimerkiksi player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} on jo listalla nimellä {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Tämän kopion tunniste, esimerkiksi Vanilla, AoWx tai Ziggurat. Jätä tyhjäksi, jos et halua tunnistetta:"/>
 		<lookup key="radioNoLabel" value="Ei tunnistetta"/>
 		<lookup key="radioOtherLabel" value="Muu:"/>
@@ -2665,6 +2791,20 @@
 		<lookup key="buttonRescan" value="Caută din nou"/>
 		<lookup key="buttonRescanning" value="Se caută..."/>
 		<lookup key="lblGamesHelp" value="Dați fiecărei copii a unui joc o etichetă scurtă, de exemplu Vanilla, AoWx sau Ziggurat. Eticheta călătorește cu turele trimise, așa că toți jucătorii dintr-o partidă trebuie să folosească aceeași etichetă. Copia implicită primește turele fără etichetă."/>
+		<lookup key="tabAliases" value="Aliasuri"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Nume"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Adresă de e-mail"/>
+		<lookup key="buttonAddAlias" value="Adaugă..."/>
+		<lookup key="buttonEditAlias" value="Editează..."/>
+		<lookup key="buttonRemoveAlias" value="Elimină"/>
+		<lookup key="lblAliasesHelp" value="Dați jucătorilor cu care jucați numele sub care îi cunoașteți. Log de Activitate și mesajele Wrapper-ului arată numele în locul adresei de e-mail, iar o tură de la o adresă din această listă nu este marcată ca venind de la un expeditor nou. Lista rămâne pe acest PC."/>
+		<lookup key="titleAddAlias" value="Adaugă alias"/>
+		<lookup key="titleEditAlias" value="Editează alias"/>
+		<lookup key="lblAliasName" value="Nume:"/>
+		<lookup key="lblAliasAddress" value="Adresă de e-mail:"/>
+		<lookup key="msgAliasNoName" value="Introduceți numele sub care îl cunoașteți pe jucător."/>
+		<lookup key="msgAliasBadAddress" value="Introduceți o singură adresă de e-mail, de exemplu player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} figurează deja ca {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Eticheta acestei copii, de exemplu Vanilla, AoWx sau Ziggurat. Lăsați gol pentru niciuna:"/>
 		<lookup key="radioNoLabel" value="Fără etichetă"/>
 		<lookup key="radioOtherLabel" value="Alta:"/>
@@ -2940,6 +3080,20 @@
 		<lookup key="buttonRescan" value="Искать снова"/>
 		<lookup key="buttonRescanning" value="Поиск..."/>
 		<lookup key="lblGamesHelp" value="Дайте каждой копии игры короткую метку, например Vanilla, AoWx или Ziggurat. Метка передаётся вместе с отправляемыми ходами, поэтому все участники партии должны использовать одну и ту же метку. Копия по умолчанию получает ходы без метки."/>
+		<lookup key="tabAliases" value="Псевдонимы"/>
+		<lookup key="panelAliaseslistViewAliases0" value="Имя"/>
+		<lookup key="panelAliaseslistViewAliases1" value="Адрес эл. почты"/>
+		<lookup key="buttonAddAlias" value="Добавить..."/>
+		<lookup key="buttonEditAlias" value="Изменить..."/>
+		<lookup key="buttonRemoveAlias" value="Удалить"/>
+		<lookup key="lblAliasesHelp" value="Дайте игрокам, с которыми вы играете, имена, под которыми вы их знаете. Список событий и сообщения Wrapper&apos;а показывают имя вместо адреса эл. почты, а ход с адреса из этого списка не помечается как ход от нового отправителя. Список хранится только на этом ПК."/>
+		<lookup key="titleAddAlias" value="Добавить псевдоним"/>
+		<lookup key="titleEditAlias" value="Изменить псевдоним"/>
+		<lookup key="lblAliasName" value="Имя:"/>
+		<lookup key="lblAliasAddress" value="Адрес эл. почты:"/>
+		<lookup key="msgAliasNoName" value="Введите имя, под которым вы знаете игрока."/>
+		<lookup key="msgAliasBadAddress" value="Введите один адрес эл. почты, например player@example.com."/>
+		<lookup key="msgAliasTaken" value="{0} уже есть в списке как {1}."/>
 		<lookup key="msgInstallLabelPrompt" value="Метка этой копии, например Vanilla, AoWx или Ziggurat. Оставьте пустым, если метка не нужна:"/>
 		<lookup key="radioNoLabel" value="Без метки"/>
 		<lookup key="radioOtherLabel" value="Другая:"/>

@@ -43,6 +43,8 @@
             this.accountsConfig = new AowEmailWrapper.Controls.AccountsConfig();
             this.tabActivity = new System.Windows.Forms.TabPage();
             this.activityListView = new AowEmailWrapper.Controls.ActivityListView();
+            this.tabAliases = new System.Windows.Forms.TabPage();
+            this.aliasesConfig = new AowEmailWrapper.Controls.AliasesConfig();
             this.tabGames = new System.Windows.Forms.TabPage();
             this.gamesConfig = new AowEmailWrapper.Controls.GamesConfig();
             this.tabPreferences = new System.Windows.Forms.TabPage();
@@ -116,6 +118,7 @@
             this.tabControlMain.SuspendLayout();
             this.tabAccounts.SuspendLayout();
             this.tabActivity.SuspendLayout();
+            this.tabAliases.SuspendLayout();
             this.tabGames.SuspendLayout();
             this.tabPreferences.SuspendLayout();
             this.tabAbout.SuspendLayout();
@@ -204,6 +207,7 @@
             // 
             this.tabControlMain.Controls.Add(this.tabAccounts);
             this.tabControlMain.Controls.Add(this.tabActivity);
+            this.tabControlMain.Controls.Add(this.tabAliases);
             this.tabControlMain.Controls.Add(this.tabGames);
             this.tabControlMain.Controls.Add(this.tabPreferences);
             this.tabControlMain.Controls.Add(this.tabAbout);
@@ -255,6 +259,24 @@
             this.activityListView.Size = new System.Drawing.Size(514, 518);
             this.activityListView.SmallImageList = null;
             this.activityListView.TabIndex = 0;
+            //
+            // tabAliases
+            //
+            this.tabAliases.Controls.Add(this.aliasesConfig);
+            this.tabAliases.Location = new System.Drawing.Point(4, 22);
+            this.tabAliases.Name = "tabAliases";
+            this.tabAliases.Size = new System.Drawing.Size(514, 518);
+            this.tabAliases.TabIndex = 9;
+            this.tabAliases.Text = "Aliases";
+            this.tabAliases.UseVisualStyleBackColor = true;
+            //
+            // aliasesConfig
+            //
+            this.aliasesConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aliasesConfig.Location = new System.Drawing.Point(0, 0);
+            this.aliasesConfig.Name = "aliasesConfig";
+            this.aliasesConfig.Size = new System.Drawing.Size(514, 518);
+            this.aliasesConfig.TabIndex = 0;
             //
             // tabGames
             //
@@ -1023,6 +1045,7 @@
             this.tabControlMain.ResumeLayout(false);
             this.tabAccounts.ResumeLayout(false);
             this.tabActivity.ResumeLayout(false);
+            this.tabAliases.ResumeLayout(false);
             this.tabGames.ResumeLayout(false);
             this.tabPreferences.ResumeLayout(false);
             this.tabAbout.ResumeLayout(false);
@@ -1067,6 +1090,8 @@
         private AowEmailWrapper.Controls.AccountsConfig accountsConfig;
         private System.Windows.Forms.TabPage tabActivity;
         private AowEmailWrapper.Controls.ActivityListView activityListView;
+        private System.Windows.Forms.TabPage tabAliases;
+        private AowEmailWrapper.Controls.AliasesConfig aliasesConfig;
         private System.Windows.Forms.Panel panelAbout;
         private System.Windows.Forms.Label lblNotice;
         private System.Windows.Forms.Panel panelLocalMessageStore;

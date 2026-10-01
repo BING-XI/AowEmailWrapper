@@ -272,6 +272,7 @@ namespace AowEmailWrapper.Tests
                     Create<BugReportForm>((AccountConfigValues)null),
                     Create<UpdateForm>(new UpdateInfo { Tag = "v9.9.9", Name = "9.9.9", AssetName = "AowEmailWrapper-9.9.9-setup.exe", Size = 1 }),
                     Create<LabelDialog>(game.DisplayName, game.Label, LabelDialog.BuildOptions(game, new Dictionary<string, string> { { "AoWx", Path.Combine(_root, "other") } })),
+                    Create<AliasDialog>(new PlayerAlias("Bob", "bob@example.com"), new AliasList(), new[] { "bob@example.com" }),
                     //The caller passes a translated caption and buttons; the message comes from the error itself
                     Create<ExceptionDialog>(Translator.Translate("Main"), new Exception(Open + "error text" + Close), MessageBoxIcon.Error, new[] { Translator.Translate("buttonOK") }),
                 };
