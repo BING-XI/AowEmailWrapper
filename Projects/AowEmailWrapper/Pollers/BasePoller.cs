@@ -234,7 +234,7 @@ namespace AowEmailWrapper.Pollers
                             {
                                 if (theASG.Length > 0)
                                 {
-                                    _gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender);
+                                    _gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender, MailHelper.GetTurnServer(email));
 
                                     TurnLogger.SaveLog(theASG.FileNameTrue, bodyText);
                                 }

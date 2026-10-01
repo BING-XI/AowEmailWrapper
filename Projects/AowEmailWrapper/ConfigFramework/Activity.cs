@@ -110,6 +110,10 @@ namespace AowEmailWrapper.ConfigFramework
         [XmlAttribute("mod")]
         public string ModLabel { get; set; }
 
+        /// <summary>The turn server this game's Wrappers record its turns on, if it has one.</summary>
+        [XmlAttribute("turn_server")]
+        public string TurnServer { get; set; }
+
         /// <summary>Address a received turn came from.</summary>
         [XmlAttribute("sender")]
         public string Sender { get; set; }
@@ -179,6 +183,7 @@ namespace AowEmailWrapper.ConfigFramework
         {
             AccountName = e.AccountName;
             InstallFolder = e.Install != null ? e.Install.Folder : null;
+            TurnServer = e.TurnServer;
             ModLabel = e.ModLabel;
             Sender = e.Sender;
             Players = e.Players;

@@ -90,6 +90,29 @@ namespace AowEmailWrapper.Helpers
             }
         }
 
+        /// <summary>Header that names the turn server a game's Wrappers record its turns on.</summary>
+        public const string TurnServerHeaderName = "X-AowEmailWrapper-Turn-Server";
+
+        /// <summary>The turn server the email names, or null when it names none a Wrapper should use.</summary>
+        public static string GetTurnServer(MimeMessage message)
+        {
+            return message != null ? TurnServerClient.Normalise(message.Headers[TurnServerHeaderName]) : null;
+        }
+
+        public static void SetTurnServer(MimeMessage message, string server)
+        {
+            if (message == null)
+            {
+                return;
+            }
+            message.Headers.RemoveAll(TurnServerHeaderName);
+            string normalised = TurnServerClient.Normalise(server);
+            if (normalised != null)
+            {
+                message.Headers.Add(TurnServerHeaderName, normalised);
+            }
+        }
+
         public static MimePart GetFirstAttachment(MimeMessage message)
         {
             return GetAttachments(message).FirstOrDefault();

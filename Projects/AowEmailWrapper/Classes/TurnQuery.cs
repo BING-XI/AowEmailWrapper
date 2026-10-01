@@ -410,6 +410,60 @@ namespace AowEmailWrapper.Classes
 
         #endregion
 
+        #region Turn server
+
+        /// <summary>
+        /// Puts what a turn server holds for a game in place of what was known about where its turn is, and
+        /// returns the newest record that counted, or null when none did. The player's own records and
+        /// those of addresses that are not in the game are left out. The turn goes round the players one
+        /// after another, so a turn received before the newest send anyone records has moved on since; that
+        /// receipt, left over from an earlier round whose send was never recorded, is left out too.
+        /// </summary>
+        public static TurnState ApplyServerRecords(Activity activity, IEnumerable<TurnRecord> records, IEnumerable<string> ownAddresses)
+        {
+            if (activity == null)
+            {
+                return null;
+            }
+
+            List<string> own = (ownAddresses ?? Enumerable.Empty<string>()).Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+            bool playersKnown = !string.IsNullOrEmpty(activity.Players) || !string.IsNullOrEmpty(activity.Sender) || !string.IsNullOrEmpty(activity.Recipients);
+            List<TurnState> states = (records ?? Enumerable.Empty<TurnRecord>())
+                .Where(record => record != null && record.IsValid && string.Equals(record.Game, activity.FileName, StringComparison.OrdinalIgnoreCase))
+                .Where(record => !own.Any(mine => SameAddress(mine, record.Player)) && (!playersKnown || IsPlayer(activity, record.Player)))
+                .Select(record => record.ToState())
+                .OrderBy(state => state.Date)
+                .ToList();
+
+            DateTimeOffset? newestSend = states.Where(state => state.Status == ActivityState.Sent).Select(state => state.Date).Max();
+            long ticks;
+            if ((activity.Status == ActivityState.Sent || activity.Status == ActivityState.Pending) && long.TryParse(activity.DateTicks, out ticks))
+            {
+                DateTimeOffset mine = new DateTimeOffset(new DateTime(ticks, DateTimeKind.Local));
+                if (!newestSend.HasValue || mine > newestSend.Value)
+                {
+                    newestSend = mine;
+                }
+            }
+
+            states.RemoveAll(state => state.Holds && newestSend.HasValue && state.Date < newestSend.Value);
+
+            activity.Whereabouts = null;
+            activity.Holder = null;
+            activity.Answers.Clear();
+            foreach (TurnState state in states)
+            {
+                RecordWhereabouts(activity, state);
+            }
+
+            TurnSend likely = LikelyHolder(activity, own);
+            activity.LikelyHolder = likely != null ? likely.To : null;
+
+            return states.LastOrDefault();
+        }
+
+        #endregion
+
         #region Address helpers
 
         public static bool SameAddress(string a, string b)

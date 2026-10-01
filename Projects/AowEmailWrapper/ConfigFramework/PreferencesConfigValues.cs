@@ -100,6 +100,22 @@ namespace AowEmailWrapper.ConfigFramework
         [XmlAttribute("accountsColumns")]
         public string AccountsColumnWidths { get; set; }
 
+        /// <summary>
+        /// The turn server new games record their turns on, put on the turns the player sends. A game that
+        /// already has one, from the turns it arrived with, keeps it.
+        /// </summary>
+        [XmlAttribute("turnServer")]
+        public string TurnServerAddress { get; set; }
+
+        /// <summary>Run a turn server in the Wrapper and publish it through Tailscale Funnel.</summary>
+        [XmlAttribute("hostTurnServer")]
+        public bool HostTurnServer { get; set; }
+
+        public bool ShouldSerializeHostTurnServer()
+        {
+            return HostTurnServer;
+        }
+
         public PreferencesConfigValues()
             : this(false)
         { }

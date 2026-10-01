@@ -78,6 +78,22 @@ namespace AowEmailWrapper
         private const string WrapperProbablyWithYouSentKey = "msgWrapperProbablyWithYouSent";
         private const string WrapperProbablyWithFallback = "{0} probably has '{1}': {2} sent it to them on {3}, and they have not answered.";
         private const string WrapperWhereIsTitleFallback = "Who has the turn?";
+        private const string TurnServerNoneKey = "msgTurnServerNone";
+        private const string TurnServerUnreachableKey = "msgTurnServerUnreachable";
+        private const string TurnServerNoRecordsKey = "msgTurnServerNoRecords";
+        private const string TurnServerOffKey = "msgTurnServerOff";
+        private const string TurnServerStartingKey = "msgTurnServerStarting";
+        private const string TurnServerPublishedKey = "msgTurnServerPublished";
+        private const string TurnServerNotAnsweringKey = "msgTurnServerNotAnswering";
+        private const string TurnServerNoTailscaleKey = "msgTurnServerNoTailscale";
+        private const string TurnServerNotSignedInKey = "msgTurnServerNotSignedIn";
+        private const string TurnServerApproveKey = "msgTurnServerApprove";
+        private const string TurnServerFailedKey = "msgTurnServerFailed";
+        private const string TurnServerPortTakenKey = "msgTurnServerPortTaken";
+        private const string TurnServerRecordsFile = "records.json";
+        private const string TurnServerOutboxFile = "outbox.json";
+        //Records that could not be delivered are tried again this often
+        private const int TurnServerRetryMilliseconds = 5 * 60 * 1000;
         private const string WrapperNewSenderFallback = "'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with.";
         private const string WrapperResendToKey = "msgWrapperResendTo";
         private const string WrapperUpdateAvailableKey = "msgWrapperUpdateAvailable";
@@ -162,6 +178,11 @@ namespace AowEmailWrapper
         private int _showingExceptionCount = 0;
 
         private ContextMenuStrip _contextMenu;
+
+        private TurnServerClient _turnServerClient;
+        private TurnServerHost _turnServerHost;
+        private System.Windows.Forms.Timer _turnServerTimer;
+        private bool _turnServerPublishing;
 
         private ToolStripMenuItem _menuAccounts;
         private ToolStripMenuItem _menuShow;
@@ -306,6 +327,8 @@ namespace AowEmailWrapper
             this.FormClosing += new FormClosingEventHandler(Main_FormClosing);
 
             ScheduleUpdateCheck();
+
+            StartTurnServerSupport();
 
             Splash.CloseForm();
         }
@@ -583,6 +606,13 @@ namespace AowEmailWrapper
                 StopAllPolling();
                 SaveColumnWidths();
 
+                if (_turnServerHost != null)
+                {
+                    //Left published: other Wrappers keep their records until this one runs again
+                    _turnServerHost.Stop();
+                    _turnServerHost = null;
+                }
+
                 if (_aow1GameWatcher != null)
                 {
                     _aow1GameWatcher.Stop();
@@ -775,6 +805,7 @@ namespace AowEmailWrapper
                 }
 
                 //Preferences
+                bool wasHosting = _wrapperConfig.PreferencesConfig != null && _wrapperConfig.PreferencesConfig.HostTurnServer;
                 PreferencesConfigValues preferencesConfigValues = preferencesConfig.Config;
                 if (preferencesConfigValues != null)
                 {
@@ -814,6 +845,8 @@ namespace AowEmailWrapper
 
                 DataManagerHelper.SaveConfig(_wrapperConfig);
                 ConfigNeedsSave = false;
+
+                ApplyTurnServerHosting(wasHosting);
 
                 bool activateSuccess = false;
 
@@ -869,6 +902,8 @@ namespace AowEmailWrapper
             activityListView.OnResendClick += new ActivityListViewEventHandler(ActivityListViewResend);
             activityListView.OnMoveTo += new ActivityMoveEventHandler(ActivityListViewMoveTo);
             activityListView.OnWhereIs += new ActivityListViewEventHandler(ActivityListViewWhereIs);
+            activityListView.OnCheckTurnServer += new ActivityListViewEventHandler(ActivityListViewCheckTurnServer);
+            preferencesConfig.TurnServerRetry += (sender, e) => PublishTurnServer();
         }
 
         private void ShutDown(object sender, EventArgs e)
@@ -1862,15 +1897,7 @@ namespace AowEmailWrapper
             string text = TurnQuery.Describe(state, activity.FileName);
             if (likely != null && !TurnQuery.SameAddress(previousGuess, likely.To))
             {
-                string when = likely.Date.LocalDateTime.ToString("d MMM yyyy HH:mm", System.Globalization.CultureInfo.CurrentCulture);
-                string guess = string.IsNullOrEmpty(likely.From)
-                    ? Translator.Translate(WrapperProbablyWithYouSentKey, likely.To, activity.FileName, when)
-                    : Translator.Translate(WrapperProbablyWithKey, likely.To, activity.FileName, likely.From, when);
-                if (string.IsNullOrEmpty(guess))
-                {
-                    guess = string.Format(WrapperProbablyWithFallback, likely.To, activity.FileName, likely.From ?? "you", when);
-                }
-                text = string.Concat(text, Environment.NewLine, guess);
+                text = string.Concat(text, Environment.NewLine, ProbablyWithText(likely, activity.FileName));
             }
             ShowBalloon(15000, WhereIsTitle(), text, state.Holds ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
@@ -1912,6 +1939,253 @@ namespace AowEmailWrapper
         {
             string title = Translator.Translate(WrapperWhereIsTitleKey);
             return string.IsNullOrEmpty(title) ? WrapperWhereIsTitleFallback : title;
+        }
+
+        /// <summary>"probably has" line for the player the chain of sends points at.</summary>
+        private static string ProbablyWithText(TurnSend likely, string game)
+        {
+            string when = likely.Date.LocalDateTime.ToString("d MMM yyyy HH:mm", System.Globalization.CultureInfo.CurrentCulture);
+            string guess = string.IsNullOrEmpty(likely.From)
+                ? Translator.Translate(WrapperProbablyWithYouSentKey, likely.To, game, when)
+                : Translator.Translate(WrapperProbablyWithKey, likely.To, game, likely.From, when);
+            return string.IsNullOrEmpty(guess) ? string.Format(WrapperProbablyWithFallback, likely.To, game, likely.From ?? "you", when) : guess;
+        }
+
+        /// <summary>The outbox of records waiting to be delivered, retried every few minutes, and the hosted server if the player hosts one.</summary>
+        private void StartTurnServerSupport()
+        {
+            try
+            {
+                _turnServerClient = new TurnServerClient(Path.Combine(AppDataHelper.TurnServer.FullName, TurnServerOutboxFile));
+                _turnServerTimer = new System.Windows.Forms.Timer();
+                _turnServerTimer.Interval = TurnServerRetryMilliseconds;
+                _turnServerTimer.Tick += (sender, e) => _ = _turnServerClient.FlushAsync();
+                _turnServerTimer.Start();
+                _ = _turnServerClient.FlushAsync();
+
+                ApplyTurnServerHosting(false);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Turn server support not started: {0}", ex);
+            }
+        }
+
+        private PreferencesConfigValues Preferences
+        {
+            get { return _wrapperConfig != null ? _wrapperConfig.PreferencesConfig : null; }
+        }
+
+        /// <summary>The game's own turn server, or the one the player set for games that have none.</summary>
+        private string TurnServerFor(Activity activity)
+        {
+            string own = activity != null ? TurnServerClient.Normalise(activity.TurnServer) : null;
+            return own ?? (Preferences != null ? TurnServerClient.Normalise(Preferences.TurnServerAddress) : null);
+        }
+
+        /// <summary>The address the player plays under on the account, as the other players know it.</summary>
+        private string PlayerAddressFor(string accountName)
+        {
+            AccountConfigValues account = null;
+            if (_wrapperConfig != null && _wrapperConfig.AccountsList != null)
+            {
+                account = (!string.IsNullOrEmpty(accountName) ? _wrapperConfig.AccountsList.GetAccountByName(accountName) : null) ?? _wrapperConfig.AccountsList.PrimaryAccount;
+            }
+            return (account != null ? WrapperMailer.SenderAddress(account) : null) ?? OwnAddresses().FirstOrDefault();
+        }
+
+        /// <summary>Tells the game's turn server, if it has one, what the player just did with its turn.</summary>
+        private void RecordOnTurnServer(Activity activity, string player)
+        {
+            string server = TurnServerFor(activity);
+            if (_turnServerClient == null || server == null || string.IsNullOrEmpty(player))
+            {
+                return;
+            }
+
+            long ticks;
+            DateTimeOffset when = long.TryParse(activity.DateTicks, out ticks) ? new DateTimeOffset(new DateTime(ticks, DateTimeKind.Local)) : DateTimeOffset.Now;
+            TurnRecord record = TurnRecord.Create(activity.FileName, player, activity.Status, when, activity.Recipients, activity.TurnNumber);
+            Trace.TraceInformation("Recording '{0}' as {1} by {2} on {3}", record.Game, record.Status, player, server);
+            _ = _turnServerClient.PostAsync(server, record);
+        }
+
+        /// <summary>Names the game's turn server on an outgoing turn, so the players it reaches record there too.</summary>
+        private void TagOutgoingTurnServer(MimeMessage theEmail)
+        {
+            try
+            {
+                MimePart theAttachment = MailHelper.GetFirstAttachment(theEmail);
+                if (theAttachment == null)
+                {
+                    return;
+                }
+
+                Activity activity = _activityLog != null ? _activityLog.GetLastActivityByFileName(theAttachment.FileName) : null;
+                MailHelper.SetTurnServer(theEmail, TurnServerFor(activity));
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning("Could not name the turn server on the turn: {0}", ex);
+            }
+        }
+
+        /// <summary>"Who has the turn? (turn server)": reads the game's records from its turn server; nobody is emailed.</summary>
+        private async void ActivityListViewCheckTurnServer(object sender, List<Activity> activities)
+        {
+            foreach (Activity activity in activities)
+            {
+                string server = TurnServerFor(activity);
+                if (server == null || _turnServerClient == null)
+                {
+                    ShowBalloon(10000, WhereIsTitle(), Translator.Translate(TurnServerNoneKey, activity.FileName), ToolTipIcon.Info);
+                    continue;
+                }
+
+                List<TurnRecord> records;
+                try
+                {
+                    records = await _turnServerClient.GetAsync(server, activity.FileName);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning("Turn server {0} not read for '{1}': {2}", server, activity.FileName, ex.Message);
+                    ShowBalloon(10000, WhereIsTitle(), Translator.Translate(TurnServerUnreachableKey, server, ex.Message), ToolTipIcon.Warning);
+                    continue;
+                }
+
+                TurnState newest = TurnQuery.ApplyServerRecords(activity, records, OwnAddresses());
+                DataManagerHelper.SaveActivityLog(_activityLog);
+                activityListView.Refresh();
+
+                ShowBalloon(15000, WhereIsTitle(), TurnServerAnswer(activity, newest), activity.Holder != null ? ToolTipIcon.Warning : ToolTipIcon.Info);
+            }
+        }
+
+        private string TurnServerAnswer(Activity activity, TurnState newest)
+        {
+            TurnAnswer holder = activity.Answers.LastOrDefault(answer => TurnQuery.SameAddress(answer.Responder, activity.Holder));
+            if (holder != null)
+            {
+                DateTimeOffset date;
+                return TurnQuery.Describe(new TurnState
+                {
+                    Responder = holder.Responder,
+                    Status = holder.Status,
+                    Date = DateTimeOffset.TryParse(holder.Date, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out date) ? date : (DateTimeOffset?)null,
+                }, activity.FileName);
+            }
+
+            TurnSend likely = TurnQuery.LikelyHolder(activity, OwnAddresses());
+            if (likely != null)
+            {
+                return ProbablyWithText(likely, activity.FileName);
+            }
+
+            return newest != null ? TurnQuery.Describe(newest, activity.FileName) : Translator.Translate(TurnServerNoRecordsKey, activity.FileName);
+        }
+
+        /// <summary>Starts or stops the hosted turn server to match the settings, and publishes it when it runs.</summary>
+        private void ApplyTurnServerHosting(bool wasHosting)
+        {
+            if (Preferences == null || !Preferences.HostTurnServer)
+            {
+                if (_turnServerHost != null)
+                {
+                    _turnServerHost.Stop();
+                    _turnServerHost = null;
+                }
+                if (wasHosting)
+                {
+                    Task.Run(() => TailscaleHelper.Unpublish());
+                }
+                preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerOffKey), null, null);
+                return;
+            }
+
+            if (_turnServerHost == null)
+            {
+                TurnServerHost host = new TurnServerHost(new TurnServerStore(Path.Combine(AppDataHelper.TurnServer.FullName, TurnServerRecordsFile)));
+                try
+                {
+                    host.Start(TurnServerHost.DefaultPort);
+                }
+                catch (SocketException ex)
+                {
+                    Trace.TraceWarning("Turn server not started: {0}", ex.Message);
+                    preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerPortTakenKey), null, TurnServerHost.DefaultPort.ToString());
+                    return;
+                }
+                _turnServerHost = host;
+            }
+
+            PublishTurnServer();
+        }
+
+        /// <summary>Publishes the hosted server through Tailscale Funnel and reports how it went in the settings.</summary>
+        private async void PublishTurnServer()
+        {
+            if (_turnServerHost == null || _turnServerPublishing)
+            {
+                return;
+            }
+
+            _turnServerPublishing = true;
+            try
+            {
+                preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerStartingKey), null, null);
+                int port = _turnServerHost.Port;
+                TailscaleResult result = await Task.Run(() => TailscaleHelper.Publish(port));
+                Trace.TraceInformation("Publishing the turn server: {0} {1}", result.State, (result.Detail ?? string.Empty).Trim());
+
+                switch (result.State)
+                {
+                    case TailscaleState.Published:
+                        bool answers = await _turnServerClient.IsTurnServerAsync(result.Url);
+                        preferencesConfig.SetTurnServerStatus(Translator.Translate(answers ? TurnServerPublishedKey : TurnServerNotAnsweringKey), result.Url, null);
+                        OfferPublishedAddress(result.Url);
+                        break;
+                    case TailscaleState.NotInstalled:
+                        preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerNoTailscaleKey), TailscaleHelper.DownloadUrl, null);
+                        break;
+                    case TailscaleState.NotSignedIn:
+                        preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerNotSignedInKey), null, null);
+                        break;
+                    case TailscaleState.NeedsApproval:
+                        preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerApproveKey), result.Link, null);
+                        break;
+                    default:
+                        string detail = (result.Detail ?? string.Empty).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? string.Empty;
+                        preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerFailedKey), null, detail.Trim());
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Publishing the turn server failed: {0}", ex);
+                preferencesConfig.SetTurnServerStatus(Translator.Translate(TurnServerFailedKey), null, ex.Message);
+            }
+            finally
+            {
+                _turnServerPublishing = false;
+            }
+        }
+
+        /// <summary>
+        /// A player who hosts and has set no address plays on their own server: the published address
+        /// becomes theirs, saved at once unless other settings are waiting to be saved by the player.
+        /// </summary>
+        private void OfferPublishedAddress(string url)
+        {
+            bool pending = ConfigNeedsSave;
+            if (!preferencesConfig.OfferTurnServerAddress(url) || pending || Preferences == null)
+            {
+                return;
+            }
+
+            Preferences.TurnServerAddress = url;
+            DataManagerHelper.SaveConfig(_wrapperConfig);
+            ConfigNeedsSave = false;
         }
 
         private static void SendWrapperMessage(AccountConfigValues account, MimeMessage message)
@@ -2109,6 +2383,7 @@ namespace AowEmailWrapper
                 if (theEmail != null)
                 {
                     TagOutgoingInstall(theEmail);
+                    TagOutgoingTurnServer(theEmail);
 
                     SmtpSender sender = RouteOutgoing(theEmail);
                     if (sender == null)
@@ -2190,7 +2465,9 @@ namespace AowEmailWrapper
                         //Whoever the player sends turns to is someone they are playing with
                         theActivity.Recipients = MailHelper.GetRecipientAddresses(theResponse.GameEmail);
                         _activityLog.AddContacts(new[] { theActivity.Recipients });
+                        theActivity.TurnServer = MailHelper.GetTurnServer(theResponse.GameEmail) ?? theActivity.TurnServer;
                         DataManagerHelper.SaveActivityLog(_activityLog);
+                        RecordOnTurnServer(theActivity, PlayerAddressFor(theActivity.AccountName));
                     }
 
                     if (_wrapperConfig.PreferencesConfig != null && _wrapperConfig.PreferencesConfig.CopyToEmailOut)
@@ -2412,9 +2689,12 @@ namespace AowEmailWrapper
 
             Activity newActivity = new Activity(e);
             newActivity.NewSender = !knownSender;
+            //A game keeps the turn server it has; one without takes the server the turn names
+            newActivity.TurnServer = (lastActivity != null ? TurnServerClient.Normalise(lastActivity.TurnServer) : null) ?? e.TurnServer;
             _activityLog.Activities.Add(newActivity);
             _activityLog.AddContact(e.Sender);
             _activityLog.AddContacts(new[] { newActivity.Players });
+            RecordOnTurnServer(newActivity, PlayerAddressFor(e.AccountName));
 
             if (newActivity.NewSender)
             {
@@ -2758,6 +3038,8 @@ namespace AowEmailWrapper
         {
             if (list != null && list.Count > 0)
             {
+                list.ForEach(endedActivity => RecordOnTurnServer(endedActivity, PlayerAddressFor(endedActivity.AccountName)));
+
                 try
                 {
                     if (MessageBox.Show(Translator.Translate(WrapperArchiveGameMessageBoxKey, ConfigHelper.EndedFolder), Translator.Translate(this.Name), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)

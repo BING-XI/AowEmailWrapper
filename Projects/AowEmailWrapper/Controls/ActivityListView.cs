@@ -33,12 +33,15 @@ namespace AowEmailWrapper.Controls
         private const string NewSenderKey = "activityNewSender";
         private const string NewSenderFallback = "new sender";
         private const string Menu_WhereIs_Tag = "menuItemWhereIs";
-        private const string WhereIsFallback = "Who has the turn?";
+        private const string WhereIsFallback = "Who has the turn? (emails every player)";
+        private const string Menu_TurnServer_Tag = "menuItemTurnServer";
+        private const string TurnServerFallback = "Who has the turn? (turn server)";
         private const string HeldByKey = "activityHeldBy";
         private const string HeldByFallback = "held by {0}";
         private const string ProbablyWithKey = "activityProbablyWith";
         private const string ProbablyWithFallback = "probably with {0}";
         private ToolStripMenuItem _whereIsMenuItem;
+        private ToolStripMenuItem _turnServerMenuItem;
 
         #endregion
 
@@ -51,6 +54,7 @@ namespace AowEmailWrapper.Controls
         public EventHandler OnListChanged;
         public ActivityMoveEventHandler OnMoveTo;
         public ActivityListViewEventHandler OnWhereIs;
+        public ActivityListViewEventHandler OnCheckTurnServer;
 
         /// <summary>Used to name the copy a game lives in and to offer the other copies under Move to.</summary>
         public AowGameManager GameManager { get; set; }
@@ -391,8 +395,14 @@ namespace AowEmailWrapper.Controls
             _resendMenuItem = new ToolStripMenuItem();
             _moveToMenuItem = new ToolStripMenuItem();
             _whereIsMenuItem = new ToolStripMenuItem();
+            _turnServerMenuItem = new ToolStripMenuItem();
 
-            _contextMenu.Items.AddRange(new ToolStripMenuItem[] { _resendMenuItem, _moveToMenuItem, _whereIsMenuItem, markEnded, markSent, remove });
+            _contextMenu.Items.AddRange(new ToolStripMenuItem[] { _resendMenuItem, _moveToMenuItem, _turnServerMenuItem, _whereIsMenuItem, markEnded, markSent, remove });
+
+            string turnServer = Translator.Translate(Menu_TurnServer_Tag);
+            _turnServerMenuItem.Text = string.IsNullOrEmpty(turnServer) ? TurnServerFallback : turnServer;
+            _turnServerMenuItem.Tag = Menu_TurnServer_Tag;
+            _turnServerMenuItem.Click += menuItemClickEvent;
 
             string whereIs = Translator.Translate(Menu_WhereIs_Tag);
             _whereIsMenuItem.Text = string.IsNullOrEmpty(whereIs) ? WhereIsFallback : whereIs;
@@ -462,6 +472,12 @@ namespace AowEmailWrapper.Controls
                             OnWhereIs(this, selected);
                         }
                         break;
+                    case Menu_TurnServer_Tag:
+                        if (OnCheckTurnServer != null)
+                        {
+                            OnCheckTurnServer(this, selected);
+                        }
+                        break;
                 }
             }
         }
@@ -488,6 +504,7 @@ namespace AowEmailWrapper.Controls
 
             //Only a turn that has left this player can be somewhere else
             _whereIsMenuItem.Enabled = enabled && GetSelectedActivities().All(activity => activity.Status.Equals(ActivityState.Sent) && TurnQuery.PlayersToAsk(activity, null).Count > 0);
+            _turnServerMenuItem.Enabled = enabled && GetSelectedActivities().All(activity => !activity.Status.Equals(ActivityState.Ended));
 
             PopulateMoveTo();
         }

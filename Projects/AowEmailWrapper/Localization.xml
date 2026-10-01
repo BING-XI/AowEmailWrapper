@@ -119,7 +119,7 @@
 		<lookup key="msgWrapperNewSender" value="'{0}' came from {1}, who has not sent you a turn before. Only open turns from people you are playing with."/>
 		<lookup key="activityNewSender" value="new sender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Found {0} unplayed turn(s) in your mailbox and added them to the activity log."/>
-		<lookup key="menuItemWhereIs" value="Who has the turn?"/>
+		<lookup key="menuItemWhereIs" value="Who has the turn? (emails every player)"/>
 		<lookup key="activityHeldBy" value="held by {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Who has the turn?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Asked {0} player(s) who has &apos;{1}&apos;. Answers arrive with the next mail checks."/>
@@ -127,6 +127,23 @@
 		<lookup key="activityProbablyWith" value="probably with {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} probably has &apos;{1}&apos;: {2} sent it to them on {3}, and they have not answered."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} probably has &apos;{1}&apos;: you sent it to them on {2}, and they have not answered."/>
+		<lookup key="menuItemTurnServer" value="Who has the turn? (turn server)"/>
+		<lookup key="groupBoxTurnServer" value="Turn Server"/>
+		<lookup key="fbHostTurnServer" value="Host a turn server:"/>
+		<lookup key="fbTurnServerAddress" value="Turn server address:"/>
+		<lookup key="msgTurnServerOff" value="Turns you send carry this address, so the other players&apos; Wrappers record their turns there too. Hosting needs Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Publishing the turn server through Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Hosting at {0}. Other Wrappers reach it while this Wrapper runs."/>
+		<lookup key="msgTurnServerNotAnswering" value="Published at {0}, but it does not answer yet. The first time can take a minute; then {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Hosting needs Tailscale. Install it from {0}, sign in, then {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale is not signed in. Sign in, then {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale asks you to allow Funnel at {0}. Allow it, then {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale could not publish the turn server ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="The turn server could not start: port {2} is in use."/>
+		<lookup key="linkTurnServerRetry" value="try again"/>
+		<lookup key="msgTurnServerNone" value="No turn server is known for &apos;{0}&apos;. Enter one under Settings, or wait for a turn that names one."/>
+		<lookup key="msgTurnServerUnreachable" value="The turn server {0} did not answer: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="No Wrapper has recorded &apos;{0}&apos; on the turn server yet."/>
 		<lookup key="msgInputEmailSettingsManual" value="You will enter the settings manually."/>
 		<lookup key="msgWrapperResendTo" value="Resend To:"/>
 		<lookup key="msgAutoconfigPage2Success" value="Found your mail settings. Click Next."/>
@@ -527,7 +544,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; vient de {1}, qui ne vous a jamais envoyé de tour. N&apos;ouvrez que les tours des personnes avec qui vous jouez."/>
 		<lookup key="activityNewSender" value="nouvel expéditeur"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} tour(s) non joué(s) trouvé(s) dans votre boîte aux lettres et ajouté(s) au journal d&apos;activité."/>
-		<lookup key="menuItemWhereIs" value="Qui a le tour ?"/>
+		<lookup key="menuItemWhereIs" value="Qui a le tour ? (écrit à tous les joueurs)"/>
 		<lookup key="activityHeldBy" value="chez {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Qui a le tour ?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} joueur(s) interrogé(s) pour savoir qui a &apos;{1}&apos;. Les réponses arrivent avec les prochaines vérifications du courrier."/>
@@ -535,6 +552,23 @@
 		<lookup key="activityProbablyWith" value="probablement chez {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} a probablement &apos;{1}&apos; : {2} le lui a envoyé le {3}, et il n&apos;a pas répondu."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} a probablement &apos;{1}&apos; : vous le lui avez envoyé le {2}, et il n&apos;a pas répondu."/>
+		<lookup key="menuItemTurnServer" value="Qui a le tour ? (serveur de tours)"/>
+		<lookup key="groupBoxTurnServer" value="Serveur de tours"/>
+		<lookup key="fbHostTurnServer" value="Héberger un serveur de tours :"/>
+		<lookup key="fbTurnServerAddress" value="Adresse du serveur de tours :"/>
+		<lookup key="msgTurnServerOff" value="Les tours que vous envoyez portent cette adresse, pour que les Wrappers des autres joueurs y enregistrent aussi leurs tours. L&apos;hébergement nécessite Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Publication du serveur de tours via Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Hébergé à {0}. Les autres Wrappers y accèdent tant que ce Wrapper fonctionne."/>
+		<lookup key="msgTurnServerNotAnswering" value="Publié à {0}, mais il ne répond pas encore. La première fois, cela peut prendre une minute ; ensuite, {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="L&apos;hébergement nécessite Tailscale. Installez-le depuis {0}, connectez-vous, puis {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale n&apos;est pas connecté. Connectez-vous, puis {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale vous demande d&apos;autoriser Funnel sur {0}. Autorisez-le, puis {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale n&apos;a pas pu publier le serveur de tours ({2}) ; {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Le serveur de tours n&apos;a pas pu démarrer : le port {2} est occupé."/>
+		<lookup key="linkTurnServerRetry" value="réessayez"/>
+		<lookup key="msgTurnServerNone" value="Aucun serveur de tours n&apos;est connu pour &apos;{0}&apos;. Indiquez-en un dans les Paramètres, ou attendez un tour qui en nomme un."/>
+		<lookup key="msgTurnServerUnreachable" value="Le serveur de tours {0} n&apos;a pas répondu : {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Aucun Wrapper n&apos;a encore enregistré &apos;{0}&apos; sur le serveur de tours."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Des paramètres ont été trouvés pour cette adresse, mais ils enverraient votre mot de passe sans chiffrement ; le Wrapper ne les utilisera donc pas. Veuillez saisir les paramètres du serveur manuellement."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -803,7 +837,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kam von {1}, der Ihnen noch nie einen Zug geschickt hat. Öffnen Sie nur Züge von Leuten, mit denen Sie spielen."/>
 		<lookup key="activityNewSender" value="neuer Absender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} ungespielte(r) Zug/Züge im Postfach gefunden und dem Aktivitätsprotokoll hinzugefügt."/>
-		<lookup key="menuItemWhereIs" value="Wer hat den Zug?"/>
+		<lookup key="menuItemWhereIs" value="Wer hat den Zug? (schreibt allen Spielern)"/>
 		<lookup key="activityHeldBy" value="bei {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Wer hat den Zug?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} Spieler gefragt, wer &apos;{1}&apos; hat. Die Antworten kommen mit den nächsten E-Mail-Abfragen."/>
@@ -811,6 +845,23 @@
 		<lookup key="activityProbablyWith" value="vermutlich bei {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} hat &apos;{1}&apos; vermutlich: {2} hat es am {3} an ihn geschickt, und er hat nicht geantwortet."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} hat &apos;{1}&apos; vermutlich: Sie haben es am {2} an ihn geschickt, und er hat nicht geantwortet."/>
+		<lookup key="menuItemTurnServer" value="Wer hat den Zug? (Zugserver)"/>
+		<lookup key="groupBoxTurnServer" value="Zugserver"/>
+		<lookup key="fbHostTurnServer" value="Zugserver bereitstellen:"/>
+		<lookup key="fbTurnServerAddress" value="Adresse des Zugservers:"/>
+		<lookup key="msgTurnServerOff" value="Ihre gesendeten Züge tragen diese Adresse, damit die Wrapper der anderen Spieler ihre Züge ebenfalls dort eintragen. Zum Bereitstellen wird Tailscale benötigt."/>
+		<lookup key="msgTurnServerStarting" value="Der Zugserver wird über Tailscale veröffentlicht..."/>
+		<lookup key="msgTurnServerPublished" value="Bereitgestellt unter {0}. Andere Wrapper erreichen ihn, solange dieser Wrapper läuft."/>
+		<lookup key="msgTurnServerNotAnswering" value="Unter {0} veröffentlicht, aber er antwortet noch nicht. Beim ersten Mal kann das eine Minute dauern; dann {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Zum Bereitstellen wird Tailscale benötigt. Installieren Sie es von {0}, melden Sie sich an und dann {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale ist nicht angemeldet. Melden Sie sich an und dann {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale bittet Sie, Funnel unter {0} zu erlauben. Erlauben Sie es und dann {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale konnte den Zugserver nicht veröffentlichen ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Der Zugserver konnte nicht starten: Port {2} ist belegt."/>
+		<lookup key="linkTurnServerRetry" value="erneut versuchen"/>
+		<lookup key="msgTurnServerNone" value="Für &apos;{0}&apos; ist kein Zugserver bekannt. Tragen Sie einen in den Einstellungen ein oder warten Sie auf einen Zug, der einen nennt."/>
+		<lookup key="msgTurnServerUnreachable" value="Der Zugserver {0} hat nicht geantwortet: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Noch kein Wrapper hat &apos;{0}&apos; auf dem Zugserver eingetragen."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Für diese Adresse wurden Einstellungen gefunden, aber sie würden Ihr Passwort unverschlüsselt senden, daher verwendet der Wrapper sie nicht. Bitte geben Sie die Servereinstellungen manuell ein."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -1078,7 +1129,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; viene de {1}, que nunca le ha enviado un turno. Abra solo turnos de personas con las que juega."/>
 		<lookup key="activityNewSender" value="remitente nuevo"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Se encontraron {0} turno(s) sin jugar en su buzón y se añadieron al registro de actividad."/>
-		<lookup key="menuItemWhereIs" value="¿Quién tiene el turno?"/>
+		<lookup key="menuItemWhereIs" value="¿Quién tiene el turno? (escribe a todos los jugadores)"/>
 		<lookup key="activityHeldBy" value="lo tiene {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="¿Quién tiene el turno?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Se preguntó a {0} jugador(es) quién tiene &apos;{1}&apos;. Las respuestas llegan con las próximas comprobaciones del correo."/>
@@ -1086,6 +1137,23 @@
 		<lookup key="activityProbablyWith" value="probablemente lo tiene {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="Probablemente {0} tiene &apos;{1}&apos;: {2} se lo envió el {3} y no ha respondido."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="Probablemente {0} tiene &apos;{1}&apos;: se lo enviaste el {2} y no ha respondido."/>
+		<lookup key="menuItemTurnServer" value="¿Quién tiene el turno? (servidor de turnos)"/>
+		<lookup key="groupBoxTurnServer" value="Servidor de turnos"/>
+		<lookup key="fbHostTurnServer" value="Alojar un servidor de turnos:"/>
+		<lookup key="fbTurnServerAddress" value="Dirección del servidor de turnos:"/>
+		<lookup key="msgTurnServerOff" value="Los turnos que envías llevan esta dirección, para que los Wrappers de los demás jugadores también registren allí sus turnos. Para alojarlo hace falta Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Publicando el servidor de turnos a través de Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Alojado en {0}. Los demás Wrappers lo alcanzan mientras este Wrapper esté en marcha."/>
+		<lookup key="msgTurnServerNotAnswering" value="Publicado en {0}, pero aún no responde. La primera vez puede tardar un minuto; después, {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Para alojarlo hace falta Tailscale. Instálalo desde {0}, inicia sesión y luego {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale no tiene la sesión iniciada. Inicia sesión y luego {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale te pide que permitas Funnel en {0}. Permítelo y luego {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale no pudo publicar el servidor de turnos ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="El servidor de turnos no pudo iniciarse: el puerto {2} está en uso."/>
+		<lookup key="linkTurnServerRetry" value="vuelve a intentarlo"/>
+		<lookup key="msgTurnServerNone" value="No se conoce ningún servidor de turnos para &apos;{0}&apos;. Indica uno en Configuración o espera un turno que lo indique."/>
+		<lookup key="msgTurnServerUnreachable" value="El servidor de turnos {0} no respondió: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Ningún Wrapper ha registrado aún &apos;{0}&apos; en el servidor de turnos."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Se encontró una configuración para esta dirección, pero enviaría su contraseña sin cifrar, así que el Wrapper no la usará. Introduzca la configuración del servidor manualmente."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -1357,7 +1425,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; komt van {1}, die u nog nooit een beurt heeft gestuurd. Open alleen beurten van mensen met wie u speelt."/>
 		<lookup key="activityNewSender" value="nieuwe afzender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="{0} ongespeelde beurt(en) gevonden in uw postvak en toegevoegd aan het activiteitenlogboek."/>
-		<lookup key="menuItemWhereIs" value="Wie heeft de beurt?"/>
+		<lookup key="menuItemWhereIs" value="Wie heeft de beurt? (mailt alle spelers)"/>
 		<lookup key="activityHeldBy" value="bij {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Wie heeft de beurt?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="{0} speler(s) gevraagd wie &apos;{1}&apos; heeft. De antwoorden komen met de volgende e-mailcontroles."/>
@@ -1365,6 +1433,23 @@
 		<lookup key="activityProbablyWith" value="waarschijnlijk bij {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} heeft &apos;{1}&apos; waarschijnlijk: {2} stuurde het op {3} en er is geen antwoord gekomen."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} heeft &apos;{1}&apos; waarschijnlijk: u stuurde het op {2} en er is geen antwoord gekomen."/>
+		<lookup key="menuItemTurnServer" value="Wie heeft de beurt? (beurtenserver)"/>
+		<lookup key="groupBoxTurnServer" value="Beurtenserver"/>
+		<lookup key="fbHostTurnServer" value="Een beurtenserver hosten:"/>
+		<lookup key="fbTurnServerAddress" value="Adres van de beurtenserver:"/>
+		<lookup key="msgTurnServerOff" value="Beurten die u verstuurt dragen dit adres, zodat de Wrappers van de andere spelers hun beurten daar ook vastleggen. Hosten vereist Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="De beurtenserver wordt via Tailscale gepubliceerd..."/>
+		<lookup key="msgTurnServerPublished" value="Gehost op {0}. Andere Wrappers bereiken hem zolang deze Wrapper draait."/>
+		<lookup key="msgTurnServerNotAnswering" value="Gepubliceerd op {0}, maar hij antwoordt nog niet. De eerste keer kan dat een minuut duren; daarna {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Hosten vereist Tailscale. Installeer het via {0}, meld u aan en daarna {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale is niet aangemeld. Meld u aan en daarna {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale vraagt u Funnel toe te staan op {0}. Sta het toe en daarna {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale kon de beurtenserver niet publiceren ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="De beurtenserver kon niet starten: poort {2} is in gebruik."/>
+		<lookup key="linkTurnServerRetry" value="opnieuw proberen"/>
+		<lookup key="msgTurnServerNone" value="Voor &apos;{0}&apos; is geen beurtenserver bekend. Vul er een in bij Instellingen, of wacht op een beurt die er een noemt."/>
+		<lookup key="msgTurnServerUnreachable" value="De beurtenserver {0} antwoordde niet: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Nog geen Wrapper heeft &apos;{0}&apos; op de beurtenserver vastgelegd."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Er zijn instellingen voor dit adres gevonden, maar die zouden uw wachtwoord onversleuteld versturen, dus de Wrapper gebruikt ze niet. Voer de serverinstellingen handmatig in."/>
 		<lookup key="enumEmailIn" value="EmailIn"/>
 		<lookup key="enumSave" value="Save"/>
@@ -1626,7 +1711,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kom fra {1}, som ikke har sendt dig en tur før. Åbn kun ture fra folk, du spiller med."/>
 		<lookup key="activityNewSender" value="ny afsender"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Fandt {0} uspillede ture i din postkasse og føjede dem til aktivitetsloggen."/>
-		<lookup key="menuItemWhereIs" value="Hvem har turen?"/>
+		<lookup key="menuItemWhereIs" value="Hvem har turen? (mailer alle spillere)"/>
 		<lookup key="activityHeldBy" value="hos {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Hvem har turen?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Spurgte {0} spiller(e), hvem der har &apos;{1}&apos;. Svarene kommer med de næste posttjek."/>
@@ -1634,6 +1719,23 @@
 		<lookup key="activityProbablyWith" value="sandsynligvis hos {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} har sandsynligvis &apos;{1}&apos;: {2} sendte den til dem den {3}, og de har ikke svaret."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} har sandsynligvis &apos;{1}&apos;: du sendte den til dem den {2}, og de har ikke svaret."/>
+		<lookup key="menuItemTurnServer" value="Hvem har turen? (turserver)"/>
+		<lookup key="groupBoxTurnServer" value="Turserver"/>
+		<lookup key="fbHostTurnServer" value="Vær vært for en turserver:"/>
+		<lookup key="fbTurnServerAddress" value="Turserverens adresse:"/>
+		<lookup key="msgTurnServerOff" value="Ture, du sender, bærer denne adresse, så de andre spilleres Wrappere også registrerer deres ture der. Værtskab kræver Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Turserveren offentliggøres via Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Kører på {0}. Andre Wrappere når den, så længe denne Wrapper kører."/>
+		<lookup key="msgTurnServerNotAnswering" value="Offentliggjort på {0}, men den svarer ikke endnu. Første gang kan det tage et minut; derefter {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Værtskab kræver Tailscale. Installer det fra {0}, log ind, og derefter {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale er ikke logget ind. Log ind, og derefter {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale beder dig tillade Funnel på {0}. Tillad det, og derefter {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale kunne ikke offentliggøre turserveren ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Turserveren kunne ikke starte: port {2} er i brug."/>
+		<lookup key="linkTurnServerRetry" value="prøv igen"/>
+		<lookup key="msgTurnServerNone" value="Der kendes ingen turserver til &apos;{0}&apos;. Angiv en under Indstillinger, eller vent på en tur, der nævner en."/>
+		<lookup key="msgTurnServerUnreachable" value="Turserveren {0} svarede ikke: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Ingen Wrapper har endnu registreret &apos;{0}&apos; på turserveren."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Der blev fundet indstillinger for denne adresse, men de ville sende din adgangskode ukrypteret, så Wrapperen bruger dem ikke. Indtast serverindstillingerne manuelt."/>
 		<lookup key="menuItemExit" value="&amp;Afslut"/>
 		<lookup key="enumIMAP" value="IMAP"/>
@@ -1909,7 +2011,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; kom från {1}, som inte har skickat ett drag till dig tidigare. Öppna bara drag från personer du spelar med."/>
 		<lookup key="activityNewSender" value="ny avsändare"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Hittade {0} ospelade drag i din brevlåda och lade till dem i aktivitetsloggen."/>
-		<lookup key="menuItemWhereIs" value="Vem har draget?"/>
+		<lookup key="menuItemWhereIs" value="Vem har draget? (mejlar alla spelare)"/>
 		<lookup key="activityHeldBy" value="hos {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Vem har draget?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Frågade {0} spelare vem som har &apos;{1}&apos;. Svaren kommer med nästa e-postkontroll."/>
@@ -1917,6 +2019,23 @@
 		<lookup key="activityProbablyWith" value="troligen hos {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} har troligen &apos;{1}&apos;: {2} skickade det till dem den {3}, och de har inte svarat."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} har troligen &apos;{1}&apos;: du skickade det till dem den {2}, och de har inte svarat."/>
+		<lookup key="menuItemTurnServer" value="Vem har draget? (dragserver)"/>
+		<lookup key="groupBoxTurnServer" value="Dragserver"/>
+		<lookup key="fbHostTurnServer" value="Var värd för en dragserver:"/>
+		<lookup key="fbTurnServerAddress" value="Dragserverns adress:"/>
+		<lookup key="msgTurnServerOff" value="Drag du skickar bär denna adress, så att de andra spelarnas Wrappers också registrerar sina drag där. Att vara värd kräver Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Dragservern publiceras via Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Körs på {0}. Andra Wrappers når den så länge denna Wrapper körs."/>
+		<lookup key="msgTurnServerNotAnswering" value="Publicerad på {0}, men den svarar inte än. Första gången kan det ta en minut; sedan {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Att vara värd kräver Tailscale. Installera det från {0}, logga in och sedan {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale är inte inloggat. Logga in och sedan {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale ber dig tillåta Funnel på {0}. Tillåt det och sedan {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale kunde inte publicera dragservern ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Dragservern kunde inte starta: port {2} används."/>
+		<lookup key="linkTurnServerRetry" value="försök igen"/>
+		<lookup key="msgTurnServerNone" value="Ingen dragserver är känd för &apos;{0}&apos;. Ange en under Inställningar, eller vänta på ett drag som anger en."/>
+		<lookup key="msgTurnServerUnreachable" value="Dragservern {0} svarade inte: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Ingen Wrapper har registrerat &apos;{0}&apos; på dragservern än."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Inställningar hittades för den här adressen, men de skulle skicka ditt lösenord okrypterat, så Wrappern använder dem inte. Ange serverinställningarna manuellt."/>
 		<lookup key="buttonDetailsShow" value="Detaljer &gt;&gt;"/>
 		<lookup key="buttonDetailsHide" value="&lt;&lt; Detaljer"/>
@@ -2178,7 +2297,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; przyszła od {1}, który nigdy wcześniej nie przysłał ci tury. Otwieraj tylko tury od osób, z którymi grasz."/>
 		<lookup key="activityNewSender" value="nowy nadawca"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Znaleziono {0} nierozegranych tur w skrzynce i dodano je do dziennika aktywności."/>
-		<lookup key="menuItemWhereIs" value="Kto ma turę?"/>
+		<lookup key="menuItemWhereIs" value="Kto ma turę? (pisze do wszystkich graczy)"/>
 		<lookup key="activityHeldBy" value="ma {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Kto ma turę?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Zapytano {0} graczy, kto ma &apos;{1}&apos;. Odpowiedzi przyjdą przy kolejnych sprawdzeniach poczty."/>
@@ -2186,6 +2305,23 @@
 		<lookup key="activityProbablyWith" value="prawdopodobnie u {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} prawdopodobnie ma &apos;{1}&apos;: {2} wysłał mu je {3} i nie odpowiedział."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} prawdopodobnie ma &apos;{1}&apos;: wysłałeś mu je {2} i nie odpowiedział."/>
+		<lookup key="menuItemTurnServer" value="Kto ma turę? (serwer tur)"/>
+		<lookup key="groupBoxTurnServer" value="Serwer tur"/>
+		<lookup key="fbHostTurnServer" value="Udostępniaj serwer tur:"/>
+		<lookup key="fbTurnServerAddress" value="Adres serwera tur:"/>
+		<lookup key="msgTurnServerOff" value="Wysyłane przez ciebie tury niosą ten adres, więc Wrappery pozostałych graczy także zapisują tam swoje tury. Udostępnianie wymaga Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Publikowanie serwera tur przez Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Udostępniany pod {0}. Inne Wrappery łączą się z nim, dopóki ten Wrapper działa."/>
+		<lookup key="msgTurnServerNotAnswering" value="Opublikowany pod {0}, ale jeszcze nie odpowiada. Za pierwszym razem może to potrwać minutę; potem {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Udostępnianie wymaga Tailscale. Zainstaluj go z {0}, zaloguj się, a potem {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale nie jest zalogowany. Zaloguj się, a potem {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale prosi o zezwolenie na Funnel pod {0}. Zezwól, a potem {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale nie mógł opublikować serwera tur ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Serwer tur nie mógł wystartować: port {2} jest zajęty."/>
+		<lookup key="linkTurnServerRetry" value="spróbuj ponownie"/>
+		<lookup key="msgTurnServerNone" value="Dla &apos;{0}&apos; nie jest znany żaden serwer tur. Podaj go w Ustawieniach albo poczekaj na turę, która go wskaże."/>
+		<lookup key="msgTurnServerUnreachable" value="Serwer tur {0} nie odpowiedział: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Żaden Wrapper nie zapisał jeszcze &apos;{0}&apos; na serwerze tur."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Znaleziono ustawienia dla tego adresu, ale wysyłałyby hasło bez szyfrowania, więc Wrapper ich nie użyje. Wprowadź ustawienia serwera ręcznie."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -2455,7 +2591,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; tuli osoitteesta {1}, joka ei ole lähettänyt sinulle vuoroa aiemmin. Avaa vain niiden vuoroja, joiden kanssa pelaat."/>
 		<lookup key="activityNewSender" value="uusi lähettäjä"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Postilaatikosta löytyi {0} pelaamatonta vuoroa, ja ne lisättiin toimintalokiin."/>
-		<lookup key="menuItemWhereIs" value="Kenellä vuoro on?"/>
+		<lookup key="menuItemWhereIs" value="Kenellä vuoro on? (lähettää sähköpostia kaikille pelaajille)"/>
 		<lookup key="activityHeldBy" value="pelaajalla {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Kenellä vuoro on?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Kysyttiin {0} pelaajalta, kenellä &apos;{1}&apos; on. Vastaukset saapuvat seuraavien postitarkistusten mukana."/>
@@ -2463,6 +2599,23 @@
 		<lookup key="activityProbablyWith" value="luultavasti pelaajalla {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="{0} luultavasti pitää vuoroa &apos;{1}&apos;: {2} lähetti sen hänelle {3}, eikä hän ole vastannut."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="{0} luultavasti pitää vuoroa &apos;{1}&apos;: lähetit sen hänelle {2}, eikä hän ole vastannut."/>
+		<lookup key="menuItemTurnServer" value="Kenellä vuoro on? (vuoropalvelin)"/>
+		<lookup key="groupBoxTurnServer" value="Vuoropalvelin"/>
+		<lookup key="fbHostTurnServer" value="Ylläpidä vuoropalvelinta:"/>
+		<lookup key="fbTurnServerAddress" value="Vuoropalvelimen osoite:"/>
+		<lookup key="msgTurnServerOff" value="Lähettämäsi vuorot kuljettavat tätä osoitetta, joten muiden pelaajien Wrapperit kirjaavat vuoronsa myös sinne. Ylläpito vaatii Tailscalen."/>
+		<lookup key="msgTurnServerStarting" value="Vuoropalvelinta julkaistaan Tailscalen kautta..."/>
+		<lookup key="msgTurnServerPublished" value="Ylläpidetään osoitteessa {0}. Muut Wrapperit tavoittavat sen, kun tämä Wrapper on käynnissä."/>
+		<lookup key="msgTurnServerNotAnswering" value="Julkaistu osoitteessa {0}, mutta se ei vastaa vielä. Ensimmäisellä kerralla se voi kestää minuutin; sitten {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Ylläpito vaatii Tailscalen. Asenna se osoitteesta {0}, kirjaudu sisään ja sitten {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale ei ole kirjautunut. Kirjaudu sisään ja sitten {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale pyytää sallimaan Funnelin osoitteessa {0}. Salli se ja sitten {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale ei voinut julkaista vuoropalvelinta ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Vuoropalvelin ei käynnistynyt: portti {2} on käytössä."/>
+		<lookup key="linkTurnServerRetry" value="yritä uudelleen"/>
+		<lookup key="msgTurnServerNone" value="Pelille &apos;{0}&apos; ei tunneta vuoropalvelinta. Anna se Asetuksissa tai odota vuoroa, joka nimeää sen."/>
+		<lookup key="msgTurnServerUnreachable" value="Vuoropalvelin {0} ei vastannut: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Mikään Wrapper ei ole vielä kirjannut peliä &apos;{0}&apos; vuoropalvelimelle."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Tälle osoitteelle löytyi asetukset, mutta ne lähettäisivät salasanasi salaamattomana, joten Wrapper ei käytä niitä. Syötä palvelimen asetukset käsin."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -2727,7 +2880,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; a venit de la {1}, care nu v-a mai trimis o tură. Deschideți doar ture de la persoanele cu care jucați."/>
 		<lookup key="activityNewSender" value="expeditor nou"/>
 		<lookup key="msgWrapperTurnsRecovered" value="Am găsit {0} ture nejucate în căsuța poștală și le-am adăugat în jurnalul de activitate."/>
-		<lookup key="menuItemWhereIs" value="Cine are tura?"/>
+		<lookup key="menuItemWhereIs" value="Cine are tura? (scrie tuturor jucătorilor)"/>
 		<lookup key="activityHeldBy" value="la {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="Cine are tura?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Am întrebat {0} jucător(i) cine are &apos;{1}&apos;. Răspunsurile sosesc la următoarele verificări ale poștei."/>
@@ -2735,6 +2888,23 @@
 		<lookup key="activityProbablyWith" value="probabil la {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="Probabil {0} are &apos;{1}&apos;: {2} i l-a trimis pe {3}, iar acesta nu a răspuns."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="Probabil {0} are &apos;{1}&apos;: i l-ați trimis pe {2}, iar acesta nu a răspuns."/>
+		<lookup key="menuItemTurnServer" value="Cine are tura? (server de ture)"/>
+		<lookup key="groupBoxTurnServer" value="Server de ture"/>
+		<lookup key="fbHostTurnServer" value="Găzduiește un server de ture:"/>
+		<lookup key="fbTurnServerAddress" value="Adresa serverului de ture:"/>
+		<lookup key="msgTurnServerOff" value="Turele pe care le trimiteți poartă această adresă, astfel încât Wrapper-ele celorlalți jucători își înregistrează și ele turele acolo. Găzduirea necesită Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Serverul de ture se publică prin Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Găzduit la {0}. Celelalte Wrapper-e îl găsesc cât timp acest Wrapper rulează."/>
+		<lookup key="msgTurnServerNotAnswering" value="Publicat la {0}, dar nu răspunde încă. Prima dată poate dura un minut; apoi {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Găzduirea necesită Tailscale. Instalați-l de la {0}, conectați-vă, apoi {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale nu este conectat. Conectați-vă, apoi {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale vă cere să permiteți Funnel la {0}. Permiteți, apoi {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale nu a putut publica serverul de ture ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Serverul de ture nu a putut porni: portul {2} este ocupat."/>
+		<lookup key="linkTurnServerRetry" value="încercați din nou"/>
+		<lookup key="msgTurnServerNone" value="Nu se cunoaște niciun server de ture pentru &apos;{0}&apos;. Introduceți unul în Setări sau așteptați o tură care numește unul."/>
+		<lookup key="msgTurnServerUnreachable" value="Serverul de ture {0} nu a răspuns: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Niciun Wrapper nu a înregistrat încă &apos;{0}&apos; pe serverul de ture."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Au fost găsite setări pentru această adresă, dar ar trimite parola necriptată, așa că Wrapperul nu le va folosi. Introduceți manual setările serverului."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>
@@ -3003,7 +3173,7 @@
 		<lookup key="msgWrapperNewSender" value="&apos;{0}&apos; пришёл от {1}, который раньше не присылал вам ходов. Открывайте только ходы от тех, с кем играете."/>
 		<lookup key="activityNewSender" value="новый отправитель"/>
 		<lookup key="msgWrapperTurnsRecovered" value="В почтовом ящике найдено несыгранных ходов: {0}. Они добавлены в журнал активности."/>
-		<lookup key="menuItemWhereIs" value="У кого ход?"/>
+		<lookup key="menuItemWhereIs" value="У кого ход? (письмо всем игрокам)"/>
 		<lookup key="activityHeldBy" value="у {0}"/>
 		<lookup key="msgWrapperWhereIsTitle" value="У кого ход?"/>
 		<lookup key="msgWrapperWhereIsAsked" value="Спросили игроков ({0}), у кого &apos;{1}&apos;. Ответы придут при следующих проверках почты."/>
@@ -3011,6 +3181,23 @@
 		<lookup key="activityProbablyWith" value="вероятно, у {0}"/>
 		<lookup key="msgWrapperProbablyWith" value="Вероятно, &apos;{1}&apos; у {0}: {2} отправил ход {3}, а ответа нет."/>
 		<lookup key="msgWrapperProbablyWithYouSent" value="Вероятно, &apos;{1}&apos; у {0}: вы отправили ход {2}, а ответа нет."/>
+		<lookup key="menuItemTurnServer" value="У кого ход? (сервер ходов)"/>
+		<lookup key="groupBoxTurnServer" value="Сервер ходов"/>
+		<lookup key="fbHostTurnServer" value="Размещать сервер ходов:"/>
+		<lookup key="fbTurnServerAddress" value="Адрес сервера ходов:"/>
+		<lookup key="msgTurnServerOff" value="Отправленные вами ходы несут этот адрес, поэтому Wrapper&apos;ы других игроков тоже записывают туда свои ходы. Для размещения нужен Tailscale."/>
+		<lookup key="msgTurnServerStarting" value="Сервер ходов публикуется через Tailscale..."/>
+		<lookup key="msgTurnServerPublished" value="Размещён по адресу {0}. Другие Wrapper&apos;ы видят его, пока работает этот Wrapper."/>
+		<lookup key="msgTurnServerNotAnswering" value="Опубликован по адресу {0}, но пока не отвечает. В первый раз это может занять минуту; затем {1}."/>
+		<lookup key="msgTurnServerNoTailscale" value="Для размещения нужен Tailscale. Установите его с {0}, войдите в систему, затем {1}."/>
+		<lookup key="msgTurnServerNotSignedIn" value="Tailscale не выполнил вход. Войдите, затем {1}."/>
+		<lookup key="msgTurnServerApprove" value="Tailscale просит разрешить Funnel по адресу {0}. Разрешите, затем {1}."/>
+		<lookup key="msgTurnServerFailed" value="Tailscale не смог опубликовать сервер ходов ({2}); {1}."/>
+		<lookup key="msgTurnServerPortTaken" value="Сервер ходов не запустился: порт {2} занят."/>
+		<lookup key="linkTurnServerRetry" value="попробуйте снова"/>
+		<lookup key="msgTurnServerNone" value="Для &apos;{0}&apos; сервер ходов неизвестен. Укажите его в Настройках или дождитесь хода, в котором он указан."/>
+		<lookup key="msgTurnServerUnreachable" value="Сервер ходов {0} не ответил: {1}"/>
+		<lookup key="msgTurnServerNoRecords" value="Ни один Wrapper ещё не записал &apos;{0}&apos; на сервер ходов."/>
 		<lookup key="msgAutoconfigUnencryptedOnly" value="Для этого адреса найдены настройки, но с ними пароль передавался бы без шифрования, поэтому Wrapper их не использует. Введите настройки сервера вручную."/>
 		<lookup key="enumIMAP" value="IMAP"/>
 		<lookup key="enumPOP3" value="POP3"/>

@@ -41,7 +41,14 @@
             this.fbEmailSound = new AowEmailWrapper.Controls.FormBlockCheckBox();
             this.fbLocalization = new AowEmailWrapper.Controls.FormBlockCombo();
             this.fbTheme = new AowEmailWrapper.Controls.FormBlockCombo();
+            this.groupBoxTurnServer = new System.Windows.Forms.GroupBox();
+            this.panelTurnServerMessage = new System.Windows.Forms.Panel();
+            this.linkTurnServerStatus = new System.Windows.Forms.LinkLabel();
+            this.fbTurnServerAddress = new AowEmailWrapper.Controls.FormBlockText();
+            this.fbHostTurnServer = new AowEmailWrapper.Controls.FormBlockCheckBox();
             this.groupBoxPreferences.SuspendLayout();
+            this.groupBoxTurnServer.SuspendLayout();
+            this.panelTurnServerMessage.SuspendLayout();
             this.groupBoxEmailSelection.SuspendLayout();
             this.panelMessage.SuspendLayout();
             this.SuspendLayout();
@@ -211,17 +218,82 @@
             this.fbTheme.SelectedValue = "";
             this.fbTheme.Size = new System.Drawing.Size(419, 24);
             this.fbTheme.TabIndex = 20;
+            //
+            // groupBoxTurnServer
+            //
+            this.groupBoxTurnServer.AutoSize = true;
+            this.groupBoxTurnServer.Controls.Add(this.panelTurnServerMessage);
+            this.groupBoxTurnServer.Controls.Add(this.fbTurnServerAddress);
+            this.groupBoxTurnServer.Controls.Add(this.fbHostTurnServer);
+            this.groupBoxTurnServer.Dock = System.Windows.Forms.DockStyle.Top;
+            this.groupBoxTurnServer.Location = new System.Drawing.Point(0, 229);
+            this.groupBoxTurnServer.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBoxTurnServer.Name = "groupBoxTurnServer";
+            this.groupBoxTurnServer.Padding = new System.Windows.Forms.Padding(2, 2, 2, 5);
+            this.groupBoxTurnServer.Size = new System.Drawing.Size(423, 118);
+            this.groupBoxTurnServer.TabIndex = 15;
+            this.groupBoxTurnServer.TabStop = false;
+            this.groupBoxTurnServer.Text = "Turn Server";
+            //
+            // panelTurnServerMessage
+            //
+            this.panelTurnServerMessage.BackColor = System.Drawing.SystemColors.Info;
+            this.panelTurnServerMessage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelTurnServerMessage.Controls.Add(this.linkTurnServerStatus);
+            this.panelTurnServerMessage.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelTurnServerMessage.Location = new System.Drawing.Point(2, 63);
+            this.panelTurnServerMessage.Name = "panelTurnServerMessage";
+            this.panelTurnServerMessage.Padding = new System.Windows.Forms.Padding(2);
+            this.panelTurnServerMessage.Size = new System.Drawing.Size(419, 50);
+            this.panelTurnServerMessage.TabIndex = 3;
+            //
+            // linkTurnServerStatus
+            //
+            this.linkTurnServerStatus.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.linkTurnServerStatus.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
+            this.linkTurnServerStatus.Location = new System.Drawing.Point(2, 2);
+            this.linkTurnServerStatus.Name = "linkTurnServerStatus";
+            this.linkTurnServerStatus.Size = new System.Drawing.Size(413, 44);
+            this.linkTurnServerStatus.TabIndex = 0;
+            this.linkTurnServerStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // fbTurnServerAddress
+            //
+            this.fbTurnServerAddress.Dock = System.Windows.Forms.DockStyle.Top;
+            this.fbTurnServerAddress.IsPassword = false;
+            this.fbTurnServerAddress.LabelName = "Turn server address:";
+            this.fbTurnServerAddress.Location = new System.Drawing.Point(2, 39);
+            this.fbTurnServerAddress.Margin = new System.Windows.Forms.Padding(2);
+            this.fbTurnServerAddress.MinimumSize = new System.Drawing.Size(0, 24);
+            this.fbTurnServerAddress.Name = "fbTurnServerAddress";
+            this.fbTurnServerAddress.Size = new System.Drawing.Size(419, 24);
+            this.fbTurnServerAddress.TabIndex = 2;
+            this.fbTurnServerAddress.TextValue = "";
+            //
+            // fbHostTurnServer
+            //
+            this.fbHostTurnServer.Checked = false;
+            this.fbHostTurnServer.Dock = System.Windows.Forms.DockStyle.Top;
+            this.fbHostTurnServer.LabelName = "Host a turn server:";
+            this.fbHostTurnServer.Location = new System.Drawing.Point(2, 15);
+            this.fbHostTurnServer.MinimumSize = new System.Drawing.Size(0, 24);
+            this.fbHostTurnServer.Name = "fbHostTurnServer";
+            this.fbHostTurnServer.Size = new System.Drawing.Size(419, 24);
+            this.fbHostTurnServer.TabIndex = 1;
             // 
             // PreferencesConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.groupBoxTurnServer);
             this.Controls.Add(this.groupBoxEmailSelection);
             this.Controls.Add(this.groupBoxPreferences);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "PreferencesConfig";
-            this.Size = new System.Drawing.Size(423, 296);
+            this.Size = new System.Drawing.Size(423, 412);
             this.groupBoxPreferences.ResumeLayout(false);
+            this.groupBoxTurnServer.ResumeLayout(false);
+            this.panelTurnServerMessage.ResumeLayout(false);
             this.groupBoxEmailSelection.ResumeLayout(false);
             this.panelMessage.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -244,5 +316,10 @@
         private FormBlockCheckBox fbEmailSound;
         private FormBlockCheckBox fbCopyToEmailOut;
         private FormBlockText fbGameWrapperDataPort;
+        private System.Windows.Forms.GroupBox groupBoxTurnServer;
+        private System.Windows.Forms.Panel panelTurnServerMessage;
+        private System.Windows.Forms.LinkLabel linkTurnServerStatus;
+        private FormBlockText fbTurnServerAddress;
+        private FormBlockCheckBox fbHostTurnServer;
     }
 }

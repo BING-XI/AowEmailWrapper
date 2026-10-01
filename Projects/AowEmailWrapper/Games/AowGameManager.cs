@@ -417,6 +417,11 @@ namespace AowEmailWrapper.Games
 
         public void StoreDownloadFile(ASGFileInfo theAsgFile, EmailSaveFolder saveFolder, string accountName, string modLabel, string sender)
         {
+            StoreDownloadFile(theAsgFile, saveFolder, accountName, modLabel, sender, null);
+        }
+
+        public void StoreDownloadFile(ASGFileInfo theAsgFile, EmailSaveFolder saveFolder, string accountName, string modLabel, string sender, string turnServer)
+        {
             AowGame theGame = theAsgFile.IsValid ? ResolveIncoming(theAsgFile.GameType, modLabel, theAsgFile.FileNameTrue) : null;
 
             if (theGame != null)
@@ -432,13 +437,14 @@ namespace AowEmailWrapper.Games
                     Install = theGame,
                     ModLabel = modLabel,
                     Sender = sender,
+                    TurnServer = turnServer,
                     Players = ASGFileInfo.JoinAddresses(theAsgFile.PlayerEmails)
                 });
             }
             else
             {
                 theAsgFile.SaveToFolder(_checkEmailFolder);
-                RaiseOnGameSaved(new AowGameSavedEventArgs(AowGameType.Unknown, theAsgFile.FileName) { AccountName = accountName, ModLabel = modLabel, Sender = sender, Players = ASGFileInfo.JoinAddresses(theAsgFile.PlayerEmails) });
+                RaiseOnGameSaved(new AowGameSavedEventArgs(AowGameType.Unknown, theAsgFile.FileName) { AccountName = accountName, ModLabel = modLabel, Sender = sender, TurnServer = turnServer, Players = ASGFileInfo.JoinAddresses(theAsgFile.PlayerEmails) });
             }
         }
 

@@ -302,7 +302,7 @@
             this.preferencesConfig.Margin = new System.Windows.Forms.Padding(2);
             this.preferencesConfig.Name = "preferencesConfig";
             this.preferencesConfig.Padding = new System.Windows.Forms.Padding(5);
-            this.preferencesConfig.Size = new System.Drawing.Size(514, 337);
+            this.preferencesConfig.Size = new System.Drawing.Size(514, 405);
             this.preferencesConfig.TabIndex = 0;
             // 
             // tabAbout

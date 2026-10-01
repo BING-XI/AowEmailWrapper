@@ -41,6 +41,9 @@
         /// <summary>Mod label carried by the email, if any.</summary>
         public string ModLabel { get; set; }
 
+        /// <summary>The turn server the email named, if any.</summary>
+        public string TurnServer { get; set; }
+
         /// <summary>Email address the turn was sent from, empty when it did not come by email.</summary>
         public string Sender { get; set; }
 

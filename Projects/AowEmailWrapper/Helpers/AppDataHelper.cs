@@ -13,6 +13,7 @@ namespace AowEmailWrapper.Helpers
         private const string APPDATA_Wrapper_Config = "Config";
         private const string APPDATA_Wrapper_ActivityLog = "ActivityLog";
         private const string APPDATA_Wrapper_Resend = "Resend";
+        private const string APPDATA_Wrapper_TurnServer = "TurnServer";
 
         private static DirectoryInfo _wrapperRoot;
         private static DirectoryInfo _wrapperMessageStore;
@@ -21,6 +22,7 @@ namespace AowEmailWrapper.Helpers
         private static DirectoryInfo _wrapperConfig;
         private static DirectoryInfo _wrapperActivityLog;
         private static DirectoryInfo _wrapperResend;
+        private static DirectoryInfo _wrapperTurnServer;
 
         public static DirectoryInfo AppDataFolder
         {
@@ -108,6 +110,19 @@ namespace AowEmailWrapper.Helpers
                     _wrapperResend = GetFolder(Root, APPDATA_Wrapper_Resend);
                 }
                 return _wrapperResend;
+            }
+        }
+
+        /// <summary>The records of a hosted turn server and the outbox of records waiting to be delivered.</summary>
+        public static DirectoryInfo TurnServer
+        {
+            get
+            {
+                if (_wrapperTurnServer == null)
+                {
+                    _wrapperTurnServer = GetFolder(Root, APPDATA_Wrapper_TurnServer);
+                }
+                return _wrapperTurnServer;
             }
         }
 
