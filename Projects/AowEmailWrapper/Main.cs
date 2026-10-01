@@ -2190,8 +2190,10 @@ namespace AowEmailWrapper
                         //Whoever the player sends turns to is someone they are playing with
                         theActivity.Recipients = MailHelper.GetRecipientAddresses(theResponse.GameEmail);
                         _activityLog.AddContacts(new[] { theActivity.Recipients });
-                        DataManagerHelper.SaveActivityLog(_activityLog);
                     }
+                    //Shown and saved once the send is fully recorded: the copy the turn came from and its label are
+                    //only known now, and the first turn of a new game shown before that came up as the plain game
+                    RaiseEvent(_activityLogRefresh, this, new EventArgs());
 
                     if (_wrapperConfig.PreferencesConfig != null && _wrapperConfig.PreferencesConfig.CopyToEmailOut)
                     {
@@ -2870,8 +2872,6 @@ namespace AowEmailWrapper
 
                 _activityLog.Activities.Add(theActivity);
             }
-
-            RaiseEvent(_activityLogRefresh, this, new EventArgs());
 
             return theActivity;
         }

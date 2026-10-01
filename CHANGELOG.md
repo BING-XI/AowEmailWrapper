@@ -8,6 +8,12 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
 - AoWx copies and their turns show AoWx's own grey dragon on the tray menu and in the Activity Log, as
   Ziggurat's do with its purple one.
 
+### Fixed
+
+- The first turn sent in a new game shows its copy at once (Ziggurat's purple dragon and its label, for
+  instance). Before, the Activity Log showed it as the plain game until the list was next redrawn, though
+  the turn had gone out from, and was recorded under, the right copy.
+
 ## 2.1.2
 
 - Column widths you drag on the Activity Log and the account list are remembered, and come back the next
