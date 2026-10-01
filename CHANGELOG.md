@@ -8,6 +8,11 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
 - AoWx copies and their turns show AoWx's own grey dragon on the tray menu and in the Activity Log, as
   Ziggurat's do with its purple one.
 
+### Fixed
+
+- The tray menu shows an envelope next to a game again when a turn for it has arrived. Since version 2.0
+  the envelope was drawn just past the menu's right edge, out of sight.
+
 ## 2.1.2
 
 - Column widths you drag on the Activity Log and the account list are remembered, and come back the next

@@ -45,17 +45,6 @@ namespace AowEmailWrapper.Controls
             Font = font;
         }
 
-        public override Size GetPreferredSize(Size constrainingSize)
-        {
-            Size size = base.GetPreferredSize(constrainingSize);
-            if (_endImage != null)
-            {
-                size.Width += _endImage.Width + EndImagePadding;
-                size.Height = Math.Max(size.Height, _endImage.Height + 4);
-            }
-            return size;
-        }
-
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
