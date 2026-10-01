@@ -100,6 +100,10 @@ namespace AowEmailWrapper.ConfigFramework
         [XmlAttribute("accountsColumns")]
         public string AccountsColumnWidths { get; set; }
 
+        /// <summary>The size the player last gave the window, "width,height" at 96 dpi; empty for the default size.</summary>
+        [XmlAttribute("windowSize")]
+        public string WindowSize { get; set; }
+
         public PreferencesConfigValues()
             : this(false)
         { }

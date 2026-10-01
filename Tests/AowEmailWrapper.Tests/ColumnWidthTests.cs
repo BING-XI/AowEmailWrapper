@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -21,8 +22,132 @@ namespace AowEmailWrapper.Tests
             list.Columns.Add(new ColumnHeader { Text = "Ticks", Tag = "Fixed;0", Width = 0 });
             list.Items.Add(new ListViewItem(new[] { "turn.asg", "Map", "3", "0" }));
             form.Controls.Add(list);
+            //A live list, as on screen: only then does a new width go through the notifications a drag sends
+            IntPtr handle = list.Handle;
             ListViewColumnResizer.AllowUserResizing(list);
             return list;
+        }
+
+        /// <summary>Laid out like the lists now are: columns sized to their text or fixed, then the fill column last.</summary>
+        private static ListView BuildFillLastList(Form form, int width, params string[] status)
+        {
+            ListView list = new ListView { View = View.Details, Width = width, Height = 200 };
+            list.Columns.Add(new ColumnHeader { Text = "File", Tag = "ContentHeaderMax" });
+            list.Columns.Add(new ColumnHeader { Text = "Map", Tag = "Fixed;130" });
+            list.Columns.Add(new ColumnHeader { Text = "Status", Tag = "ContentHeaderMax" });
+            list.Columns.Add(new ColumnHeader { Text = "Copy", Tag = "Fill" });
+            list.Columns.Add(new ColumnHeader { Text = "Ticks", Tag = "Fixed;0", Width = 0 });
+            foreach (string text in status)
+            {
+                list.Items.Add(new ListViewItem(new[] { "turn.asg", "Map", text, "Vanilla", "0" }));
+            }
+            form.Controls.Add(list);
+            IntPtr handle = list.Handle;
+            ListViewColumnResizer.AllowUserResizing(list);
+            ListViewColumnResizer.ResizeColumns(list);
+            return list;
+        }
+
+        private static int Total(ListView list)
+        {
+            return list.Columns.Cast<ColumnHeader>().Sum(column => column.Width);
+        }
+
+        [Fact]
+        public void TheFillColumnGivesAndTakesTheRoomAColumnIsDraggedTo()
+        {
+            using (Form form = new Form())
+            {
+                ListView list = BuildFillLastList(form, 900, "Sent");
+                Assert.Equal(list.ClientSize.Width, Total(list));
+                int fill = list.Columns[3].Width;
+
+                //Widened: the fill column gives the room at once, so the list does not scroll sideways
+                list.Columns[1].Width = 180;
+                Assert.Equal("Fixed;180", list.Columns[1].Tag);
+                Assert.Equal(fill - 50, list.Columns[3].Width);
+                Assert.Equal(list.ClientSize.Width, Total(list));
+
+                //Narrowed: it takes the room back, so no gap opens at the right
+                list.Columns[1].Width = 100;
+                Assert.Equal(fill + 30, list.Columns[3].Width);
+                Assert.Equal(list.ClientSize.Width, Total(list));
+                Assert.Equal("Fill", list.Columns[3].Tag);
+            }
+        }
+
+        [Fact]
+        public void TheFillColumnCannotBeDraggedAndKeepsFilling()
+        {
+            using (Form form = new Form())
+            {
+                ListView list = BuildFillLastList(form, 900, "Sent");
+                int fill = list.Columns[3].Width;
+
+                list.Columns[3].Width = fill - 100;
+
+                Assert.Equal(fill, list.Columns[3].Width);
+                Assert.Equal("Fill", list.Columns[3].Tag);
+                Assert.Null(ListViewColumnResizer.SavedWidths(list));
+            }
+        }
+
+        [Fact]
+        public void AnEmptyListStillSpansItsWidth()
+        {
+            using (Form form = new Form())
+            {
+                ListView list = BuildFillLastList(form, 700);
+                Assert.Equal(list.ClientSize.Width, Total(list));
+                Assert.True(list.Columns[0].Width > 0 && list.Columns[2].Width > 0);
+            }
+        }
+
+        [Fact]
+        public void ShortOfRoomTheWidestTextColumnGivesWayButOnlyThen()
+        {
+            string longStatus = "Sent (probably with somebody.with.a.very.long.address@example.com)";
+            using (Form form = new Form())
+            {
+                ListView wide = BuildFillLastList(form, 1600, longStatus);
+                int natural = wide.Columns[2].Width;
+                Assert.Equal(wide.ClientSize.Width, Total(wide));
+
+                ListView narrow = BuildFillLastList(form, 500, longStatus);
+                Assert.True(narrow.Columns[2].Width < natural, "the long status column gives way in a narrow list");
+                Assert.Equal(narrow.ClientSize.Width, Total(narrow));
+            }
+        }
+
+        [Fact]
+        public void ADraggedColumnGoesBackToAutomaticWhenItsEdgeIsDoubleClicked()
+        {
+            using (Form form = new Form())
+            {
+                ListView list = BuildFillLastList(form, 900, "Sent");
+                int automatic = list.Columns[2].Width;
+                list.Columns[2].Width = automatic + 120;
+                Assert.Equal("Fixed;" + (automatic + 120), list.Columns[2].Tag);
+
+                ListViewColumnResizer.ResetColumn(list, 2);
+
+                Assert.Equal("ContentHeaderMax", list.Columns[2].Tag);
+                Assert.Equal(automatic, list.Columns[2].Width);
+                Assert.Equal(list.ClientSize.Width, Total(list));
+                Assert.Null(ListViewColumnResizer.SavedWidths(list));
+            }
+        }
+
+        [Fact]
+        public void TheLeastWidthEarlierVersionsSavedForTheFillColumnIsDropped()
+        {
+            using (Form form = new Form())
+            {
+                ListView list = BuildFillLastList(form, 900, "Sent");
+                ListViewColumnResizer.RestoreWidths(list, "5|3=Fill;600|1=Fixed;150");
+                Assert.Equal("Fill", list.Columns[3].Tag);
+                Assert.Equal("Fixed;150", list.Columns[1].Tag);
+            }
         }
 
         [Fact]

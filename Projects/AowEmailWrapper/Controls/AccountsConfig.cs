@@ -109,6 +109,8 @@ namespace AowEmailWrapper.Controls
         {
             InitializeComponent();
             ImageListLoader.Load(imageListIcons, "AccountsConfig");
+            //The account's settings keep to about the width they were designed for in a wide window; the list above takes the whole width
+            tabControlAccountEditor.MaximumSize = Main.FormContentMaxSize;
 
             ActiveFont = new Font(this.Font, FontStyle.Bold);
             NormalFont = new Font(this.Font, FontStyle.Regular);

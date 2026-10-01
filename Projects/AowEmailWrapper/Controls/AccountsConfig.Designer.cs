@@ -107,12 +107,12 @@
             // 
             // colAddress
             // 
-            this.colAddress.Tag = "Fill";
+            this.colAddress.Tag = "ContentHeaderMax";
             this.colAddress.Text = "Address";
             // 
             // colDefault
             // 
-            this.colDefault.Tag = "ContentHeaderMax";
+            this.colDefault.Tag = "Fill";
             this.colDefault.Text = "Default";
             // 
             // colHidden

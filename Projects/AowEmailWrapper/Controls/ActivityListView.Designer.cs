@@ -62,7 +62,7 @@
             // 
             // colFileName
             // 
-            this.colFileName.Tag = "Fill";
+            this.colFileName.Tag = "ContentHeaderMax";
             this.colFileName.Text = "File Name";
             this.colFileName.Width = 155;
             // 
@@ -89,7 +89,7 @@
             // 
             // colInstall
             // 
-            this.colInstall.Tag = "ContentHeaderMax";
+            this.colInstall.Tag = "Fill";
             this.colInstall.Text = "Copy";
             // 
             // colTicks

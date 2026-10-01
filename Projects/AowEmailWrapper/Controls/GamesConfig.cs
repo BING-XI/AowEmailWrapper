@@ -80,8 +80,9 @@ namespace AowEmailWrapper.Controls
             listViewGames.Columns.Add(new ColumnHeader { Text = "Game", Tag = "ContentHeaderMax" });
             listViewGames.Columns.Add(new ColumnHeader { Text = "Mod", Tag = "ContentHeaderMax" });
             listViewGames.Columns.Add(new ColumnHeader { Text = "Default", Tag = "HeaderSize" });
-            //The folder is last and sized to its longest path, so the list scrolls sideways rather than cutting paths short
-            listViewGames.Columns.Add(new ColumnHeader { Text = "Folder", Tag = "ContentHeaderMax" });
+            //The folder is last and fills the rest of the list, but never less than its longest path, so the list
+            //scrolls sideways rather than cutting paths short
+            listViewGames.Columns.Add(new ColumnHeader { Text = "Folder", Tag = "Fill" });
             ListViewColumnResizer.AllowUserResizing(listViewGames);
             listViewGames.SelectedIndexChanged += (sender, e) => UpdateButtons();
             //Sized on control resize only: reacting to the list's own client size changes loops when a scroll bar appears

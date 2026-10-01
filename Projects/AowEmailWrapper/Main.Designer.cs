@@ -1011,10 +1011,9 @@
             this.Controls.Add(this.panelMain);
             this.Controls.Add(this.panelBottom);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.MaximizeBox = false;
             this.Name = "Main";
             this.Text = "Age of Wonders Email Wrapper";
             this.panelBottom.ResumeLayout(false);
