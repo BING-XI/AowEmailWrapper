@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using AowEmailWrapper.Classes;
 using AowEmailWrapper.Controls;
 
 namespace AowEmailWrapper.Helpers
@@ -128,6 +129,13 @@ namespace AowEmailWrapper.Helpers
         }
 
         /// <summary>Restyles a form (or any control tree) for the current look.</summary>
+        /// <summary>The font a list's column headings are drawn in: the heading serif when the look draws them, else the list's own.</summary>
+        public static Font ListHeadingFont(ListView listView)
+        {
+            ListViewHooks hooks;
+            return _listViewHooks.TryGetValue(listView, out hooks) && hooks.Attached ? HeadingFont : listView.Font;
+        }
+
         public static void Apply(Control root)
         {
             if (root == null || root.IsDisposed)
@@ -721,6 +729,11 @@ namespace AowEmailWrapper.Helpers
                 _listView = listView;
             }
 
+            public bool Attached
+            {
+                get { return _attached; }
+            }
+
             public void Attach()
             {
                 if (_attached) return;
@@ -729,6 +742,8 @@ namespace AowEmailWrapper.Helpers
                 _listView.DrawColumnHeader += DrawColumnHeader;
                 _listView.DrawItem += DrawDefault;
                 _listView.DrawSubItem += DrawSubItemDefault;
+                //The headings are now drawn in the heading serif, wider than the list's own font they were sized for
+                ListViewColumnResizer.ResizeColumns(_listView);
             }
 
             public void Detach()
@@ -739,6 +754,7 @@ namespace AowEmailWrapper.Helpers
                 _listView.DrawItem -= DrawDefault;
                 _listView.DrawSubItem -= DrawSubItemDefault;
                 _listView.OwnerDraw = false;
+                ListViewColumnResizer.ResizeColumns(_listView);
             }
 
             private static void DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)

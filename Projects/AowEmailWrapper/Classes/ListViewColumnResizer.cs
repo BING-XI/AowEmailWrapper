@@ -382,14 +382,18 @@ namespace AowEmailWrapper.Classes
             }
         }
 
-        /// <summary>The width the column's heading needs, measured rather than auto-sized: the last column auto-sized to its heading fills the list.</summary>
+        /// <summary>
+        /// The width the column's heading needs, measured in the font it is drawn in (the Age of Wonders look draws
+        /// headings in its bold serif, wider than the list's own font), rather than auto-sized: the last column
+        /// auto-sized to its heading fills the list.
+        /// </summary>
         private static int HeaderWidth(ListView theListView, ColumnHeader column)
         {
             if (string.IsNullOrEmpty(column.Text))
             {
                 return MinimumUserWidth;
             }
-            return TextRenderer.MeasureText(column.Text, theListView.Font, System.Drawing.Size.Empty, TextFormatFlags.NoPrefix | TextFormatFlags.SingleLine).Width + DpiHelper.Scale(HeaderPadding);
+            return TextRenderer.MeasureText(column.Text, Theme.ListHeadingFont(theListView), System.Drawing.Size.Empty, TextFormatFlags.NoPrefix | TextFormatFlags.SingleLine).Width + DpiHelper.Scale(HeaderPadding);
         }
 
         /// <summary>
