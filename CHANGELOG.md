@@ -3,6 +3,15 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- A double-click on the tray icon opens the waiting turn at the top of the Activity Log, and each further
+  double-click the next one down; with no turn waiting it opens the main window. A single click opens the main
+  window.
+- Opening a turn while its game is already running brings the game to the front with a notification naming the
+  turn to load in it, as a running game cannot be told to load one. A copy of the game started outside the
+  Wrapper is brought to the front too, rather than started a second time.
+
 ## 2.1.8
 
 Thanks to BING-XI for this release.
