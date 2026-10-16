@@ -223,17 +223,19 @@ namespace AowEmailWrapper
             {
                 _configChangeTracking = value;
                 EventHandler configNeedsSave = new EventHandler(OnConfigNeedsSave);
+                EventHandler preferencesChanged = new EventHandler(PreferencesChanged);
 
-                //Not the Games tab: its changes are applied and saved at once (GamesChanged)
+                //Only the Accounts tab waits for Save, as saving it reconnects every account; the Games and
+                //Settings tabs apply and save their changes at once (GamesChanged, PreferencesChanged)
                 if (_configChangeTracking)
                 {
                     accountsConfig.Config_Changed += configNeedsSave;
-                    preferencesConfig.Config_Changed += configNeedsSave;
+                    preferencesConfig.Config_Changed += preferencesChanged;
                 }
                 else
                 {
                     accountsConfig.Config_Changed -= configNeedsSave;
-                    preferencesConfig.Config_Changed -= configNeedsSave;
+                    preferencesConfig.Config_Changed -= preferencesChanged;
                 }
             }
         }
@@ -330,6 +332,9 @@ namespace AowEmailWrapper
             CheckNotifyIconState(true);
 
             this.FormClosing += new FormClosingEventHandler(Main_FormClosing);
+            //A Settings tab field still being typed in is not left when the player goes elsewhere or sends the
+            //window to the tray
+            this.Deactivate += (sender, e) => preferencesConfig.FinishEditing();
 
             ScheduleUpdateCheck();
 
@@ -858,22 +863,7 @@ namespace AowEmailWrapper
                 PreferencesConfigValues preferencesConfigValues = preferencesConfig.Config;
                 if (preferencesConfigValues != null)
                 {
-                    string keyName = Translator.Translate(this.Name);
-                    if (preferencesConfigValues.Autostart)
-                    {
-                        string keyValue = string.Format(WrapperAutostartTemplate, Application.ExecutablePath, ConfigHelper.AUTOSTART_CMD_PARAM);
-                        RegistryHelper.SetValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName, keyValue);
-                    }
-                    else
-                    {
-                        //Only this copy's own entry: another installation of the Wrapper (or a test copy with
-                        //autostart off) must not switch off the autostart of the one the player uses
-                        string current = RegistryHelper.GetValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
-                        if (current != null && current.IndexOf(Application.ExecutablePath, StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            RegistryHelper.DeleteValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
-                        }
-                    }
+                    ApplyAutostart(preferencesConfigValues);
                 }
 
                 //Games: labels, defaults and folders added by hand
@@ -910,6 +900,69 @@ namespace AowEmailWrapper
                     {
                         RestartWrapper();
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.ToString());
+                Trace.Flush();
+                ShowException(ex);
+            }
+        }
+
+        private void ApplyAutostart(PreferencesConfigValues preferences)
+        {
+            string keyName = Translator.Translate(this.Name);
+            if (preferences.Autostart)
+            {
+                string keyValue = string.Format(WrapperAutostartTemplate, Application.ExecutablePath, ConfigHelper.AUTOSTART_CMD_PARAM);
+                RegistryHelper.SetValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName, keyValue);
+            }
+            else
+            {
+                //Only this copy's own entry: another installation of the Wrapper (or a test copy with
+                //autostart off) must not switch off the autostart of the one the player uses
+                string current = RegistryHelper.GetValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                if (current != null && current.IndexOf(Application.ExecutablePath, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    RegistryHelper.DeleteValue(Registry.CurrentUser, WINDOWS_REG_STARTUP_LOCATION, keyName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A change on the Settings tab is applied and saved at once, as one on the Games tab is: a box ticked or a
+        /// choice made, or a text field left. Edits on the Accounts tab not saved yet stay unsaved, as that tab
+        /// keeps them to itself until Save.
+        /// </summary>
+        private void PreferencesChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                PreferencesConfigValues changed = preferencesConfig.Config;
+                if (changed == null)
+                {
+                    return;
+                }
+                PreferencesConfigValues before = _wrapperConfig.PreferencesConfig;
+
+                ApplyAutostart(changed);
+                KeepColumnWidths(changed);
+                _wrapperConfig.PreferencesConfig = changed;
+                DataManagerHelper.SaveConfig(_wrapperConfig);
+                Trace.TraceInformation("Settings tab change applied and saved");
+
+                if (before == null || before.GameWrapperDataPort != changed.GameWrapperDataPort)
+                {
+                    ApplyGamePort(_wrapperConfig.AccountsList != null ? _wrapperConfig.AccountsList.PrimaryAccount : null);
+                }
+
+                //A language takes a restart; offered once, when it is chosen
+                if (!changed.LanguageCode.Equals(Translator.CurrentLanguageCode) && (before == null || !changed.LanguageCode.Equals(before.LanguageCode)) &&
+                    MessageBox.Show(this, Translator.Translate(WrapperRestartRequiredKey), Translator.Translate(this.Name), MessageBoxButtons.YesNo, MessageBoxIcon.Information).Equals(DialogResult.Yes) &&
+                    ConfirmUnsavedChanges())
+                {
+                    RestartWrapper();
                 }
             }
             catch (Exception ex)
@@ -969,6 +1022,7 @@ namespace AowEmailWrapper
         /// </summary>
         private bool ConfirmUnsavedChanges()
         {
+            preferencesConfig.FinishEditing();
             if (!ConfigNeedsSave)
             {
                 return true;
@@ -2565,33 +2619,7 @@ namespace AowEmailWrapper
 
                 panelLocalMessageStore.Visible = primary != null && primary.PollingConfig != null && primary.PollingConfig.EmailType.Equals(EmailType.POP3);
 
-                //Belt and braces for Game to Wrapper communication
-                int listenPort = PreferencesConfigValues.GameWrapperDataPortDefault;
-
-                if (_wrapperConfig.PreferencesConfig != null &&
-                    _wrapperConfig.PreferencesConfig.GameWrapperDataPort > 0)
-                {
-                    listenPort = _wrapperConfig.PreferencesConfig.GameWrapperDataPort;
-                }
-
-                if (_theServer == null)
-                {
-                    //Start Wrapper SMTP Server
-                    StartServer(listenPort);
-                }
-                else if (_theServer != null &&
-                    _theServer.IsRunning &&
-                    !_theServer.Port.Equals(listenPort))
-                {
-                    //They changed the port, the SMTP Server needs a restart
-                    StopServer();
-                    StartServer(listenPort);
-                }
-
-                if (primary != null && primary.SmtpConfig != null)
-                {
-                    _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, listenPort));
-                }
+                ApplyGamePort(primary);
 
                 CreateAllSenders();
                 StartAllPolling();
@@ -2616,6 +2644,41 @@ namespace AowEmailWrapper
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Starts the local mail server the games hand their turns to, on the port the Settings tab gives, or
+        /// restarts it when the port has changed; and points the games' email settings at it.
+        /// </summary>
+        private void ApplyGamePort(AccountConfigValues primary)
+        {
+            //Belt and braces for Game to Wrapper communication
+            int listenPort = PreferencesConfigValues.GameWrapperDataPortDefault;
+
+            if (_wrapperConfig.PreferencesConfig != null &&
+                _wrapperConfig.PreferencesConfig.GameWrapperDataPort > 0)
+            {
+                listenPort = _wrapperConfig.PreferencesConfig.GameWrapperDataPort;
+            }
+
+            if (_theServer == null)
+            {
+                //Start Wrapper SMTP Server
+                StartServer(listenPort);
+            }
+            else if (_theServer != null &&
+                _theServer.IsRunning &&
+                !_theServer.Port.Equals(listenPort))
+            {
+                //They changed the port, the SMTP Server needs a restart
+                StopServer();
+                StartServer(listenPort);
+            }
+
+            if (primary != null && primary.SmtpConfig != null)
+            {
+                _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, listenPort));
+            }
         }
 
         #endregion

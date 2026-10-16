@@ -3,6 +3,13 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- Changes on the Settings tab are applied and saved at once, as those on the Games and Aliases tabs already
+  were: a box or a choice as you make it, the name sent with your turns and the data port when you leave the
+  field. Only the Accounts tab still waits for *Save Settings*, as saving it reconnects every account. A new
+  data port takes effect straight away, and choosing a language offers the restart it needs.
+
 ## 2.1.8
 
 Thanks to BING-XI for this release.

@@ -401,6 +401,28 @@ namespace AowEmailWrapper.SmokeTests
             Assert.Fail($"no tab '{name}'");
         }
 
+        /// <summary>
+        /// Ticks or clears the check box on the same line as a label of the main window. The Settings tab's check
+        /// boxes carry no text of their own; their label stands beside them.
+        /// </summary>
+        public void ToggleCheckBoxBeside(string label)
+        {
+            AutomationElement root = AutomationElement.FromHandle(MainWindow());
+            Condition named = new AndCondition(
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text),
+                new PropertyCondition(AutomationElement.NameProperty, label));
+            AutomationElement text = null;
+            Until(() => (text = root.FindFirst(TreeScope.Descendants, named)) != null, TimeSpan.FromSeconds(10), $"no label '{label}'");
+            System.Windows.Rect line = text.Current.BoundingRectangle;
+            AutomationElement box = root.FindAll(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.CheckBox))
+                .Cast<AutomationElement>()
+                .Where(element => !element.Current.IsOffscreen)
+                .OrderBy(element => Math.Abs((element.Current.BoundingRectangle.Top + element.Current.BoundingRectangle.Bottom) / 2 - (line.Top + line.Bottom) / 2))
+                .First();
+            //Off this thread: the call returns only once the Wrapper has handled the change
+            Task.Run(() => ((TogglePattern)box.GetCurrentPattern(TogglePattern.Pattern)).Toggle()).Wait(TimeSpan.FromSeconds(10));
+        }
+
         /// <summary>Clicks a button of a window, as BM_CLICK; posted, so a dialog it opens does not block the test.</summary>
         public void ClickButton(IntPtr window, string text)
         {
@@ -427,6 +449,28 @@ namespace AowEmailWrapper.SmokeTests
             using (StreamReader reader = new StreamReader(stream))
             {
                 return reader.ReadToEnd();
+            }
+        }
+
+        /// <summary>A file the Wrapper may be writing at the same moment.</summary>
+        public string ReadFile(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return string.Empty;
+            }
+            try
+            {
+                using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (IOException)
+            {
+                //Replaced as it was opened; the next look finds the new one
+                return string.Empty;
             }
         }
 
@@ -591,6 +635,7 @@ namespace AowEmailWrapper.SmokeTests
         [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr h, StringBuilder s, int n);
         [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
         [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+        [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr h);
         [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
         [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
         [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr h, int m, IntPtr w, IntPtr l);
