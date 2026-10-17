@@ -51,12 +51,26 @@ namespace AowEmailWrapper.SmokeTests
         /// </summary>
         public static int FreePort()
         {
+            return FreePort(20000, 40000);
+        }
+
+        /// <summary>
+        /// A free port the Settings tab accepts for the games' data port: from 49151 up. Any other port is put back
+        /// to the default, 49252, whenever the tab is read, which a Wrapper already running on the PC may be holding.
+        /// </summary>
+        public static int FreeSettingsPort()
+        {
+            return FreePort(49300, 60000);
+        }
+
+        public static int FreePort(int from, int to)
+        {
             for (int attempt = 0; attempt < 200; attempt++)
             {
                 int port;
                 lock (PortPicker)
                 {
-                    port = PortPicker.Next(20000, 40000);
+                    port = PortPicker.Next(from, to);
                 }
                 try
                 {
@@ -69,7 +83,7 @@ namespace AowEmailWrapper.SmokeTests
                 {
                 }
             }
-            throw new InvalidOperationException("no free port found between 20000 and 40000");
+            throw new InvalidOperationException("no free port found between " + from + " and " + to);
         }
 
         public void Add(MimeMessage message)

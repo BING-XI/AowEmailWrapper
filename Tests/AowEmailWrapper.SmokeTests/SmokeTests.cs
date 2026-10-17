@@ -290,6 +290,9 @@ namespace AowEmailWrapper.SmokeTests
         {
             using (AppUnderTest app = new AppUnderTest())
             {
+                //A port the Settings tab keeps as it is: it puts any other back to 49252 when it reads the tab, so a
+                //change would restart the mail server there, where a Wrapper already running on this PC holds it
+                app.Config.PreferencesConfig.GameWrapperDataPort = FakePop3Server.FreeSettingsPort();
                 app.Start();
                 app.ShowAndSettle();
                 app.SelectTab("Settings");
