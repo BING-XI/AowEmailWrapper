@@ -231,6 +231,53 @@ namespace AowEmailWrapper.SmokeTests
         }
 
         [Fact]
+        public void Double_clicks_on_the_tray_icon_open_the_waiting_turns_and_bring_a_running_game_forward()
+        {
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                app.AddStandInGameCopy(GameLabel);
+                app.AddWaitingTurn("Older.asg", 60);
+                app.AddWaitingTurn("Newer.asg", 5);
+                app.Start();
+                string exe = Path.Combine(app.GameFolder, "AoW.exe");
+
+                //The top of the Activity Log first
+                app.DoubleClickTrayIcon();
+                AppUnderTest.Until(() => app.ReadLog().Contains($@"Started {exe} loading EmailIn\Newer.asg"), TimeSpan.FromSeconds(20), () => "the newer turn was not opened:" + Environment.NewLine + app.ReadLog());
+                IntPtr game = IntPtr.Zero;
+                AppUnderTest.Until(() => (game = app.GameWindow()) != IntPtr.Zero, TimeSpan.FromSeconds(20), () => "the game did not start:" + Environment.NewLine + app.ReadLog());
+
+                //Then the next one down, which the running game cannot be told to load: it comes back to the front,
+                //and the player is told which turn to load in it
+                Native.PostMessage(game, 0x0112, (IntPtr)0xF020, IntPtr.Zero);
+                AppUnderTest.Until(() => Native.IsIconic(game), TimeSpan.FromSeconds(10), "the game did not minimize");
+                app.DoubleClickTrayIcon();
+                AppUnderTest.Until(() => !Native.IsIconic(game), TimeSpan.FromSeconds(10), () => "the running game was not brought back:" + Environment.NewLine + app.ReadLog());
+                AppUnderTest.Until(() => app.ReadLog().Contains("running without Older.asg"), TimeSpan.FromSeconds(10), () => "the player was not told to load the turn:" + Environment.NewLine + app.ReadLog());
+                Assert.DoesNotContain(@"loading EmailIn\Older.asg", app.ReadLog());
+                Assert.Equal(game, app.GameWindow());
+            }
+        }
+
+        [Fact]
+        public void A_click_on_the_tray_icon_shows_the_Wrapper_with_a_turn_waiting()
+        {
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                app.AddStandInGameCopy(GameLabel);
+                app.AddWaitingTurn("Waiting.asg", 5);
+                app.Start();
+                AppUnderTest.Until(() => !Native.IsWindowVisible(app.MainWindow()), TimeSpan.FromSeconds(20), "the Wrapper did not start in the tray");
+
+                app.ClickTrayIcon();
+
+                AppUnderTest.Until(() => app.MainWindow() != IntPtr.Zero && Native.IsWindowVisible(app.MainWindow()) && !Native.IsIconic(app.MainWindow()),
+                    TimeSpan.FromSeconds(10), "the Wrapper did not show itself:" + Environment.NewLine + app.DescribeWindows());
+                Assert.DoesNotContain("Started", app.ReadLog());
+            }
+        }
+
+        [Fact]
         public void An_arriving_turn_is_stored_and_recorded_as_received()
         {
             using (FakePop3Server mail = new FakePop3Server())

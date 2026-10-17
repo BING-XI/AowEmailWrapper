@@ -60,6 +60,8 @@ namespace AowEmailWrapper
         //The text of the last notification shown; NotifyIcon does not keep it when the text is passed to ShowBalloonTip
         private string _lastBalloonText;
         private const string WrapperGameStartFailedFallback = "The game could not be started from {0}: {1}";
+        private const string WrapperLoadInRunningGameKey = "msgLoadInRunningGame";
+        private const string WrapperLoadInRunningGameFallback = "{0} is already running. Load {1} in it.";
         private const string WrapperEmailSentSuccessKey = "msgWrapperEmailSentSuccess";
         private const string WrapperEmailSentFailedKey = "msgWrapperEmailSentFailed";
         private const string WrapperRestartRequiredKey = "msgWrapperRestartRequired";
@@ -131,6 +133,12 @@ namespace AowEmailWrapper
         private StartedTaskWatcher _aow1GameWatcher;
         private StartedTaskWatcher _aow2GameWatcher;
         private StartedTaskWatcher _aowSmGameWatcher;
+
+        //Waiting turns opened since a double-click on the tray icon last went round them all, by file name
+        private readonly HashSet<string> _openedTurns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        //A single click on the tray icon waits out the double-click time, so a double-click opens a turn without
+        //showing the Wrapper as well
+        private System.Windows.Forms.Timer _trayClickTimer;
 
         private EventHandler _shutDownEvent;
         private EventHandler _maximizeEvent;
@@ -324,6 +332,9 @@ namespace AowEmailWrapper
             linkDiscordAow2.LinkClicked += new LinkLabelLinkClickedEventHandler(linkDiscord_LinkClicked);
             notifyIcon.BalloonTipClicked += new EventHandler(notifyIcon_BalloonTipClicked);
             notifyIcon.BalloonTipClosed += new EventHandler(notifyIcon_BalloonTipClosed);
+            notifyIcon.MouseClick += new MouseEventHandler(notifyIcon_MouseClick);
+            _trayClickTimer = new System.Windows.Forms.Timer(components);
+            _trayClickTimer.Tick += new EventHandler(trayClickTimer_Tick);
 
             CreateContextMenu();
 
@@ -728,9 +739,33 @@ namespace AowEmailWrapper
                 Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(bounds));
         }
 
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _trayClickTimer.Stop();
+                _trayClickTimer.Interval = SystemInformation.DoubleClickTime;
+                _trayClickTimer.Start();
+            }
+        }
+
+        private void trayClickTimer_Tick(object sender, EventArgs e)
+        {
+            _trayClickTimer.Stop();
+            Maximize();
+        }
+
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            Maximize();
+            _trayClickTimer.Stop();
+            if (e.Button == MouseButtons.Left)
+            {
+                OpenNextTurn();
+            }
+            else
+            {
+                Maximize();
+            }
         }
 
         private void cmdSave_Click(object sender, EventArgs e)
@@ -1586,19 +1621,74 @@ namespace AowEmailWrapper
         private void StartGame(AowGame theGame, Activity turn)
         {
             string save = SaveToLoad(theGame, turn);
+            if (turn != null && turn.Status == ActivityState.Received)
+            {
+                //However it was opened, the next double-click on the tray icon moves on from it
+                _openedTurns.Add(turn.FileName);
+            }
             switch (theGame.GameType)
             {
                 case AowGameType.Aow1:
-                    StartGame(theGame, save, ref _aow1GameWatcher);
+                    StartGame(theGame, turn, save, ref _aow1GameWatcher);
                     break;
                 case AowGameType.Aow2:
-                    StartGame(theGame, save, ref _aow2GameWatcher);
+                    StartGame(theGame, turn, save, ref _aow2GameWatcher);
                     break;
                 case AowGameType.AowSm:
                 case AowGameType.AowMpe:
-                    StartGame(theGame, save, ref _aowSmGameWatcher);
+                    StartGame(theGame, turn, save, ref _aowSmGameWatcher);
                     break;
             }
+        }
+
+        /// <summary>
+        /// A double-click on the tray icon: the next turn waiting for the player, going
+        /// down the Activity Log from the top, or the Wrapper itself when no turn waits.
+        /// </summary>
+        private void OpenNextTurn()
+        {
+            List<Activity> waiting = WaitingInListOrder(_activityLog.Activities.Where(activity =>
+            {
+                AowGame game = _gameManager.GetGameForActivity(activity);
+                return game != null && game.IsInstalled;
+            }));
+            Activity next = NextWaitingTurn(waiting, _openedTurns);
+            if (next == null)
+            {
+                Maximize();
+                return;
+            }
+            Trace.TraceInformation("Opening the next waiting turn, {0}", next.FileName);
+            StartGame(_gameManager.GetGameForActivity(next), next);
+        }
+
+        /// <summary>The turns waiting for the player, in the Activity Log's order: newest first.</summary>
+        internal static List<Activity> WaitingInListOrder(IEnumerable<Activity> activities)
+        {
+            return activities
+                .Where(activity => activity.Status == ActivityState.Received)
+                .OrderByDescending(activity =>
+                {
+                    long ticks;
+                    return long.TryParse(activity.DateTicks, out ticks) ? ticks : long.MinValue;
+                })
+                .ToList();
+        }
+
+        /// <summary>
+        /// The first waiting turn not opened yet, so each double-click moves on to the next, and the top one again
+        /// once all have been opened. A turn that no longer waits is forgotten, so its next turn counts as not opened.
+        /// </summary>
+        internal static Activity NextWaitingTurn(IList<Activity> waiting, HashSet<string> opened)
+        {
+            opened.RemoveWhere(name => !waiting.Any(activity => opened.Comparer.Equals(activity.FileName, name)));
+            Activity next = waiting.FirstOrDefault(activity => !opened.Contains(activity.FileName));
+            if (next == null && waiting.Count > 0)
+            {
+                opened.Clear();
+                next = waiting[0];
+            }
+            return next;
         }
 
         /// <summary>
@@ -1635,29 +1725,50 @@ namespace AowEmailWrapper
         }
 
         /// <summary>
-        /// One running copy of each game is watched, so a second click while it runs does nothing. A start
-        /// that fails is reported and leaves the slot free: before, the failed watcher stayed in it and
-        /// every later click was ignored without a word.
+        /// One running copy of each game is watched, so a second click while it runs brings it to the front. A
+        /// running game cannot be told to load a turn, as it reads the save to load only when it starts, so the
+        /// player is told which one to load in it. A start that fails is reported and leaves the slot free:
+        /// before, the failed watcher stayed in it and every later click was ignored without a word.
         /// </summary>
-        private void StartGame(AowGame theGame, string save, ref StartedTaskWatcher watcher)
+        private void StartGame(AowGame theGame, Activity turn, string save, ref StartedTaskWatcher watcher)
         {
             if (watcher != null)
             {
-                //Already running: bring it to the front rather than doing nothing
-                if (WindowHelper.BringToFront(watcher.Process))
-                {
-                    Trace.TraceInformation("{0} is running; brought it to the front", theGame.ExePath);
-                    return;
-                }
-                if (watcher.Process == null || HasExited(watcher.Process))
+                Process process = watcher.Process;
+                if (process == null || HasExited(process))
                 {
                     //It ended and the watcher has not reported it yet; start it again
                     watcher = null;
                 }
                 else
                 {
-                    //Still starting up, with no window to show yet
+                    //Already running: bring it to the front rather than doing nothing. Still starting up, it has no
+                    //window to show yet.
+                    if (WindowHelper.BringToFront(process))
+                    {
+                        Trace.TraceInformation("{0} is running; brought it to the front", theGame.ExePath);
+                    }
+                    if (save != null && !watcher.Loads(theGame, save))
+                    {
+                        TellToLoadInRunningGame(watcher.Game ?? theGame, turn);
+                    }
                     return;
+                }
+            }
+            else
+            {
+                AowGame runningCopy;
+                using (Process running = RunningCopy(theGame.GameType, out runningCopy))
+                {
+                    if (running != null && WindowHelper.BringToFront(running))
+                    {
+                        Trace.TraceInformation("{0} is running, started outside the Wrapper; brought it to the front", runningCopy.ExePath);
+                        if (save != null)
+                        {
+                            TellToLoadInRunningGame(runningCopy, turn);
+                        }
+                        return;
+                    }
                 }
             }
 
@@ -1689,6 +1800,64 @@ namespace AowEmailWrapper
                 string title = Translator.Translate(this.Name);
                 BeginInvoke(new Action(() => MessageBox.Show(Visible ? this : null, message, title, MessageBoxButtons.OK, MessageBoxIcon.Error)));
             }
+        }
+
+        /// <summary>
+        /// A copy of a game the Wrapper knows that is running without having been started by it, from the desktop
+        /// say, matched by its executable's path; null when there is none.
+        /// </summary>
+        private static Process RunningCopy(AowGameType gameType, out AowGame copy)
+        {
+            foreach (AowGame game in _gameManager.Games.Where(game => game.IsInstalled && SameWatcher(game.GameType, gameType)))
+            {
+                Process match = null;
+                foreach (Process process in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(game.ExePath)))
+                {
+                    if (match == null && IsRunFrom(process, game.ExePath))
+                    {
+                        match = process;
+                    }
+                    else
+                    {
+                        process.Dispose();
+                    }
+                }
+                if (match != null)
+                {
+                    copy = game;
+                    return match;
+                }
+            }
+            copy = null;
+            return null;
+        }
+
+        /// <summary>Whether two kinds of game share a watcher, and so run one at a time.</summary>
+        private static bool SameWatcher(AowGameType one, AowGameType other)
+        {
+            Func<AowGameType, bool> shadowMagic = type => type == AowGameType.AowSm || type == AowGameType.AowMpe;
+            return one == other || (shadowMagic(one) && shadowMagic(other));
+        }
+
+        private static bool IsRunFrom(Process process, string exePath)
+        {
+            try
+            {
+                return !process.HasExited && string.Equals(Path.GetFullPath(process.MainModule.FileName), Path.GetFullPath(exePath), StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception || ex is InvalidOperationException || ex is NotSupportedException)
+            {
+                //Running elevated, or gone already
+                return false;
+            }
+        }
+
+        private void TellToLoadInRunningGame(AowGame running, Activity turn)
+        {
+            string name = AowGameManager.MenuName(_gameManager.Games, running);
+            Trace.TraceInformation("{0} is running without {1}; told the player to load it there", name, turn.FileName);
+            string text = Translator.Translate(WrapperLoadInRunningGameKey, name, turn.FileName);
+            ShowBalloon(10000, Translator.Translate(this.Name), string.IsNullOrEmpty(text) ? string.Format(WrapperLoadInRunningGameFallback, name, turn.FileName) : text, ToolTipIcon.Info);
         }
 
         #endregion

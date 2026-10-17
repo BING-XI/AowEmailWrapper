@@ -5,6 +5,12 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
 
 ## Unreleased
 
+- A double-click on the tray icon opens the waiting turn at the top of the Activity Log, and each further
+  double-click the next one down; with no turn waiting it opens the main window. A single click opens the main
+  window.
+- Opening a turn while its game is already running brings the game to the front with a notification naming the
+  turn to load in it, as a running game cannot be told to load one. A copy of the game started outside the
+  Wrapper is brought to the front too, rather than started a second time.
 - Changes on the Settings tab are applied and saved at once, as those on the Games and Aliases tabs already
   were: a box or a choice as you make it, the name sent with your turns and the data port when you leave the
   field. Only the Accounts tab still waits for *Save Settings*, as saving it reconnects every account. A new

@@ -13,6 +13,7 @@ using AowEmailWrapper.Games;
 using AowEmailWrapper.Helpers;
 using Microsoft.Win32;
 using Xunit;
+using Activity = AowEmailWrapper.ConfigFramework.Activity;
 
 namespace AowEmailWrapper.SmokeTests
 {
@@ -149,6 +150,20 @@ namespace AowEmailWrapper.SmokeTests
             AddGameCopy(Path.Combine(GameFolder, "StandInGame.exe"), label);
         }
 
+        private readonly ActivityList _activityLog = new ActivityList();
+
+        /// <summary>A turn received <paramref name="minutesAgo"/> into the game copy's EmailIn, waiting to be played.</summary>
+        public void AddWaitingTurn(string fileName, int minutesAgo)
+        {
+            string emailIn = Path.Combine(GameFolder, "EmailIn");
+            Directory.CreateDirectory(emailIn);
+            File.WriteAllText(Path.Combine(emailIn, fileName), "a turn");
+            Activity turn = new Activity(ActivityState.Received, AowGameType.Aow1, fileName, "Smoke test", "1");
+            turn.DateTicks = DateTime.Now.AddMinutes(-minutesAgo).Ticks.ToString();
+            turn.InstallFolder = GameFolder;
+            _activityLog.Activities.Add(turn);
+        }
+
         /// <summary>A second start of the same executable with the same settings, as from the Start menu.</summary>
         public Process StartAgain()
         {
@@ -189,6 +204,12 @@ namespace AowEmailWrapper.SmokeTests
             string configFolder = Path.Combine(AppData, "AowEmailWrapper", "Config");
             Directory.CreateDirectory(configFolder);
             FileHelper.SaveXmlFile(Path.Combine(configFolder, "config.xml"), Config);
+            if (_activityLog.Activities.Count > 0)
+            {
+                string logFolder = Path.Combine(AppData, "AowEmailWrapper", "ActivityLog");
+                Directory.CreateDirectory(logFolder);
+                FileHelper.SaveXmlFile(Path.Combine(logFolder, "activity.xml"), _activityLog);
+            }
 
             ProcessStartInfo start = new ProcessStartInfo(Path.Combine(AppFolder, ExeName))
             {
@@ -320,6 +341,16 @@ namespace AowEmailWrapper.SmokeTests
             foreach (IntPtr h in NotifyWindows())
             {
                 Native.PostMessage(h, TrayMessage, IntPtr.Zero, (IntPtr)0x203);
+            }
+        }
+
+        /// <summary>What the tray icon receives when the player clicks it once.</summary>
+        public void ClickTrayIcon()
+        {
+            foreach (IntPtr h in NotifyWindows())
+            {
+                Native.PostMessage(h, TrayMessage, IntPtr.Zero, (IntPtr)0x201);
+                Native.PostMessage(h, TrayMessage, IntPtr.Zero, (IntPtr)0x202);
             }
         }
 
