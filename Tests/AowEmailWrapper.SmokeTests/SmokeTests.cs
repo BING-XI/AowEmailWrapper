@@ -333,6 +333,28 @@ namespace AowEmailWrapper.SmokeTests
         }
 
         [Fact]
+        public void A_change_on_the_Settings_tab_is_saved_without_Save_Settings()
+        {
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                //A port the Settings tab keeps as it is: it puts any other back to 49252 when it reads the tab, so a
+                //change would restart the mail server there, where a Wrapper already running on this PC holds it
+                app.Config.PreferencesConfig.GameWrapperDataPort = FakePop3Server.FreeSettingsPort();
+                app.Start();
+                app.ShowAndSettle();
+                app.SelectTab("Settings");
+                string config = Path.Combine(app.AppData, "AowEmailWrapper", "Config", "config.xml");
+                Assert.DoesNotContain("playsoundonemail=\"true\"", app.ReadFile(config));
+
+                app.ToggleCheckBoxBeside("Email Downloaded sound:");
+
+                AppUnderTest.Until(() => app.ReadFile(config).Contains("playsoundonemail=\"true\""), TimeSpan.FromSeconds(10), () => "the setting was not saved:" + Environment.NewLine + app.ReadLog());
+                IntPtr save = Native.Children(app.MainWindow()).Single(h => Native.Text(h) == "Save Settings");
+                Assert.False(Native.IsWindowEnabled(save), "Save Settings lit up for a change already saved");
+            }
+        }
+
+        [Fact]
         public void Names_on_a_known_players_turn_are_learned_and_a_strangers_are_not()
         {
             using (FakePop3Server mail = new FakePop3Server())

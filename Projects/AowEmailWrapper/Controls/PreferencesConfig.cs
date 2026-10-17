@@ -20,6 +20,9 @@ namespace AowEmailWrapper.Controls
         private const string PlayerNameHintKey = "lblPlayerNameHint";
         private PreferencesConfigValues _config;
         private bool _populating;
+        //The text fields as last reported, so leaving one unchanged reports nothing
+        private string _reportedPlayerName;
+        private string _reportedPort;
 
         public PreferencesConfig()
         {
@@ -54,12 +57,14 @@ namespace AowEmailWrapper.Controls
             fbLocalization.InnerComboBox.SelectedIndexChanged += raiseConfigChange;
             fbTheme.InnerComboBox.SelectedIndexChanged += raiseConfigChange;
             fbTheme.InnerComboBox.SelectedIndexChanged += (sender, e) => { if (!_populating) ThemeChanged?.Invoke(this, e); };
-            fbGameWrapperDataPort.InnerTextBox.TextChanged += raiseConfigChange;
+            //The text fields count as changed when they are left, not at each key: the port is checked as it is
+            //read, and a port half typed would be put back to the default
+            fbGameWrapperDataPort.InnerTextBox.Leave += (sender, e) => FinishEditing();
             fbPlayerName.InnerTextBox.MaxLength = PlayerAlias.MaxNameLength;
             string playerNameHint = Translator.Translate(PlayerNameHintKey);
             fbPlayerName.InnerTextBox.PlaceholderText = playerNameHint;
             new ToolTip().SetToolTip(fbPlayerName.InnerTextBox, playerNameHint);
-            fbPlayerName.InnerTextBox.TextChanged += raiseConfigChange;
+            fbPlayerName.InnerTextBox.Leave += (sender, e) => FinishEditing();
         }
 
         /// <summary>Fills in the name sent with the player's turns, unless they have given one already.</summary>
@@ -68,7 +73,27 @@ namespace AowEmailWrapper.Controls
             if (string.IsNullOrWhiteSpace(fbPlayerName.TextValue) && !string.IsNullOrWhiteSpace(name))
             {
                 fbPlayerName.TextValue = name.Trim();
+                FinishEditing();
             }
+        }
+
+        /// <summary>
+        /// Reports a text field changed since it was last reported, as when it is left. Also called when the window
+        /// loses the focus or the Wrapper closes, as a field still being typed in is not left then.
+        /// </summary>
+        public void FinishEditing()
+        {
+            if (!string.Equals(fbPlayerName.TextValue, _reportedPlayerName, StringComparison.Ordinal) ||
+                !string.Equals(fbGameWrapperDataPort.TextValue, _reportedPort, StringComparison.Ordinal))
+            {
+                Raise_Config_Changed(this, EventArgs.Empty);
+            }
+        }
+
+        private void RememberReportedText()
+        {
+            _reportedPlayerName = fbPlayerName.TextValue;
+            _reportedPort = fbGameWrapperDataPort.TextValue;
         }
 
         public string Prefix
@@ -134,6 +159,7 @@ namespace AowEmailWrapper.Controls
                 fbPlayerName.TextValue = _config.PlayerName ?? string.Empty;
                 fbGameWrapperDataPort.TextValue = _config.GameWrapperDataPort.ToString();
                 UpdateSaveFolderTip();
+                RememberReportedText();
             }
             finally
             {
@@ -143,10 +169,19 @@ namespace AowEmailWrapper.Controls
 
         private void Raise_Config_Changed(object sender, EventArgs e)
         {
+            //Filling the tab in from the saved settings changes nothing
+            if (_populating)
+            {
+                return;
+            }
+            //Before the report, so a field finished while it is handled (a box it puts up takes the focus) is not
+            //reported twice; and after, as reading the settings may have put an unusable port back to the default
+            RememberReportedText();
             if (Config_Changed != null)
             {
                 Config_Changed(this, e);
             }
+            RememberReportedText();
         }
 
         private void SaveFolder_SelectedIndexChanged(object sender, EventArgs e)

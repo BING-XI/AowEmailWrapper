@@ -205,8 +205,8 @@
 		<lookup key="msgIgnoreInstalls" value="These copies were found automatically. Remove them from the list and ignore their folders from now on? Add folder... brings a copy back."/>
 		<lookup key="msgGameStartFailed" value="The game could not be started from {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} is already running. Load {1} in it."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Some changes on the Accounts or Settings tab have not been saved. Save them before the Wrapper closes?"/>
-		<lookup key="msgLocalPortInUse" value="The Wrapper could not open port {0}, which the games send their turns to: another program, or another copy of the Wrapper, is using it. No turn can be sent until it is free. Choose another port under &quot;Game to Wrapper data port&quot; on the Settings tab and save."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Some changes on the Accounts tab have not been saved. Save them before the Wrapper closes?"/>
+		<lookup key="msgLocalPortInUse" value="The Wrapper could not open port {0}, which the games send their turns to: another program, or another copy of the Wrapper, is using it. No turn can be sent until it is free. Choose another port under &quot;Game to Wrapper data port&quot; on the Settings tab."/>
 		<lookup key="buttonRescan" value="Rescan"/>
 		<lookup key="lblGamesHelp" value="A turn goes to the copy its game was last played in. A new game goes to the copy the Default column marks for its label."/>
 		<lookup key="buttonRescanning" value="Scanning..."/>
@@ -490,8 +490,8 @@
 		<lookup key="msgIgnoreInstalls" value="Ces copies ont été trouvées automatiquement. Les retirer de la liste et ignorer leurs dossiers désormais ? Ajouter un dossier... fait revenir une copie."/>
 		<lookup key="msgGameStartFailed" value="Le jeu n&apos;a pas pu être lancé depuis {0} : {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} est déjà lancé. Chargez-y {1}."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Certaines modifications des onglets Comptes ou Paramètres n&apos;ont pas été enregistrées. Les enregistrer avant la fermeture du Wrapper ?"/>
-		<lookup key="msgLocalPortInUse" value="Le Wrapper n&apos;a pas pu ouvrir le port {0}, par lequel les jeux lui envoient leurs tours : un autre programme, ou un autre Wrapper, l&apos;utilise. Aucun tour ne peut être envoyé tant qu&apos;il n&apos;est pas libre. Choisissez un autre port dans « Jeu de Wrapper port de données » de l&apos;onglet Paramètres, puis enregistrez."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Certaines modifications de l&apos;onglet Comptes n&apos;ont pas été enregistrées. Les enregistrer avant la fermeture du Wrapper ?"/>
+		<lookup key="msgLocalPortInUse" value="Le Wrapper n&apos;a pas pu ouvrir le port {0}, par lequel les jeux lui envoient leurs tours : un autre programme, ou un autre Wrapper, l&apos;utilise. Aucun tour ne peut être envoyé tant qu&apos;il n&apos;est pas libre. Choisissez un autre port dans « Jeu de Wrapper port de données » de l&apos;onglet Paramètres."/>
 		<lookup key="buttonRescan" value="Rechercher à nouveau"/>
 		<lookup key="lblGamesHelp" value="Un tour va dans la copie où sa partie a été jouée en dernier. Une nouvelle partie va dans la copie que la colonne Par défaut indique pour son étiquette."/>
 		<lookup key="buttonRescanning" value="Recherche..."/>
@@ -790,8 +790,8 @@
 		<lookup key="msgIgnoreInstalls" value="Diese Kopien wurden automatisch gefunden. Aus der Liste entfernen und ihre Ordner ab jetzt ignorieren? Ordner hinzufügen... holt eine Kopie zurück."/>
 		<lookup key="msgGameStartFailed" value="Das Spiel konnte nicht aus {0} gestartet werden: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} läuft bereits. Laden Sie {1} darin."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Einige Änderungen auf den Registerkarten Konten oder Einstellungen wurden nicht gespeichert. Vor dem Schließen des Wrappers speichern?"/>
-		<lookup key="msgLocalPortInUse" value="Der Wrapper konnte Port {0} nicht öffnen, über den die Spiele ihm ihre Züge übergeben: ein anderes Programm oder ein anderer Wrapper benutzt ihn. Solange er belegt ist, kann kein Zug gesendet werden. Wählen Sie unter „Spiel um Wrapper datenport“ auf der Registerkarte Einstellungen einen anderen Port und speichern Sie."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Einige Änderungen auf der Registerkarte Konten wurden nicht gespeichert. Vor dem Schließen des Wrappers speichern?"/>
+		<lookup key="msgLocalPortInUse" value="Der Wrapper konnte Port {0} nicht öffnen, über den die Spiele ihm ihre Züge übergeben: ein anderes Programm oder ein anderer Wrapper benutzt ihn. Solange er belegt ist, kann kein Zug gesendet werden. Wählen Sie unter „Spiel um Wrapper datenport“ auf der Registerkarte Einstellungen einen anderen Port."/>
 		<lookup key="buttonRescan" value="Erneut suchen"/>
 		<lookup key="lblGamesHelp" value="Ein Zug geht in die Kopie, in der seine Partie zuletzt gespielt wurde. Eine neue Partie geht in die Kopie, die die Spalte Standard für ihre Bezeichnung angibt."/>
 		<lookup key="buttonRescanning" value="Suche läuft..."/>
@@ -1089,8 +1089,8 @@
 		<lookup key="msgIgnoreInstalls" value="Estas copias se encontraron automáticamente. ¿Quitarlas de la lista e ignorar sus carpetas a partir de ahora? Añadir carpeta... recupera una copia."/>
 		<lookup key="msgGameStartFailed" value="No se pudo iniciar el juego desde {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} ya está en ejecución. Carga {1} en él."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Algunos cambios en las pestañas Cuentas o Configuración no se han guardado. ¿Guardarlos antes de cerrar el Wrapper?"/>
-		<lookup key="msgLocalPortInUse" value="El Wrapper no pudo abrir el puerto {0}, por el que los juegos le entregan sus turnos: otro programa, u otro Wrapper, lo está usando. No se puede enviar ningún turno hasta que quede libre. Elige otro puerto en «Puerto de datos del Juego al Wrapper» de la pestaña Configuración y guarda."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Algunos cambios en la pestaña Cuentas no se han guardado. ¿Guardarlos antes de cerrar el Wrapper?"/>
+		<lookup key="msgLocalPortInUse" value="El Wrapper no pudo abrir el puerto {0}, por el que los juegos le entregan sus turnos: otro programa, u otro Wrapper, lo está usando. No se puede enviar ningún turno hasta que quede libre. Elige otro puerto en «Puerto de datos del Juego al Wrapper» de la pestaña Configuración."/>
 		<lookup key="buttonRescan" value="Volver a buscar"/>
 		<lookup key="lblGamesHelp" value="Un turno va a la copia donde se jugó su partida por última vez. Una partida nueva va a la copia que la columna Predeterminada indica para su etiqueta."/>
 		<lookup key="buttonRescanning" value="Buscando..."/>
@@ -1389,8 +1389,8 @@
 		<lookup key="msgIgnoreInstalls" value="Deze kopieën zijn automatisch gevonden. Uit de lijst verwijderen en hun mappen voortaan negeren? Map toevoegen... haalt een kopie terug."/>
 		<lookup key="msgGameStartFailed" value="Het spel kon niet worden gestart vanuit {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} draait al. Laad {1} daarin."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Sommige wijzigingen op de tabbladen Accounts of Instellingen zijn niet opgeslagen. Opslaan voordat de Wrapper sluit?"/>
-		<lookup key="msgLocalPortInUse" value="De Wrapper kon poort {0} niet openen, waarlangs de spellen hun beurten doorgeven: een ander programma, of een andere Wrapper, gebruikt hem. Zolang hij bezet is, kan geen beurt worden verstuurd. Kies een andere poort bij &quot;Spel om Wrapper data poort&quot; op het tabblad Instellingen en sla op."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Sommige wijzigingen op het tabblad Accounts zijn niet opgeslagen. Opslaan voordat de Wrapper sluit?"/>
+		<lookup key="msgLocalPortInUse" value="De Wrapper kon poort {0} niet openen, waarlangs de spellen hun beurten doorgeven: een ander programma, of een andere Wrapper, gebruikt hem. Zolang hij bezet is, kan geen beurt worden verstuurd. Kies een andere poort bij &quot;Spel om Wrapper data poort&quot; op het tabblad Instellingen."/>
 		<lookup key="buttonRescan" value="Opnieuw zoeken"/>
 		<lookup key="lblGamesHelp" value="Een beurt gaat naar de kopie waarin de partij het laatst is gespeeld. Een nieuwe partij gaat naar de kopie die de kolom Standaard voor haar label aangeeft."/>
 		<lookup key="buttonRescanning" value="Bezig met zoeken..."/>
@@ -1684,8 +1684,8 @@
 		<lookup key="msgIgnoreInstalls" value="Disse kopier blev fundet automatisk. Fjern dem fra listen og ignorer deres mapper fremover? Tilføj mappe... henter en kopi tilbage."/>
 		<lookup key="msgGameStartFailed" value="Spillet kunne ikke startes fra {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} kører allerede. Indlæs {1} i spillet."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Nogle ændringer på fanerne Konti eller Indstillinger er ikke gemt. Gem dem, før Wrapperen lukker?"/>
-		<lookup key="msgLocalPortInUse" value="Wrapperen kunne ikke åbne port {0}, som spillene sender deres ture til: et andet program, eller en anden Wrapper, bruger den. Ingen tur kan sendes, før den er ledig. Vælg en anden port under &quot;Spil til Wrapper dataport&quot; på fanen Indstillinger, og gem."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Nogle ændringer på fanen Konti er ikke gemt. Gem dem, før Wrapperen lukker?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapperen kunne ikke åbne port {0}, som spillene sender deres ture til: et andet program, eller en anden Wrapper, bruger den. Ingen tur kan sendes, før den er ledig. Vælg en anden port under &quot;Spil til Wrapper dataport&quot; på fanen Indstillinger."/>
 		<lookup key="buttonRescan" value="Søg igen"/>
 		<lookup key="lblGamesHelp" value="En tur går til den kopi, spillet sidst blev spillet i. Et nyt spil går til den kopi, kolonnen Standard angiver for dets mærkat."/>
 		<lookup key="buttonRescanning" value="Søger..."/>
@@ -1990,8 +1990,8 @@
 		<lookup key="msgIgnoreInstalls" value="De här kopiorna hittades automatiskt. Ta bort dem från listan och ignorera deras mappar från och med nu? Lägg till mapp... tar tillbaka en kopia."/>
 		<lookup key="msgGameStartFailed" value="Spelet kunde inte startas från {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} körs redan. Läs in {1} i spelet."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Vissa ändringar på flikarna Konton eller Inställningar har inte sparats. Spara dem innan Wrappern stängs?"/>
-		<lookup key="msgLocalPortInUse" value="Wrappern kunde inte öppna port {0}, som spelen skickar sina drag till: ett annat program, eller en annan Wrapper, använder den. Inget drag kan skickas förrän den är ledig. Välj en annan port under &quot;Spel till Wrapperns data port&quot; på fliken Inställningar och spara."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Vissa ändringar på fliken Konton har inte sparats. Spara dem innan Wrappern stängs?"/>
+		<lookup key="msgLocalPortInUse" value="Wrappern kunde inte öppna port {0}, som spelen skickar sina drag till: ett annat program, eller en annan Wrapper, använder den. Inget drag kan skickas förrän den är ledig. Välj en annan port under &quot;Spel till Wrapperns data port&quot; på fliken Inställningar."/>
 		<lookup key="buttonRescan" value="Sök igen"/>
 		<lookup key="lblGamesHelp" value="Ett drag går till den kopia där partiet senast spelades. Ett nytt parti går till den kopia som kolumnen Standard anger för dess etikett."/>
 		<lookup key="buttonRescanning" value="Söker..."/>
@@ -2290,8 +2290,8 @@
 		<lookup key="msgIgnoreInstalls" value="Te kopie zostały znalezione automatycznie. Usunąć je z listy i odtąd ignorować ich foldery? Dodaj folder... przywraca kopię."/>
 		<lookup key="msgGameStartFailed" value="Nie udało się uruchomić gry z {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="Gra {0} jest już uruchomiona. Wczytaj w niej {1}."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Niektóre zmiany na kartach Konta lub Ustawienia nie zostały zapisane. Zapisać je przed zamknięciem Wrappera?"/>
-		<lookup key="msgLocalPortInUse" value="Wrapper nie mógł otworzyć portu {0}, przez który gry przekazują mu tury: używa go inny program albo inny Wrapper. Dopóki port jest zajęty, żadna tura nie zostanie wysłana. Wybierz inny port w polu „Port danych przesyłanych z gry do Wrappera” na karcie Ustawienia i zapisz."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Niektóre zmiany na karcie Konta nie zostały zapisane. Zapisać je przed zamknięciem Wrappera?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper nie mógł otworzyć portu {0}, przez który gry przekazują mu tury: używa go inny program albo inny Wrapper. Dopóki port jest zajęty, żadna tura nie zostanie wysłana. Wybierz inny port w polu „Port danych przesyłanych z gry do Wrappera” na karcie Ustawienia."/>
 		<lookup key="buttonRescan" value="Szukaj ponownie"/>
 		<lookup key="lblGamesHelp" value="Tura trafia do kopii, w której rozgrywka była ostatnio grana. Nowa rozgrywka trafia do kopii wskazanej dla jej etykiety w kolumnie Domyślna."/>
 		<lookup key="buttonRescanning" value="Szukanie..."/>
@@ -2590,8 +2590,8 @@
 		<lookup key="msgIgnoreInstalls" value="Nämä kopiot löytyivät automaattisesti. Poistetaanko ne luettelosta ja ohitetaanko niiden kansiot tästä lähtien? Lisää kansio... tuo kopion takaisin."/>
 		<lookup key="msgGameStartFailed" value="Peliä ei voitu käynnistää kansiosta {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} on jo käynnissä. Lataa {1} siinä."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Joitakin Tilit- tai Asetukset-välilehden muutoksia ei ole tallennettu. Tallennetaanko ne ennen Wrapperin sulkemista?"/>
-		<lookup key="msgLocalPortInUse" value="Wrapper ei voinut avata porttia {0}, jonka kautta pelit antavat sille vuoronsa: toinen ohjelma tai toinen Wrapper käyttää sitä. Vuoroja ei voi lähettää, ennen kuin portti vapautuu. Valitse toinen portti kohdassa &quot;Pelin Wrapper Data portti&quot; Asetukset-välilehdellä ja tallenna."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Joitakin Tilit-välilehden muutoksia ei ole tallennettu. Tallennetaanko ne ennen Wrapperin sulkemista?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper ei voinut avata porttia {0}, jonka kautta pelit antavat sille vuoronsa: toinen ohjelma tai toinen Wrapper käyttää sitä. Vuoroja ei voi lähettää, ennen kuin portti vapautuu. Valitse toinen portti kohdassa &quot;Pelin Wrapper Data portti&quot; Asetukset-välilehdellä."/>
 		<lookup key="buttonRescan" value="Etsi uudelleen"/>
 		<lookup key="lblGamesHelp" value="Vuoro menee kopioon, jossa peliä viimeksi pelattiin. Uusi peli menee kopioon, jonka Oletus-sarake osoittaa sen tunnisteelle."/>
 		<lookup key="buttonRescanning" value="Etsitään..."/>
@@ -2890,8 +2890,8 @@
 		<lookup key="msgIgnoreInstalls" value="Aceste copii au fost găsite automat. Le eliminați din listă și ignorați dosarele lor de acum înainte? Adăugare dosar... aduce o copie înapoi."/>
 		<lookup key="msgGameStartFailed" value="Jocul nu a putut fi pornit din {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="{0} rulează deja. Încărcați {1} în el."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Unele modificări din filele Conturi sau Setări nu au fost salvate. Le salvați înainte de închiderea Wrapperului?"/>
-		<lookup key="msgLocalPortInUse" value="Wrapper-ul nu a putut deschide portul {0}, prin care jocurile îi predau turele: îl folosește alt program sau alt Wrapper. Nicio tură nu poate fi trimisă până nu se eliberează. Alegeți alt port la „Port comunicare dintre joc şi Wrapper” în fila Setări și salvați."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Unele modificări din fila Conturi nu au fost salvate. Le salvați înainte de închiderea Wrapperului?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper-ul nu a putut deschide portul {0}, prin care jocurile îi predau turele: îl folosește alt program sau alt Wrapper. Nicio tură nu poate fi trimisă până nu se eliberează. Alegeți alt port la „Port comunicare dintre joc şi Wrapper” în fila Setări."/>
 		<lookup key="buttonRescan" value="Caută din nou"/>
 		<lookup key="lblGamesHelp" value="O tură merge în copia în care partida a fost jucată ultima dată. O partidă nouă merge în copia indicată de coloana Implicit pentru eticheta sa."/>
 		<lookup key="buttonRescanning" value="Se caută..."/>
@@ -3190,8 +3190,8 @@
 		<lookup key="msgIgnoreInstalls" value="Эти копии найдены автоматически. Убрать их из списка и впредь игнорировать их папки? «Добавить папку...» вернёт копию."/>
 		<lookup key="msgGameStartFailed" value="Не удалось запустить игру из {0}: {1}"/>
 		<lookup key="msgLoadInRunningGame" value="Игра {0} уже запущена. Загрузите в ней {1}."/>
-		<lookup key="msgWrapperUnsavedChanges" value="Некоторые изменения на вкладках «Учётные записи» или «Настройки» не сохранены. Сохранить их перед закрытием Wrapper?"/>
-		<lookup key="msgLocalPortInUse" value="Wrapper не смог открыть порт {0}, через который игры передают ему ходы: его занимает другая программа или другой Wrapper. Пока порт занят, ходы не отправляются. Выберите другой порт в поле «Порт сообщения игры и Wrapper&apos;а» на вкладке «Настройки» и сохраните."/>
+		<lookup key="msgWrapperUnsavedChanges" value="Некоторые изменения на вкладке «Учётные записи» не сохранены. Сохранить их перед закрытием Wrapper?"/>
+		<lookup key="msgLocalPortInUse" value="Wrapper не смог открыть порт {0}, через который игры передают ему ходы: его занимает другая программа или другой Wrapper. Пока порт занят, ходы не отправляются. Выберите другой порт в поле «Порт сообщения игры и Wrapper&apos;а» на вкладке «Настройки»."/>
 		<lookup key="buttonRescan" value="Искать снова"/>
 		<lookup key="lblGamesHelp" value="Ход попадает в ту копию, где партия игралась в последний раз. Новая партия попадает в копию, указанную в столбце «По умолчанию» для её метки."/>
 		<lookup key="buttonRescanning" value="Поиск..."/>
