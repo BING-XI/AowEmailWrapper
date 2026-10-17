@@ -20,6 +20,19 @@ namespace AowEmailWrapper.Classes
             set { _process = value; }
         }
 
+        public AowGame Game
+        {
+            get { return _theGame; }
+        }
+
+        /// <summary>True when this is the copy of the game, started with this save (null for the main menu).</summary>
+        public bool Loads(AowGame theGame, string saveToLoad)
+        {
+            //By id: a rescan or a save on the Games tab builds the copies afresh
+            return _theGame != null && theGame != null && _theGame.Id == theGame.Id &&
+                string.Equals(_saveToLoad, saveToLoad, System.StringComparison.OrdinalIgnoreCase);
+        }
+
         public void Stop()
         {
             _stop = true;
