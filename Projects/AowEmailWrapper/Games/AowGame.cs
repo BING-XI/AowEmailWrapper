@@ -50,7 +50,22 @@ namespace AowEmailWrapper.Games
     {
         #region String Constants
 
-        private const string AowRegPathTemplate = "Software\\Triumph Studios\\{0}";
+        private const string AowRegPathTemplate = "{0}\\{1}";
+        private const string TriumphRegistryRoot = "Software\\Triumph Studios";
+
+        /// <summary>
+        /// Where the games' email settings are written: HKCU\Software\Triumph Studios. The smoke tests set
+        /// AOWEMAILWRAPPER_TEST_REGISTRY_ROOT to a key of their own, so a Wrapper under test never points the
+        /// player's real games at itself.
+        /// </summary>
+        internal static string EmailRegistryRoot
+        {
+            get
+            {
+                string test = Environment.GetEnvironmentVariable("AOWEMAILWRAPPER_TEST_REGISTRY_ROOT");
+                return string.IsNullOrEmpty(test) ? TriumphRegistryRoot : test;
+            }
+        }
         public const string Aow1GameName = "Age of Wonders";
         public const string Aow2GameName = "Age of Wonders II";
         public const string AowSmGameName = "Age of Wonders Shadow Magic";
@@ -422,31 +437,46 @@ namespace AowEmailWrapper.Games
             return SameFolder(_root.FullName, folder);
         }
 
-        /// <summary>Writes the game's email settings so this game hands its turns to the Wrapper.</summary>
-        public void SetEmailConfig(string attachmentDir, string localEmailAddress, string smtpServer)
+        /// <summary>
+        /// Writes the game's email settings so this game hands its turns to the Wrapper. Only values that
+        /// differ are written; their names are returned, so a caller can tell when something (a game's own
+        /// setup program, say) had changed them.
+        /// </summary>
+        public List<string> SetEmailConfig(string attachmentDir, string localEmailAddress, string smtpServer)
         {
+            List<string> changed = new List<string>();
             if (!_isInstalled)
             {
-                return;
+                return changed;
             }
 
-            RegistryKey rootRegKey = RegistryHelper.GetDeepestKey(Registry.CurrentUser, string.Format(AowRegPathTemplate, _gameName), true);
+            RegistryKey rootRegKey = RegistryHelper.GetDeepestKey(Registry.CurrentUser, string.Format(AowRegPathTemplate, EmailRegistryRoot, _gameName), true);
             if (rootRegKey == null)
             {
-                return;
+                return changed;
             }
 
-            if (!string.IsNullOrEmpty(attachmentDir))
+            using (rootRegKey)
             {
-                RegistryHelper.SetValue(rootRegKey, EmailPath, AttachmentDirKeyName, attachmentDir);
+                Set(rootRegKey, AttachmentDirKeyName, attachmentDir, changed);
+                Set(rootRegKey, LocalEmailKeyName, localEmailAddress, changed);
+                Set(rootRegKey, SMTPServerKeyName, smtpServer, changed);
             }
-            if (!string.IsNullOrEmpty(localEmailAddress))
+            return changed;
+        }
+
+        private static void Set(RegistryKey root, string name, string value, List<string> changed)
+        {
+            if (string.IsNullOrEmpty(value))
             {
-                RegistryHelper.SetValue(rootRegKey, EmailPath, LocalEmailKeyName, localEmailAddress);
+                return;
             }
-            if (!string.IsNullOrEmpty(smtpServer))
+            //Registry value names ignore case; the games' own setup programs spell some differently
+            string current = RegistryHelper.GetValue(root, EmailPath, name);
+            if (!string.Equals(current, value, StringComparison.OrdinalIgnoreCase))
             {
-                RegistryHelper.SetValue(rootRegKey, EmailPath, SMTPServerKeyName, smtpServer);
+                RegistryHelper.SetValue(root, EmailPath, name, value);
+                changed.Add(name);
             }
         }
 

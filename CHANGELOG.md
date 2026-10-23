@@ -3,6 +3,18 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## 2.1.10
+
+- A copy of a game the Wrapper finds after it started, through Rescan, Add folder, a change on the Games tab
+  or the first background scan, now has its email settings pointed at the Wrapper straight away. Before,
+  that waited for the next start of the Wrapper, so a copy installed later (Ziggurat, say) could not send
+  its turns through the Wrapper in the meantime.
+- Starting a game from the tray or the Activity Log first puts its email settings right if something else,
+  such as the game's own setup program, has changed them since. The log says when settings were corrected.
+
+Run `AowEmailWrapper-2.1.10-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
+*Check for updates* on the Settings tab. Accounts and settings carry over.
+
 ## 2.1.9
 
 Thanks to BING-XI for both changes in this release.

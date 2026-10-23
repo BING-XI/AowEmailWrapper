@@ -23,9 +23,10 @@ namespace AowEmailWrapper.SmokeTests
     ///
     /// Settings folders are not the only state the Wrapper touches: with an account configured it writes
     /// the email settings of every installed game into that game's registry key, which is shared per game
-    /// type, and saving settings writes the autostart entry. A test therefore uses an account or a copy of
-    /// a game, never both; every copy found on this PC is ignored; and those registry areas are compared
-    /// before and after, restored and reported if anything changed.
+    /// type, and saving settings writes the autostart entry. The Wrapper under test therefore writes the
+    /// games' email settings to a registry key of its own (TestRegistryRoot); every copy found on this PC
+    /// is ignored; and the player's game keys and the autostart entry are compared before and after,
+    /// restored and reported if anything changed.
     /// </summary>
     public sealed class AppUnderTest : IDisposable
     {
@@ -38,6 +39,12 @@ namespace AowEmailWrapper.SmokeTests
         private Process _process;
 
         public string Root { get; }
+
+        /// <summary>
+        /// The registry key, under HKCU, that the Wrapper under test writes the games' email settings to
+        /// instead of Software\Triumph Studios (AOWEMAILWRAPPER_TEST_REGISTRY_ROOT); removed afterwards.
+        /// </summary>
+        public string TestRegistryRoot { get; }
         public string AppFolder { get; }
         public string AppData { get; }
         public string GameFolder { get; }
@@ -46,7 +53,9 @@ namespace AowEmailWrapper.SmokeTests
         public AppUnderTest()
         {
             _registryBefore = SnapshotRegistry();
-            Root = Path.Combine(Path.GetTempPath(), "AowEmailWrapper.SmokeTests", Guid.NewGuid().ToString("N"));
+            string id = Guid.NewGuid().ToString("N");
+            Root = Path.Combine(Path.GetTempPath(), "AowEmailWrapper.SmokeTests", id);
+            TestRegistryRoot = @"Software\AowEmailWrapper.SmokeTests\" + id;
             AppFolder = Path.Combine(Root, "app");
             AppData = Path.Combine(Root, "appdata");
             GameFolder = Path.Combine(Root, "game");
@@ -72,20 +81,18 @@ namespace AowEmailWrapper.SmokeTests
             Config.GamesConfig.Installs.Add(new GameInstallConfigValues { GameType = AowGameType.Aow1, Folder = Path.Combine(Root, "missing"), Manual = true, Source = InstallSource.Manual });
         }
 
-        /// <summary>A copy of Age of Wonders whose executable is <paramref name="standIn"/>; not allowed together with an account.</summary>
+        /// <summary>A copy of Age of Wonders whose executable is <paramref name="standIn"/>.</summary>
         public void AddGameCopy(string standIn, string label)
         {
-            Assert.True(Config.AccountsList.Accounts.Count == 0, "a game copy and an account together would write the game's registry key");
             Directory.CreateDirectory(GameFolder);
             File.Copy(standIn, Path.Combine(GameFolder, AowGame.Aow1ExeName), true);
             AowGame game = new AowGame(AowGameType.Aow1, GameFolder, InstallSource.Manual) { Label = label };
             Config.GamesConfig.Installs.Add(new GameInstallConfigValues(game) { Label = label, IsDefault = true });
         }
 
-        /// <summary>A POP3 account on this PC's fake mail server; not allowed together with a game copy.</summary>
+        /// <summary>A POP3 account on this PC's fake mail server.</summary>
         public void AddPop3Account(int port)
         {
-            Assert.True(Config.GamesConfig.Installs.All(install => !Directory.Exists(install.Folder)), "a game copy and an account together would write the game's registry key");
             AccountConfigValues account = new AccountConfigValues();
             account.Name = "Smoke test";
             account.PollingConfig = new PollingConfigValues();
@@ -169,6 +176,7 @@ namespace AowEmailWrapper.SmokeTests
         {
             ProcessStartInfo start = new ProcessStartInfo(Path.Combine(AppFolder, ExeName)) { UseShellExecute = false, WorkingDirectory = AppFolder };
             start.Environment["APPDATA"] = AppData;
+            start.Environment["AOWEMAILWRAPPER_TEST_REGISTRY_ROOT"] = TestRegistryRoot;
             string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT")) && !string.IsNullOrEmpty(host))
             {
@@ -220,6 +228,8 @@ namespace AowEmailWrapper.SmokeTests
                 RedirectStandardError = true,
             };
             start.Environment["APPDATA"] = AppData;
+            //The games' email settings go to a key of the test's own, never to the player's games
+            start.Environment["AOWEMAILWRAPPER_TEST_REGISTRY_ROOT"] = TestRegistryRoot;
             string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ROOT")) && !string.IsNullOrEmpty(host))
             {
@@ -469,6 +479,34 @@ namespace AowEmailWrapper.SmokeTests
 
         #region Files
 
+        /// <summary>An email setting of a game as the Wrapper under test sees it, in its test registry key.</summary>
+        public string GameEmailSetting(string gameName, string valueName)
+        {
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(TestRegistryRoot + @"\" + gameName + @"\Email"))
+            {
+                return key == null ? null : Convert.ToString(key.GetValue(valueName));
+            }
+        }
+
+        /// <summary>Changes a game's email setting behind the Wrapper's back, as a game's own setup program does.</summary>
+        public void OverwriteGameEmailSetting(string gameName, string valueName, string value)
+        {
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(TestRegistryRoot + @"\" + gameName + @"\Email"))
+            {
+                key.SetValue(valueName, value);
+            }
+        }
+
+        /// <summary>Selects a row of the list showing in the main window, by position, as a click does.</summary>
+        public void SelectListRow(int index)
+        {
+            IntPtr list = Native.Children(MainWindow()).First(h => Native.IsWindowVisible(h) && Native.Class(h).Contains("SysListView32"));
+            AutomationElement[] rows = AutomationElement.FromHandle(list)
+                .FindAll(TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ListItem)).Cast<AutomationElement>().ToArray();
+            Assert.True(index < rows.Length, $"the list has {rows.Length} rows");
+            ((SelectionItemPattern)rows[index].GetCurrentPattern(SelectionItemPattern.Pattern)).Select();
+        }
+
         public string ReadLog()
         {
             string path = Path.Combine(AppData, "AowEmailWrapper", "Logs", "wrapper.log");
@@ -651,6 +689,7 @@ namespace AowEmailWrapper.SmokeTests
             }
 
             List<string> changes = RestoreRegistry();
+            try { Registry.CurrentUser.DeleteSubKeyTree(TestRegistryRoot, false); } catch { }
             try { Directory.Delete(Root, true); } catch { }
             Assert.True(changes.Count == 0, "The Wrapper under test changed the shared registry (now restored):" + Environment.NewLine + string.Join(Environment.NewLine, changes));
         }
