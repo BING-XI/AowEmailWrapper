@@ -516,16 +516,26 @@ namespace AowEmailWrapper.Games
         #region Game folders
 
         /// <summary>Points every installed game at the Wrapper. Copies of one game share the registry key, so each key is written once.</summary>
-        public void SetEmailConfigAll(string attachmentDir, string localEmailAddress, string smtpServer)
+        /// <summary>
+        /// Points every installed game at the Wrapper. Copies of one game share the registry key, so each key
+        /// is written once. Returns, per game whose settings had to change, the names of the values changed.
+        /// </summary>
+        public Dictionary<string, List<string>> SetEmailConfigAll(string attachmentDir, string localEmailAddress, string smtpServer)
         {
+            Dictionary<string, List<string>> corrected = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             HashSet<string> done = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (AowGame game in _games.Where(game => game.IsInstalled))
             {
                 if (done.Add(game.GameName))
                 {
-                    game.SetEmailConfig(attachmentDir, localEmailAddress, smtpServer);
+                    List<string> changed = game.SetEmailConfig(attachmentDir, localEmailAddress, smtpServer);
+                    if (changed.Count > 0)
+                    {
+                        corrected[game.GameName] = changed;
+                    }
                 }
             }
+            return corrected;
         }
 
         public bool CheckWriteAccess()

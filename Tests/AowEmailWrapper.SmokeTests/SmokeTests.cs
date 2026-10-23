@@ -150,6 +150,43 @@ namespace AowEmailWrapper.SmokeTests
         }
 
         [Fact]
+        public void A_game_whose_email_settings_were_changed_elsewhere_is_put_right()
+        {
+            //Something else, a game's own setup program say, rewrites the game's email settings after the
+            //Wrapper set them; a Games tab change and starting the game from the tray must both put them back
+            const string Game = "Age of Wonders";
+            using (FakePop3Server mail = new FakePop3Server())
+            using (AppUnderTest app = new AppUnderTest())
+            {
+                app.AddPop3Account(mail.Port);
+                app.AddGameCopy(StandIn, GameLabel);
+                app.Start();
+                string wrapper = "127.0.0.1:" + app.Config.PreferencesConfig.GameWrapperDataPort;
+                string checkEmail = Path.Combine(app.AppData, "AowEmailWrapper", "CheckEmail");
+                AppUnderTest.Until(() => app.GameEmailSetting(Game, "SMTP Server") == wrapper, TimeSpan.FromSeconds(20),
+                    "the Wrapper did not point the game at itself on start: " + app.GameEmailSetting(Game, "SMTP Server"));
+
+                //Starting the game from the tray
+                app.OverwriteGameEmailSetting(Game, "SMTP Server", "imap.gmail.com");
+                app.OverwriteGameEmailSetting(Game, "Attachment Directory", app.GameFolder);
+                app.ChooseFromTrayMenu(GameMenuItem);
+                AppUnderTest.Until(() => app.GameEmailSetting(Game, "SMTP Server") == wrapper && app.GameEmailSetting(Game, "Attachment Directory") == checkEmail,
+                    TimeSpan.FromSeconds(15), "starting the game did not put its email settings right:" + Environment.NewLine + app.ReadLog());
+                Assert.Contains("pointed at the Wrapper (starting", app.ReadLog());
+
+                //A change on the Games tab: removing the copy that is missing, which asks no question
+                app.OverwriteGameEmailSetting(Game, "SMTP Server", "imap.gmail.com");
+                app.ShowAndSettle();
+                app.SelectTab("Games");
+                app.SelectListRow(1);
+                app.ClickButton(app.MainWindow(), "Remove");
+                AppUnderTest.Until(() => app.GameEmailSetting(Game, "SMTP Server") == wrapper, TimeSpan.FromSeconds(15),
+                    "a Games tab change did not put the email settings right:" + Environment.NewLine + app.ReadLog());
+                Assert.Contains("pointed at the Wrapper (Games tab)", app.ReadLog());
+            }
+        }
+
+        [Fact]
         public void The_tray_menu_starts_the_game()
         {
             using (AppUnderTest app = new AppUnderTest())

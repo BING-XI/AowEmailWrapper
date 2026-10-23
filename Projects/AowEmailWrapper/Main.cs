@@ -1772,6 +1772,9 @@ namespace AowEmailWrapper
                 }
             }
 
+            //A setup program or patch may have rewritten the game's email settings since the Wrapper wrote them
+            ApplyGameEmailSettings("starting " + theGame.DisplayName);
+
             try
             {
                 StartedTaskWatcher started = new StartedTaskWatcher(theGame, save, new StartedTaskCompleteEventHandler(StartedGameWatchCompleted));
@@ -2844,9 +2847,41 @@ namespace AowEmailWrapper
                 StartServer(listenPort);
             }
 
-            if (primary != null && primary.SmtpConfig != null)
+            ApplyGameEmailSettings(primary, listenPort, "start or settings saved");
+        }
+
+        /// <summary>
+        /// Points every installed game's email settings at the Wrapper's local mail server. Run whenever the
+        /// list of copies may have changed (a rescan, Add folder, the Games tab, the first background scan)
+        /// and before a game is started, as well as on start: a copy found later, or one whose own setup
+        /// program rewrote its settings, would otherwise send its turns somewhere else until the next start.
+        /// </summary>
+        private void ApplyGameEmailSettings(string reason)
+        {
+            AccountConfigValues primary = _wrapperConfig != null && _wrapperConfig.AccountsList != null ? _wrapperConfig.AccountsList.PrimaryAccount : null;
+            int port = _theServer != null && _theServer.IsRunning ? _theServer.Port
+                : (_wrapperConfig != null && _wrapperConfig.PreferencesConfig != null && _wrapperConfig.PreferencesConfig.GameWrapperDataPort > 0
+                    ? _wrapperConfig.PreferencesConfig.GameWrapperDataPort : PreferencesConfigValues.GameWrapperDataPortDefault);
+            ApplyGameEmailSettings(primary, port, reason);
+        }
+
+        private void ApplyGameEmailSettings(AccountConfigValues primary, int port, string reason)
+        {
+            if (primary == null || primary.SmtpConfig == null)
             {
-                _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, listenPort));
+                return;
+            }
+            try
+            {
+                Dictionary<string, List<string>> corrected = _gameManager.SetEmailConfigAll(AppDataHelper.CheckEmail.FullName, primary.SmtpConfig.EmailAddress, string.Format(GameSmtpServerTemplate, port));
+                foreach (KeyValuePair<string, List<string>> game in corrected)
+                {
+                    Trace.TraceInformation("Email settings of {0} pointed at the Wrapper ({1}): {2}", game.Key, reason, string.Join(", ", game.Value));
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning("Could not write the games' email settings ({0}): {1}", reason, ex.Message);
             }
         }
 
@@ -2987,6 +3022,7 @@ namespace AowEmailWrapper
             _gameManager.Apply(detected, known);
             _wrapperConfig.GamesConfig = _gameManager.ToConfig();
             DataManagerHelper.SaveConfig(_wrapperConfig);
+            ApplyGameEmailSettings("background scan");
 
             if (!ConfigNeedsSave)
             {
@@ -3013,6 +3049,7 @@ namespace AowEmailWrapper
             _wrapperConfig.GamesConfig = _gameManager.ToConfig();
             gamesConfig.Config = _wrapperConfig.GamesConfig;
             DataManagerHelper.SaveConfig(_wrapperConfig);
+            ApplyGameEmailSettings("rescan");
             CreateContextMenu();
             CheckNotifyIconState();
             Trace.TraceInformation("Rescan applied and saved: {0} copies", _wrapperConfig.GamesConfig.Installs.Count);
@@ -3036,6 +3073,7 @@ namespace AowEmailWrapper
             _wrapperConfig.GamesConfig = _gameManager.ToConfig();
             gamesConfig.Config = _wrapperConfig.GamesConfig;
             DataManagerHelper.SaveConfig(_wrapperConfig);
+            ApplyGameEmailSettings("Games tab");
             CreateContextMenu();
             CheckNotifyIconState();
             Trace.TraceInformation("Games tab change applied and saved: {0} copies", _wrapperConfig.GamesConfig.Installs.Count);
