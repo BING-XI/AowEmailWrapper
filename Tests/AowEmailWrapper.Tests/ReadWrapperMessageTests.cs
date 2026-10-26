@@ -1,0 +1,211 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using AowEmailWrapper.Classes;
+using AowEmailWrapper.ConfigFramework;
+using AowEmailWrapper.Games;
+using AowEmailWrapper.Helpers;
+using AowEmailWrapper.Pollers;
+using MailKit;
+using MailKit.Search;
+using MimeKit;
+using Xunit;
+
+namespace AowEmailWrapper.Tests
+{
+    /// <summary>
+    /// A wrapper notice that the player's phone or webmail opened before the Wrapper checked is already
+    /// marked as read. The scan used to look at unread mail only, so such a notice stayed in the inbox for
+    /// good. These tests run the real IMAP scan against an in-memory inbox.
+    /// </summary>
+    [Collection(nameof(ProcessStateCollection))]
+    public class ReadWrapperMessageTests : IDisposable
+    {
+        private readonly string _root;
+        private readonly string _oldAppData;
+
+        public ReadWrapperMessageTests()
+        {
+            _root = Path.Combine(Path.GetTempPath(), "AowEmailWrapper.Tests", Guid.NewGuid().ToString("N"));
+            string appData = Path.Combine(_root, "AppData");
+            Directory.CreateDirectory(appData);
+            _oldAppData = Environment.GetEnvironmentVariable("APPDATA");
+            Environment.SetEnvironmentVariable("APPDATA", appData);
+            ForgetAppDataFolders();
+            Assert.StartsWith(_root, AppDataHelper.Root.FullName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public void Dispose()
+        {
+            Environment.SetEnvironmentVariable("APPDATA", _oldAppData);
+            ForgetAppDataFolders();
+            try { Directory.Delete(_root, true); } catch { }
+        }
+
+        private static void ForgetAppDataFolders()
+        {
+            foreach (FieldInfo field in typeof(AppDataHelper).GetFields(BindingFlags.Static | BindingFlags.NonPublic).Where(field => field.FieldType == typeof(DirectoryInfo)))
+            {
+                field.SetValue(null, null);
+            }
+        }
+
+        private static MimeMessage Notice(string game, string from)
+        {
+            MimeMessage message = new MimeMessage();
+            message.From.Add(MailboxAddress.Parse(from));
+            message.To.Add(MailboxAddress.Parse("player@example.com"));
+            message.Subject = TurnQuery.SubjectPrefix + " " + game;
+            message.Headers.Add(TurnQuery.KindHeader, TurnQuery.KindReply);
+            message.Headers.Add(TurnQuery.GameHeader, game);
+            message.Body = new TextPart("plain") { Text = "Automatic reply from the Age of Wonders Email Wrapper." };
+            return message;
+        }
+
+        private static MimeMessage Ordinary(string subject)
+        {
+            MimeMessage message = new MimeMessage();
+            message.From.Add(MailboxAddress.Parse("friend@example.com"));
+            message.To.Add(MailboxAddress.Parse("player@example.com"));
+            message.Subject = subject;
+            message.Body = new TextPart("plain") { Text = "Hello" };
+            return message;
+        }
+
+        private static ImapPoller Poller(List<string> handled)
+        {
+            AowGameManager games = new AowGameManager(null, new AowGame[0], new GamesConfigValues());
+            ImapPoller poller = new ImapPoller("imap.example.com", 993, SSLType.SSL, "player@example.com", "secret", 10, EmailSaveFolder.EmailIn, games);
+            poller.OnWrapperMessage += (sender, message) => handled.Add(message.Subject);
+            return poller;
+        }
+
+        [Fact]
+        public void A_wrapper_message_already_read_is_handled_and_removed_and_other_read_mail_is_left()
+        {
+            FakeInbox inbox = FakeInbox.Create();
+            DateTime now = DateTime.Now;
+            inbox.Add(1, Ordinary("Lunch on Friday"), seen: true, now.AddHours(-5));
+            inbox.Add(2, Notice("Hamardis 2026.asg", "flecnick@example.com"), seen: true, now.AddHours(-4));
+            inbox.Add(3, Ordinary("AoW Wrapper: a question from a person, not a wrapper"), seen: true, now.AddHours(-3));
+            inbox.Add(4, Notice("Heulax 26.asg", "danaloy@example.com"), seen: false, now.AddHours(-2));
+
+            List<string> handled = new List<string>();
+            Poller(handled).ScanMailbox(inbox.Folder);
+
+            Assert.Equal(new[] { "AoW Wrapper: Hamardis 2026.asg", "AoW Wrapper: Heulax 26.asg" }, handled);
+            Assert.Equal(new uint[] { 1, 3 }, inbox.Uids);
+        }
+
+        [Fact]
+        public void A_read_wrapper_message_older_than_the_look_back_window_is_left()
+        {
+            FakeInbox inbox = FakeInbox.Create();
+            inbox.Add(1, Notice("Swolterwood 1v1.asg", "old@example.com"), seen: true, DateTime.Now.AddDays(-(ImapPoller.LookBackDays + 5)));
+
+            List<string> handled = new List<string>();
+            Poller(handled).ScanMailbox(inbox.Folder);
+
+            Assert.Empty(handled);
+            Assert.Equal(new uint[] { 1 }, inbox.Uids);
+        }
+
+        /// <summary>
+        /// An inbox in memory, behind MailKit's folder interface: the searches, summaries, downloads, flags
+        /// and expunges the scan uses. Anything else it is asked fails the test by name.
+        /// </summary>
+        public class FakeInbox : DispatchProxy
+        {
+            private sealed class Stored
+            {
+                public uint Uid;
+                public MimeMessage Message;
+                public MessageFlags Flags;
+                public DateTime Delivered;
+            }
+
+            private readonly List<Stored> _messages = new List<Stored>();
+
+            public IMailFolder Folder { get; private set; }
+
+            public uint[] Uids { get { return _messages.Select(stored => stored.Uid).ToArray(); } }
+
+            public static FakeInbox Create()
+            {
+                IMailFolder folder = Create<IMailFolder, FakeInbox>();
+                FakeInbox inbox = (FakeInbox)(object)folder;
+                inbox.Folder = folder;
+                return inbox;
+            }
+
+            public void Add(uint uid, MimeMessage message, bool seen, DateTime delivered)
+            {
+                _messages.Add(new Stored { Uid = uid, Message = message, Flags = seen ? MessageFlags.Seen : MessageFlags.None, Delivered = delivered });
+            }
+
+            private Stored Find(UniqueId uid)
+            {
+                return _messages.First(stored => stored.Uid == uid.Id);
+            }
+
+            private static bool Matches(Stored stored, SearchQuery query)
+            {
+                switch (query.Term)
+                {
+                    case SearchTerm.All: return true;
+                    case SearchTerm.Seen: return stored.Flags.HasFlag(MessageFlags.Seen);
+                    case SearchTerm.NotSeen: return !stored.Flags.HasFlag(MessageFlags.Seen);
+                    case SearchTerm.DeliveredAfter: return stored.Delivered.Date > ((DateSearchQuery)query).Date.Date;
+                    case SearchTerm.SubjectContains: return (stored.Message.Subject ?? string.Empty).IndexOf(((TextSearchQuery)query).Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    case SearchTerm.And: return Matches(stored, ((BinarySearchQuery)query).Left) && Matches(stored, ((BinarySearchQuery)query).Right);
+                    default: throw new NotSupportedException("search term " + query.Term);
+                }
+            }
+
+            protected override object Invoke(MethodInfo method, object[] args)
+            {
+                Type[] parameters = method.GetParameters().Select(parameter => parameter.ParameterType).ToArray();
+                switch (method.Name)
+                {
+                    case "Search" when parameters.Length == 2 && parameters[0] == typeof(SearchQuery):
+                        return (IList<UniqueId>)_messages.Where(stored => Matches(stored, (SearchQuery)args[0])).Select(stored => new UniqueId(stored.Uid)).ToList();
+
+                    case "Fetch" when parameters[0] == typeof(IList<UniqueId>):
+                        return (IList<IMessageSummary>)((IList<UniqueId>)args[0]).Select(uid =>
+                        {
+                            Stored stored = Find(uid);
+                            //Headers as a summary carries them; no body structure, as none of these has an attachment
+                            return (IMessageSummary)new MessageSummary(0) { UniqueId = uid, Flags = stored.Flags, Headers = stored.Message.Headers };
+                        }).ToList();
+
+                    case "GetMessage" when parameters[0] == typeof(UniqueId):
+                        return Find((UniqueId)args[0]).Message;
+
+                    case "Store" when parameters[0] == typeof(IList<UniqueId>) && args[1] is IStoreFlagsRequest request:
+                        foreach (UniqueId uid in (IList<UniqueId>)args[0])
+                        {
+                            Stored stored = Find(uid);
+                            stored.Flags = request.Action == StoreAction.Remove ? stored.Flags & ~request.Flags : stored.Flags | request.Flags;
+                        }
+                        return method.ReturnType == typeof(void) ? null : (object)new List<UniqueId>();
+
+                    case "Store" when parameters[0] == typeof(UniqueId) && args[1] is IStoreFlagsRequest single:
+                        Stored one = Find((UniqueId)args[0]);
+                        one.Flags = single.Action == StoreAction.Remove ? one.Flags & ~single.Flags : one.Flags | single.Flags;
+                        return method.ReturnType == typeof(bool) ? (object)true : null;
+
+                    case "Expunge":
+                        HashSet<uint> only = args.Length > 1 && args[0] is IList<UniqueId> uids ? new HashSet<uint>(uids.Select(uid => uid.Id)) : null;
+                        _messages.RemoveAll(stored => stored.Flags.HasFlag(MessageFlags.Deleted) && (only == null || only.Contains(stored.Uid)));
+                        return null;
+
+                    default:
+                        throw new NotImplementedException("the fake inbox does not do " + method.Name + "(" + string.Join(", ", parameters.Select(type => type.Name)) + ")");
+                }
+            }
+        }
+    }
+}

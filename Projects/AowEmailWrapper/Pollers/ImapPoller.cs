@@ -404,7 +404,7 @@ namespace AowEmailWrapper.Pollers
             RaiseTurnsRecovered(history.Recovered);
         }
 
-        private bool ScanMailbox(IMailFolder inbox)
+        internal bool ScanMailbox(IMailFolder inbox)
         {
             bool emailDownloaded = false;
 
@@ -436,10 +436,20 @@ namespace AowEmailWrapper.Pollers
             Classify(inbox, recentToCheck, out withSaveGame, out wrapperMessages);
             List<UniqueId> toDelete = new List<UniqueId>();
 
-            Trace.TraceInformation("Mailbox scan: {0} unread, {1} not seen before within {2} days, {3} with a save game attached",
-                serverUids.Count, recentToCheck.Count, LookBackDays, withSaveGame.Count);
+            //Wrapper messages are for the Wrapper, not the player, and are handled even when already read: the
+            //player's phone or webmail may open one before the Wrapper checks, and it would then stay in the inbox
+            //for good. Found by subject, confirmed by the wrapper's header like the unread ones.
+            List<long> readWrapperMessages = FindReadWrapperMessages(inbox, since);
+            foreach (long uid in readWrapperMessages)
+            {
+                wrapperMessages.Add(uid);
+            }
 
-            foreach (long uid in recentToCheck)
+            Trace.TraceInformation("Mailbox scan: {0} unread, {1} not seen before within {2} days, {3} with a save game attached, {4} wrapper message(s) already read",
+                serverUids.Count, recentToCheck.Count, LookBackDays, withSaveGame.Count, readWrapperMessages.Count);
+
+            //In mailbox order, so the read wrapper messages take their place among the unread ones
+            foreach (long uid in recentToCheck.Concat(readWrapperMessages).Distinct().OrderBy(uid => uid))
             {
                 if (wrapperMessages.Contains(uid))
                 {
@@ -487,6 +497,23 @@ namespace AowEmailWrapper.Pollers
             localMessageStore.Dispose();
 
             return emailDownloaded;
+        }
+
+        /// <summary>Wrapper messages within the look-back window that are already marked as read.</summary>
+        internal static List<long> FindReadWrapperMessages(IMailFolder inbox, DateTime since)
+        {
+            try
+            {
+                List<long> candidates = inbox.Search(SearchQuery.Seen.And(SearchQuery.SubjectContains(TurnQuery.SubjectPrefix)).And(SearchQuery.DeliveredAfter(since)))
+                    .Select(uid => (long)uid.Id).ToList();
+                return candidates.Count == 0 ? candidates : FindWrapperMessages(inbox, candidates).OrderBy(uid => uid).ToList();
+            }
+            catch (Exception ex)
+            {
+                //A server that cannot search by subject leaves them where they are, as before
+                Trace.TraceWarning("Could not look for wrapper messages already read: {0}", ex.Message);
+                return new List<long>();
+            }
         }
 
         /// <summary>Messages carrying the wrapper's own header, found by fetching that header alone.</summary>
