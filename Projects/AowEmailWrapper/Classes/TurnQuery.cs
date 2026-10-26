@@ -103,8 +103,10 @@ namespace AowEmailWrapper.Classes
         public const string KindQuery = "query";
         public const string KindReply = "reply";
 
-        private const string QuerySubjectTemplate = "AoW Wrapper: who has {0}?";
-        private const string ReplySubjectTemplate = "AoW Wrapper: {0}";
+        /// <summary>What every wrapper message's subject starts with; a mailbox search finds them by it.</summary>
+        public const string SubjectPrefix = "AoW Wrapper:";
+        private const string QuerySubjectTemplate = SubjectPrefix + " who has {0}?";
+        private const string ReplySubjectTemplate = SubjectPrefix + " {0}";
 
         #region Recognising
 

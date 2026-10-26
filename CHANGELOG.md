@@ -3,6 +3,15 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## 2.1.11
+
+- Notices between Wrappers ("AoW Wrapper: ...") are picked up and removed from the inbox even when they
+  were already opened, by a phone's mail app or webmail, before the Wrapper checked. Until now such a notice
+  stayed in the inbox for good. With IMAP accounts; POP3 accounts already handled them.
+
+Run `AowEmailWrapper-2.1.11-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
+*Check for updates* on the Settings tab. Accounts and settings carry over.
+
 ## 2.1.10
 
 - A copy of a game the Wrapper finds after it started, through Rescan, Add folder, a change on the Games tab
