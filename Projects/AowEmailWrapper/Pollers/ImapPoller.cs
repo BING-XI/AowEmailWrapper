@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using AowEmailWrapper.ASG;
@@ -85,6 +86,7 @@ namespace AowEmailWrapper.Pollers
                 return;
             }
 
+            AllowChecks();
             _stop = new CancellationTokenSource();
             _consecutiveFailures = 0;
             _scanRequest.Reset();
@@ -98,6 +100,7 @@ namespace AowEmailWrapper.Pollers
 
         public override void Stop()
         {
+            StopChecks();
             StopTimer();
 
             CancellationTokenSource stop = _stop;
@@ -174,23 +177,57 @@ namespace AowEmailWrapper.Pollers
                 {
                     using (ImapClient imap = new ImapClient())
                     {
-                        imap.Timeout = NETWORK_TIMEOUT_MS;
-                        imap.Connect(_host, _port, MailHelper.ToSecureSocketOptions(_sslType), token);
-                        MailHelper.Authenticate(imap, _username, _password, OAuthProvider);
-
-                        IMailFolder inbox = imap.Inbox;
-                        inbox.Open(FolderAccess.ReadWrite, token);
-
-                        if (ImportHistoryOnNextScan)
+                        //Signing in, the history import and the recovery count as checking the mailbox until the first
+                        //scan has begun, so the Wrapper does not close in the middle: all of them can file turns. A
+                        //stopped poller begins none of it.
+                        if (!TryBeginConnectionWork())
                         {
-                            ImportHistory(imap, token);
+                            return;
                         }
+                        bool connecting = true;
+                        Action connected = () =>
+                        {
+                            if (connecting)
+                            {
+                                connecting = false;
+                                EndConnectionWork(false);
+                            }
+                        };
 
-                        bool canIdle = imap.Capabilities.HasFlag(ImapCapabilities.Idle);
-                        Trace.TraceInformation("IMAP connected to {0}, IDLE {1}", _host, canIdle ? "supported" : "not supported, polling on the timer");
+                        IMailFolder inbox;
+                        bool canIdle;
+                        try
+                        {
+                            imap.Timeout = NETWORK_TIMEOUT_MS;
+                            imap.Connect(_host, _port, MailHelper.ToSecureSocketOptions(_sslType), token);
+                            MailHelper.Authenticate(imap, _username, _password, OAuthProvider);
 
-                        _scanRequest.Reset();
-                        Scan(inbox);
+                            inbox = imap.Inbox;
+                            inbox.Open(FolderAccess.ReadWrite, token);
+
+                            canIdle = imap.Capabilities.HasFlag(ImapCapabilities.Idle);
+
+                            if (ImportHistoryOnNextScan)
+                            {
+                                ImportHistory(imap, token);
+                            }
+
+                            Trace.TraceInformation("IMAP connected to {0}, IDLE {1}", _host, canIdle ? "supported" : "not supported, polling on the timer");
+
+                            RecoverMissedTurns(imap, token);
+
+                            _scanRequest.Reset();
+                            //Ends the connection's count once the scan's own has begun, so there is no moment between
+                            Scan(inbox, connected);
+                        }
+                        finally
+                        {
+                            if (connecting)
+                            {
+                                connecting = false;
+                                EndConnectionWork(true);
+                            }
+                        }
                         _consecutiveFailures = 0;
                         delay = ReconnectDelaySeconds;
 
@@ -274,8 +311,11 @@ namespace AowEmailWrapper.Pollers
 
         private void ReportFailure(Exception ex)
         {
-            PollBegin();
-            PollEnd(false, ex);
+            //A stopped poller has nobody left to tell
+            if (TryPollBegin())
+            {
+                PollEnd(false, ex);
+            }
         }
 
         #endregion
@@ -288,10 +328,13 @@ namespace AowEmailWrapper.Pollers
             bool emailDownloaded = false;
             Exception error = null;
 
+            if (!TryPollBegin())
+            {
+                return;
+            }
+
             try
             {
-                PollBegin();
-
                 using (ImapClient imap = new ImapClient())
                 {
                     imap.Timeout = NETWORK_TIMEOUT_MS;
@@ -305,6 +348,8 @@ namespace AowEmailWrapper.Pollers
                     {
                         ImportHistory(imap, CancellationToken.None);
                     }
+
+                    RecoverMissedTurns(imap, CancellationToken.None);
 
                     emailDownloaded = ScanMailbox(inbox);
 
@@ -323,13 +368,23 @@ namespace AowEmailWrapper.Pollers
             }
         }
 
-        /// <summary>A scan on the watcher's open connection. Errors propagate so the loop reconnects.</summary>
-        private void Scan(IMailFolder inbox)
+        /// <summary>
+        /// A scan on the watcher's open connection. Errors propagate so the loop reconnects. A stopped poller begins
+        /// none and leaves the loop. <paramref name="begun"/> runs once the scan counts as checking the mailbox.
+        /// </summary>
+        private void Scan(IMailFolder inbox, Action begun = null)
         {
             bool emailDownloaded = false;
             bool completed = false;
 
-            PollBegin();
+            if (!TryPollBegin())
+            {
+                throw new OperationCanceledException("The mail checker was stopped");
+            }
+            if (begun != null)
+            {
+                begun();
+            }
             try
             {
                 emailDownloaded = ScanMailbox(inbox);
@@ -385,7 +440,8 @@ namespace AowEmailWrapper.Pollers
                 try
                 {
                     MimeMessage email = inbox.GetMessage(new UniqueId(turn.Uid), token);
-                    if (ProcessEmailAttachments(email) > 0)
+                    bool recorded;
+                    if (ProcessEmailAttachments(email, out recorded) > 0 && recorded)
                     {
                         history.Recovered++;
                         Trace.TraceInformation("Recovered unplayed turn {0} from {1}", turn.FileName, turn.From);
@@ -402,6 +458,143 @@ namespace AowEmailWrapper.Pollers
             }
 
             RaiseTurnsRecovered(history.Recovered);
+        }
+
+        /// <summary>
+        /// Files turns that reached this install but never its activity log. A Wrapper closed in the middle of a check
+        /// (an automatic update did this right after start-up) could store a turn and mark its email as read without
+        /// recording it, so its game stayed Sent and the player was never told the turn had come.
+        /// </summary>
+        private void RecoverMissedTurns(ImapClient imap, CancellationToken token)
+        {
+            try
+            {
+                List<SentGame> games = RaiseSentGamesWanted();
+                if (games.Count > 0)
+                {
+                    RecoverStrandedTurns(imap.Inbox, games, token);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                //Tried again on the next connection
+                Trace.TraceWarning("Could not look through {0} for turns that were never recorded: {1}", _host, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// The mark such a turn leaves: its game's line is Sent, yet the game's turn file in this install was written
+        /// after the send, and it is the very save a read email from one of the game's players carries. Only then is
+        /// the turn filed again. A turn answered elsewhere, or read first on another computer or a phone, is not in
+        /// this install's folders, and the turn the player answered was written before the send. "After the send"
+        /// holds against both the line's time and the copy of the sent turn kept for Resend, written as it went out:
+        /// the copy is dated by the same file system as the turn file, so a time zone changed since does not count,
+        /// and the line's time catches a copy left from an earlier send. A game without such a copy is left alone.
+        /// Games without the mark cost nothing; a file is looked up in the mailbox once. Returns how many were filed.
+        /// </summary>
+        internal int RecoverStrandedTurns(IMailFolder inbox, IList<SentGame> games, CancellationToken token)
+        {
+            List<KeyValuePair<SentGame, FileInfo>> stranded = new List<KeyValuePair<SentGame, FileInfo>>();
+            foreach (SentGame game in games.Where(game => game != null && game.Players != null && game.Players.Count > 0))
+            {
+                FileInfo sentCopy = ResendHelper.GetCopy(game.FileName);
+                if (sentCopy == null)
+                {
+                    continue;
+                }
+
+                foreach (FileInfo file in _gameManager.StoredTurnFiles(game.FileName))
+                {
+                    if (file.LastWriteTimeUtc > sentCopy.LastWriteTimeUtc + StrandedMargin &&
+                        file.LastWriteTime > game.Sent + StrandedMargin &&
+                        !_strandedChecked.Contains(StrandedKey(file)))
+                    {
+                        stranded.Add(new KeyValuePair<SentGame, FileInfo>(game, file));
+                    }
+                }
+            }
+            if (stranded.Count == 0)
+            {
+                return 0;
+            }
+
+            List<MailboxTurn> candidates = ContactHistory.FindTurnsFrom(inbox, stranded.SelectMany(pair => pair.Key.Players), stranded.Min(pair => pair.Key.Sent), token);
+
+            int recovered = 0;
+            foreach (KeyValuePair<SentGame, FileInfo> pair in stranded)
+            {
+                SentGame game = pair.Key;
+                HashSet<string> players = new HashSet<string>(game.Players, StringComparer.OrdinalIgnoreCase);
+                byte[] stored = File.ReadAllBytes(pair.Value.FullName);
+                bool found = false;
+
+                foreach (MailboxTurn turn in candidates
+                    .Where(turn => turn.GameKey == game.GameKey && players.Contains(turn.From ?? string.Empty))
+                    .OrderByDescending(turn => turn.Arrived ?? turn.Date))
+                {
+                    MimeMessage email = inbox.GetMessage(new UniqueId(turn.Uid), token);
+                    if (!CarriesSave(email, stored))
+                    {
+                        continue;
+                    }
+
+                    found = true;
+                    bool recorded;
+                    if (ProcessEmailAttachments(email, out recorded) > 0 && recorded)
+                    {
+                        recovered++;
+                        Trace.TraceInformation("Recovered turn {0} from {1}: stored {2:u} but never recorded", turn.FileName, turn.From, pair.Value.LastWriteTime);
+                    }
+                    break;
+                }
+
+                if (!found)
+                {
+                    Trace.TraceInformation("{0} was written after its turn was sent, but no read email carries it; left alone", pair.Value.FullName);
+                }
+                _strandedChecked.Add(StrandedKey(pair.Value));
+            }
+
+            if (recovered > 0)
+            {
+                RaiseTurnsRecovered(recovered);
+            }
+            return recovered;
+        }
+
+        /// <summary>
+        /// How much later than the send a turn file must be written to count as a turn that came after it. The file of a
+        /// turn is written just before its line, and the game rewrites its EmailIn file just before a send, so before
+        /// the copy for Resend too.
+        /// </summary>
+        private static readonly TimeSpan StrandedMargin = TimeSpan.FromMinutes(1);
+
+        private readonly HashSet<string> _strandedChecked = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        private static string StrandedKey(FileInfo file)
+        {
+            return file.FullName + "|" + file.LastWriteTimeUtc.Ticks;
+        }
+
+        /// <summary>True when one of the email's save games is, byte for byte, the given file.</summary>
+        private static bool CarriesSave(MimeMessage email, byte[] stored)
+        {
+            foreach (MimePart attachment in MailHelper.GetAttachments(email))
+            {
+                if (!string.IsNullOrEmpty(attachment.FileName) && ASGFileInfo.IsAsg(attachment.FileName))
+                {
+                    byte[] data = MailHelper.GetAttachmentBytes(attachment);
+                    if (data != null && data.AsSpan().SequenceEqual(stored))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         internal bool ScanMailbox(IMailFolder inbox)
@@ -477,8 +670,19 @@ namespace AowEmailWrapper.Pollers
 
                 MimeMessage email = inbox.GetMessage(uniqueId);
 
-                if (ProcessEmailAttachments(email) > 0)
+                bool recorded;
+                if (ProcessEmailAttachments(email, out recorded) > 0)
                 {
+                    if (!recorded)
+                    {
+                        //The activity log did not take the turn: the Wrapper is closing, or storing it failed. Marked as
+                        //read, the turn could sit in the game's folder with nothing saying it waits; unread, the next
+                        //check files it again
+                        Trace.TraceWarning("The turn in message {0} was not recorded; left unread for the next check", uid);
+                        inbox.RemoveFlags(uniqueId, MessageFlags.Seen, true);
+                        continue;
+                    }
+
                     //We want the user to be able to go Mark as Unread > Poll > Redownload
                     //So just mark as read but don't add to local message store
                     emailDownloaded = true;

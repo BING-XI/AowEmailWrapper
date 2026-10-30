@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Timers;
 using AowEmailWrapper.ASG;
 using AowEmailWrapper.Classes;
@@ -15,6 +16,7 @@ namespace AowEmailWrapper.Pollers
     public delegate void PollerHistoryEventHandler(BasePoller sender, MailboxHistory history);
     public delegate void PollerRecoveredEventHandler(BasePoller sender, int count);
     public delegate void PollerWrapperMessageEventHandler(BasePoller sender, MimeMessage message);
+    public delegate void PollerSentGamesEventHandler(BasePoller sender, List<SentGame> games);
 
     public abstract class BasePoller
     {
@@ -40,6 +42,13 @@ namespace AowEmailWrapper.Pollers
 
         /// <summary>Raised after unplayed turns from the mailbox were downloaded and filed.</summary>
         public event PollerRecoveredEventHandler OnTurnsRecovered;
+
+        /// <summary>
+        /// Raised on the poller's thread when it connects, to learn which games the activity log shows as sent. The
+        /// handler fills the list before returning; the poller then looks for turns of those games that arrived but
+        /// were never recorded.
+        /// </summary>
+        public event PollerSentGamesEventHandler OnSentGamesWanted;
 
         /// <summary>The player's own addresses; mail from them counts as a turn the player sent.</summary>
         public IEnumerable<string> OwnAddresses { get; set; }
@@ -69,11 +78,93 @@ namespace AowEmailWrapper.Pollers
         /// </summary>
         public bool ImportHistoryOnNextScan { get; set; }
         private Queue<string> _pollQueue;
+        private int _connectionWork;
+        private bool _stopped;
+        //Guards the three above, so that once the poller is stopped no check or connection can begin
+        private readonly object _gate = new object();
         protected EmailSaveFolder _saveFolder;
 
+        /// <summary>
+        /// True during a check of the mailbox, and while a new connection signs in and looks through the mailbox for
+        /// turns to recover: all of them can store a turn, and closing the Wrapper in the middle cuts that off. Once
+        /// the poller is stopped nothing new begins, so when this turns false it stays false.
+        /// </summary>
         public bool IsPolling
         {
-            get { return !_pollQueue.Count.Equals(0); }
+            get
+            {
+                lock (_gate)
+                {
+                    return _pollQueue.Count > 0 || _connectionWork > 0;
+                }
+            }
+        }
+
+        /// <summary>Lets checks begin again, for a poller started (again).</summary>
+        protected void AllowChecks()
+        {
+            lock (_gate)
+            {
+                _stopped = false;
+            }
+        }
+
+        /// <summary>From here on no check or connection begins; one under way finishes.</summary>
+        protected void StopChecks()
+        {
+            lock (_gate)
+            {
+                _stopped = true;
+            }
+        }
+
+        /// <summary>Counts a new connection as checking the mailbox until its first scan begins; false once stopped.</summary>
+        protected bool TryBeginConnectionWork()
+        {
+            lock (_gate)
+            {
+                if (_stopped)
+                {
+                    return false;
+                }
+                _connectionWork++;
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Ends what <see cref="TryBeginConnectionWork"/> began. A connection that failed before its first scan tells the
+        /// window, which shows the envelope only once nothing is checking.
+        /// </summary>
+        protected void EndConnectionWork(bool failed)
+        {
+            lock (_gate)
+            {
+                _connectionWork--;
+            }
+            if (failed && OnEmailEvent != null)
+            {
+                OnEmailEvent(this, new PollerEventArgs(PollState.Aborted, false));
+            }
+        }
+
+        /// <summary>
+        /// Waits until none of the pollers is checking, for at most <paramref name="limit"/>; false when one still is.
+        /// Meant for stopped pollers, which begin nothing new.
+        /// </summary>
+        public static async System.Threading.Tasks.Task<bool> WhenIdle(IEnumerable<BasePoller> pollers, TimeSpan limit, TimeSpan step)
+        {
+            List<BasePoller> watched = (pollers ?? Enumerable.Empty<BasePoller>()).ToList();
+            Stopwatch waited = Stopwatch.StartNew();
+            while (watched.Any(poller => poller.IsPolling))
+            {
+                if (waited.Elapsed >= limit)
+                {
+                    return false;
+                }
+                await System.Threading.Tasks.Task.Delay(step);
+            }
+            return true;
         }
 
         /// <summary>Empty for password sign-in, otherwise the OAuth provider name.</summary>
@@ -109,6 +200,7 @@ namespace AowEmailWrapper.Pollers
 
         public virtual void Start()
         {
+            AllowChecks();
             if (_timer == null)
             {
                 StartTimer();
@@ -118,6 +210,7 @@ namespace AowEmailWrapper.Pollers
 
         public virtual void Stop()
         {
+            StopChecks();
             StopTimer();
         }
 
@@ -163,18 +256,30 @@ namespace AowEmailWrapper.Pollers
             pollThread.Start();
         }
 
-        protected void PollBegin()
+        /// <summary>Begins a check; false, with nothing begun, once the poller is stopped.</summary>
+        protected bool TryPollBegin()
         {
-            _pollQueue.Enqueue(Guid.NewGuid().ToString());
+            lock (_gate)
+            {
+                if (_stopped)
+                {
+                    return false;
+                }
+                _pollQueue.Enqueue(Guid.NewGuid().ToString());
+            }
             if (OnEmailEvent != null)
             {
                 OnEmailEvent(this, new PollerEventArgs(PollState.Begin, false));
             }
+            return true;
         }
 
         protected void PollEnd(bool emailDownloaded, Exception ex)
         {
-            _pollQueue.Dequeue();
+            lock (_gate)
+            {
+                _pollQueue.Dequeue();
+            }
             if (OnEmailEvent != null)
             {
                 OnEmailEvent(this, new PollerEventArgs(PollState.End, emailDownloaded, ex));
@@ -184,7 +289,10 @@ namespace AowEmailWrapper.Pollers
         /// <summary>Ends a check that failed without telling the user; the caller decides if it matters.</summary>
         protected void PollAbort()
         {
-            _pollQueue.Dequeue();
+            lock (_gate)
+            {
+                _pollQueue.Dequeue();
+            }
             if (OnEmailEvent != null)
             {
                 OnEmailEvent(this, new PollerEventArgs(PollState.Aborted, false));
@@ -209,12 +317,36 @@ namespace AowEmailWrapper.Pollers
             }
         }
 
+        /// <summary>The games the activity log shows as sent; empty when nothing answers.</summary>
+        protected List<SentGame> RaiseSentGamesWanted()
+        {
+            List<SentGame> games = new List<SentGame>();
+            PollerSentGamesEventHandler handler = OnSentGamesWanted;
+            if (handler != null)
+            {
+                handler(this, games);
+            }
+            return games;
+        }
+
         /// <summary>
         /// Saves every Age of Wonders save game attached to the email and returns how many were found.
         /// </summary>
         protected int ProcessEmailAttachments(MimeMessage email)
         {
+            bool recorded;
+            return ProcessEmailAttachments(email, out recorded);
+        }
+
+        /// <summary>
+        /// Saves every Age of Wonders save game attached to the email and returns how many were found.
+        /// <paramref name="recorded"/> is false when one of them did not reach the activity log, because the Wrapper is
+        /// closing or storing it failed; the email is then to be left for the next check.
+        /// </summary>
+        protected int ProcessEmailAttachments(MimeMessage email, out bool recorded)
+        {
             int count = 0;
+            recorded = true;
 
             try
             {
@@ -234,7 +366,10 @@ namespace AowEmailWrapper.Pollers
                             {
                                 if (theASG.Length > 0)
                                 {
-                                    _gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender, MailHelper.GetSharedNames(email), TurnQuery.WantsNotices(email));
+                                    if (!_gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender, MailHelper.GetSharedNames(email), TurnQuery.WantsNotices(email)))
+                                    {
+                                        recorded = false;
+                                    }
 
                                     TurnLogger.SaveLog(theASG.FileNameTrue, bodyText);
                                 }
@@ -245,6 +380,8 @@ namespace AowEmailWrapper.Pollers
             }
             catch (Exception ex)
             {
+                //A save that could not be written (a locked file, a folder without write access) is not in the log either
+                recorded = false;
                 Trace.TraceError(ex.ToString());
                 Trace.Flush();
             }

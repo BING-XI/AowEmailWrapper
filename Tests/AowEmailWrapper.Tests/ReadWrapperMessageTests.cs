@@ -133,6 +133,14 @@ namespace AowEmailWrapper.Tests
 
             public uint[] Uids { get { return _messages.Select(stored => stored.Uid).ToArray(); } }
 
+            /// <summary>How many messages were downloaded whole.</summary>
+            public int Downloads { get; private set; }
+
+            public bool IsSeen(uint uid)
+            {
+                return _messages.First(stored => stored.Uid == uid).Flags.HasFlag(MessageFlags.Seen);
+            }
+
             public static FakeInbox Create()
             {
                 IMailFolder folder = Create<IMailFolder, FakeInbox>();
@@ -160,9 +168,37 @@ namespace AowEmailWrapper.Tests
                     case SearchTerm.NotSeen: return !stored.Flags.HasFlag(MessageFlags.Seen);
                     case SearchTerm.DeliveredAfter: return stored.Delivered.Date > ((DateSearchQuery)query).Date.Date;
                     case SearchTerm.SubjectContains: return (stored.Message.Subject ?? string.Empty).IndexOf(((TextSearchQuery)query).Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    case SearchTerm.FromContains: return stored.Message.From.Mailboxes.Any(mailbox => mailbox.Address.IndexOf(((TextSearchQuery)query).Text, StringComparison.OrdinalIgnoreCase) >= 0);
                     case SearchTerm.And: return Matches(stored, ((BinarySearchQuery)query).Left) && Matches(stored, ((BinarySearchQuery)query).Right);
+                    case SearchTerm.Or: return Matches(stored, ((BinarySearchQuery)query).Left) || Matches(stored, ((BinarySearchQuery)query).Right);
                     default: throw new NotSupportedException("search term " + query.Term);
                 }
+            }
+
+            /// <summary>The structure the server reports for a message: its parts, with their types and file names.</summary>
+            private static BodyPart Structure(MimeEntity entity, string specifier = "")
+            {
+                Multipart multipart = entity as Multipart;
+                if (multipart != null)
+                {
+                    BodyPartMultipart parts = new BodyPartMultipart(multipart.ContentType, specifier);
+                    int index = 0;
+                    foreach (MimeEntity child in multipart)
+                    {
+                        index++;
+                        parts.BodyParts.Add(Structure(child, specifier.Length > 0 ? specifier + "." + index : index.ToString()));
+                    }
+                    return parts;
+                }
+                return new BodyPartBasic(entity.ContentType, specifier) { ContentDisposition = entity.ContentDisposition };
+            }
+
+            private static Envelope EnvelopeOf(MimeMessage message)
+            {
+                Envelope envelope = new Envelope { Subject = message.Subject, Date = message.Date };
+                envelope.From.AddRange(message.From.Mailboxes);
+                envelope.To.AddRange(message.To.Mailboxes);
+                return envelope;
             }
 
             protected override object Invoke(MethodInfo method, object[] args)
@@ -177,11 +213,19 @@ namespace AowEmailWrapper.Tests
                         return (IList<IMessageSummary>)((IList<UniqueId>)args[0]).Select(uid =>
                         {
                             Stored stored = Find(uid);
-                            //Headers as a summary carries them; no body structure, as none of these has an attachment
-                            return (IMessageSummary)new MessageSummary(0) { UniqueId = uid, Flags = stored.Flags, Headers = stored.Message.Headers };
+                            return (IMessageSummary)new MessageSummary(0)
+                            {
+                                UniqueId = uid,
+                                Flags = stored.Flags,
+                                Headers = stored.Message.Headers,
+                                Envelope = EnvelopeOf(stored.Message),
+                                Body = Structure(stored.Message.Body),
+                                InternalDate = new DateTimeOffset(stored.Delivered)
+                            };
                         }).ToList();
 
                     case "GetMessage" when parameters[0] == typeof(UniqueId):
+                        Downloads++;
                         return Find((UniqueId)args[0]).Message;
 
                     case "Store" when parameters[0] == typeof(IList<UniqueId>) && args[1] is IStoreFlagsRequest request:

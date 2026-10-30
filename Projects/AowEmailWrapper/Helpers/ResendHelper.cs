@@ -76,6 +76,20 @@ namespace AowEmailWrapper.Helpers
             return File.Exists(filePath);
         }
 
+        /// <summary>The copy kept of the game's last sent turn, written as it went out; null when there is none.</summary>
+        public static FileInfo GetCopy(string asgFileName)
+        {
+            try
+            {
+                FileInfo copy = new FileInfo(GetEmlFilePath(asgFileName));
+                return copy.Exists ? copy : null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         #endregion
 
         #region Private Methods

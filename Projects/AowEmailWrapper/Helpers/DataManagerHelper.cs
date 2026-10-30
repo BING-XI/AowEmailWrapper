@@ -120,10 +120,11 @@ namespace AowEmailWrapper.Helpers
             return returnVal;
         }
 
-        public static void SaveActivityLog(ActivityList toSave)
+        /// <summary>False when the file could not be written.</summary>
+        public static bool SaveActivityLog(ActivityList toSave)
         {
             string activityFilePath = Path.Combine(AppDataHelper.ActivityLog.FullName, ACTIVITY_FILE_NAME);
-            FileHelper.SaveXmlFile(activityFilePath, toSave);
+            return FileHelper.SaveXmlFile(activityFilePath, toSave);
         }
 
         #endregion
