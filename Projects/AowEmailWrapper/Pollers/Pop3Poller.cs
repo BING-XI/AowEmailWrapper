@@ -91,10 +91,10 @@ namespace AowEmailWrapper.Pollers
                             {
                                 if (!recorded)
                                 {
-                                    //The Wrapper is closing and the activity log did not take the turn: left out of the
-                                    //message store, so the next check fetches it again
-                                    Trace.TraceWarning("Message {0} was stored but not recorded, as the Wrapper is closing; left for the next check", uid);
-                                    break;
+                                    //The activity log did not take the turn: the Wrapper is closing, or storing it
+                                    //failed. Left out of the message store, so the next check fetches it again
+                                    Trace.TraceWarning("The turn in message {0} was not recorded; left for the next check", uid);
+                                    continue;
                                 }
 
                                 emailDownloaded = true;

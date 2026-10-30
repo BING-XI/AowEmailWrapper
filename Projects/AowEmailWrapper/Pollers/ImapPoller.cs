@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using AowEmailWrapper.ASG;
@@ -421,25 +422,19 @@ namespace AowEmailWrapper.Pollers
         }
 
         /// <summary>
-        /// Files turns that reached the inbox but never the activity log. A Wrapper closed in the middle of a check (an
-        /// automatic update did this right after start-up) could store a turn and mark its email as read without
-        /// recording it, so its game stayed Sent and the player was never told the turn had come. Each game the log
-        /// shows as sent is looked up in the mailbox, and a turn from one of its players that arrived after the
-        /// player's own last copy of it is filed like any other. Runs on every connection: finding nothing costs a few
-        /// searches and message structures, nothing is downloaded.
+        /// Files turns that reached this install but never its activity log. A Wrapper closed in the middle of a check
+        /// (an automatic update did this right after start-up) could store a turn and mark its email as read without
+        /// recording it, so its game stayed Sent and the player was never told the turn had come.
         /// </summary>
         private void RecoverMissedTurns(ImapClient imap, CancellationToken token)
         {
-            List<SentGame> games;
-            List<MailboxTurn> missed;
             try
             {
-                games = RaiseSentGamesWanted();
-                if (games.Count == 0)
+                List<SentGame> games = RaiseSentGamesWanted();
+                if (games.Count > 0)
                 {
-                    return;
+                    RecoverStrandedTurns(imap.Inbox, games, token);
                 }
-                missed = ContactHistory.FindMissedTurns(imap.Inbox, SentFolderOf(imap), games, OwnAddresses, LookBackDays, token);
             }
             catch (OperationCanceledException)
             {
@@ -449,52 +444,106 @@ namespace AowEmailWrapper.Pollers
             {
                 //Tried again on the next connection
                 Trace.TraceWarning("Could not look through {0} for turns that were never recorded: {1}", _host, ex.Message);
-                return;
+            }
+        }
+
+        /// <summary>
+        /// The mark such a turn leaves: its game's line is Sent, yet the game's turn file in this install was written
+        /// after the send, and it is the very save a read email from one of the game's players carries. Only then is
+        /// the turn filed again. A turn answered elsewhere, or read first on another computer or a phone, is not in
+        /// this install's folders, and the turn the player answered was written before the send. Games without the
+        /// mark cost nothing; a file is looked up in the mailbox once. Returns how many turns were filed.
+        /// </summary>
+        internal int RecoverStrandedTurns(IMailFolder inbox, IList<SentGame> games, CancellationToken token)
+        {
+            List<KeyValuePair<SentGame, FileInfo>> stranded = new List<KeyValuePair<SentGame, FileInfo>>();
+            foreach (SentGame game in games.Where(game => game != null && game.Players != null && game.Players.Count > 0))
+            {
+                foreach (FileInfo file in _gameManager.StoredTurnFiles(game.FileName))
+                {
+                    if (file.LastWriteTime > game.Sent + StrandedMargin && !_strandedChecked.Contains(StrandedKey(file)))
+                    {
+                        stranded.Add(new KeyValuePair<SentGame, FileInfo>(game, file));
+                    }
+                }
+            }
+            if (stranded.Count == 0)
+            {
+                return 0;
             }
 
-            Trace.TraceInformation("Turns never recorded: {0} game(s) shown as sent, {1} with a newer turn in {2}", games.Count, missed.Count, _host);
+            List<MailboxTurn> candidates = ContactHistory.FindTurnsFrom(inbox, stranded.SelectMany(pair => pair.Key.Players), stranded.Min(pair => pair.Key.Sent), token);
 
             int recovered = 0;
-            foreach (MailboxTurn turn in missed)
+            foreach (KeyValuePair<SentGame, FileInfo> pair in stranded)
             {
-                try
+                SentGame game = pair.Key;
+                HashSet<string> players = new HashSet<string>(game.Players, StringComparer.OrdinalIgnoreCase);
+                byte[] stored = File.ReadAllBytes(pair.Value.FullName);
+                bool found = false;
+
+                foreach (MailboxTurn turn in candidates
+                    .Where(turn => turn.GameKey == game.GameKey && players.Contains(turn.From ?? string.Empty))
+                    .OrderByDescending(turn => turn.Arrived ?? turn.Date))
                 {
-                    MimeMessage email = imap.Inbox.GetMessage(new UniqueId(turn.Uid), token);
+                    MimeMessage email = inbox.GetMessage(new UniqueId(turn.Uid), token);
+                    if (!CarriesSave(email, stored))
+                    {
+                        continue;
+                    }
+
+                    found = true;
                     bool recorded;
                     if (ProcessEmailAttachments(email, out recorded) > 0 && recorded)
                     {
                         recovered++;
-                        Trace.TraceInformation("Recovered turn {0} from {1}, which arrived {2:u} but was never recorded", turn.FileName, turn.From, turn.Arrived);
+                        Trace.TraceInformation("Recovered turn {0} from {1}: stored {2:u} but never recorded", turn.FileName, turn.From, pair.Value.LastWriteTime);
                     }
+                    break;
                 }
-                catch (OperationCanceledException)
+
+                if (!found)
                 {
-                    throw;
+                    Trace.TraceInformation("{0} was written after its turn was sent, but no read email carries it; left alone", pair.Value.FullName);
                 }
-                catch (Exception ex)
-                {
-                    Trace.TraceWarning("Could not recover {0}: {1}", turn.FileName, ex.Message);
-                }
+                _strandedChecked.Add(StrandedKey(pair.Value));
             }
 
             if (recovered > 0)
             {
                 RaiseTurnsRecovered(recovered);
             }
+            return recovered;
         }
 
-        /// <summary>The account's Sent folder, or null when the server does not say which folder that is.</summary>
-        private static IMailFolder SentFolderOf(ImapClient imap)
+        /// <summary>
+        /// How much later than the send a turn file must be written to count as a turn that came after it. The file of a
+        /// turn is written just before its line, and the game rewrites its EmailIn file just before a send.
+        /// </summary>
+        private static readonly TimeSpan StrandedMargin = TimeSpan.FromMinutes(1);
+
+        private readonly HashSet<string> _strandedChecked = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        private static string StrandedKey(FileInfo file)
         {
-            try
+            return file.FullName + "|" + file.LastWriteTimeUtc.Ticks;
+        }
+
+        /// <summary>True when one of the email's save games is, byte for byte, the given file.</summary>
+        private static bool CarriesSave(MimeMessage email, byte[] stored)
+        {
+            foreach (MimePart attachment in MailHelper.GetAttachments(email))
             {
-                return imap.GetFolder(SpecialFolder.Sent);
+                if (!string.IsNullOrEmpty(attachment.FileName) && ASGFileInfo.IsAsg(attachment.FileName))
+                {
+                    byte[] data = MailHelper.GetAttachmentBytes(attachment);
+                    if (data != null && data.AsSpan().SequenceEqual(stored))
+                    {
+                        return true;
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                Trace.TraceInformation("No Sent folder to look through: {0}", ex.Message);
-                return null;
-            }
+            return false;
         }
 
         internal bool ScanMailbox(IMailFolder inbox)
@@ -575,11 +624,12 @@ namespace AowEmailWrapper.Pollers
                 {
                     if (!recorded)
                     {
-                        //The Wrapper is closing and the activity log did not take the turn. Marked as read, the turn
-                        //would sit in the game's folder with nothing saying it waits; unread, the next start files it
-                        Trace.TraceWarning("Message {0} was stored but not recorded, as the Wrapper is closing; left unread for the next check", uid);
+                        //The activity log did not take the turn: the Wrapper is closing, or storing it failed. Marked as
+                        //read, the turn could sit in the game's folder with nothing saying it waits; unread, the next
+                        //check files it again
+                        Trace.TraceWarning("The turn in message {0} was not recorded; left unread for the next check", uid);
                         inbox.RemoveFlags(uniqueId, MessageFlags.Seen, true);
-                        break;
+                        continue;
                     }
 
                     //We want the user to be able to go Mark as Unread > Poll > Redownload

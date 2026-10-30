@@ -765,15 +765,50 @@ namespace AowEmailWrapper.Games
             }
         }
 
-        /// <summary>True when the turn was recorded, or when nothing listens to record it.</summary>
+        /// <summary>True when the turn was recorded; false too when nothing listens yet to record it.</summary>
         private bool RaiseOnGameSaved(AowGameSavedEventArgs e)
         {
             if (OnGameSaved == null)
             {
-                return true;
+                return false;
             }
             OnGameSaved(this, e);
             return e.Recorded;
+        }
+
+        /// <summary>
+        /// The files this install holds under a game's turn name, where downloaded turns are put: each copy's EmailIn
+        /// and Save folders, and the folder for turns of unknown games. EmailOut is left out, as the Wrapper writes
+        /// there after a send.
+        /// </summary>
+        public List<FileInfo> StoredTurnFiles(string fileName)
+        {
+            List<string> folders = _games.Where(game => game.IsInstalled)
+                .SelectMany(game => new[] { game.EmailIn, game.Save })
+                .Where(folder => folder != null)
+                .Select(folder => folder.FullName)
+                .Concat(new[] { _checkEmailFolder })
+                .Where(folder => !string.IsNullOrEmpty(folder))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (string folder in folders)
+            {
+                try
+                {
+                    string path = ASGFileInfo.GetPathInside(folder, fileName);
+                    if (path != null && File.Exists(path))
+                    {
+                        files.Add(new FileInfo(path));
+                    }
+                }
+                catch (Exception)
+                {
+                    //An unreadable folder simply does not count
+                }
+            }
+            return files;
         }
 
         private static DirectoryInfo GetSaveFolder(AowGame theGame, EmailSaveFolder saveFolder)

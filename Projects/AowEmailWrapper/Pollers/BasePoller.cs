@@ -255,8 +255,8 @@ namespace AowEmailWrapper.Pollers
 
         /// <summary>
         /// Saves every Age of Wonders save game attached to the email and returns how many were found.
-        /// <paramref name="recorded"/> is false when one of them was stored but did not reach the activity log, which
-        /// happens when the Wrapper is closing; the email is then to be left for the next check.
+        /// <paramref name="recorded"/> is false when one of them did not reach the activity log, because the Wrapper is
+        /// closing or storing it failed; the email is then to be left for the next check.
         /// </summary>
         protected int ProcessEmailAttachments(MimeMessage email, out bool recorded)
         {
@@ -295,6 +295,8 @@ namespace AowEmailWrapper.Pollers
             }
             catch (Exception ex)
             {
+                //A save that could not be written (a locked file, a folder without write access) is not in the log either
+                recorded = false;
                 Trace.TraceError(ex.ToString());
                 Trace.Flush();
             }

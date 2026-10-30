@@ -8,11 +8,11 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
 - A turn no longer goes unannounced when the Wrapper closes in the middle of a mail check, as an automatic update
   at start-up could. The turn was put in the game's folder and its email marked as read, but the Activity Log never
   recorded it, so the game stayed *Sent* with no envelope or notification. An email is now marked as read only once
-  its turn is in the Activity Log, and an automatic update waits for a mail check under way to finish.
-- With IMAP, every connection to the mailbox looks for turns missed that way, or opened first by a phone or webmail:
-  for each game shown as *Sent*, a read email with that game's save from one of its players that arrived after the
-  copy of your own turn in your Sent folder. Such a turn is filed like a new one. A game whose last turn left no copy
-  on the server is left alone.
+  its turn is in the Activity Log, and an automatic update waits for a mail check under way to finish. A turn whose
+  save could not be written, to a locked file say, is left unread too and tried again; it used to be marked as read.
+- A turn already lost this way is filed and announced when the Wrapper next connects to an IMAP mailbox. Its game
+  shows as *Sent*, but the game's folder holds a save written after your turn went, and a read email from one of the
+  game's players carries that very save.
 
 ## 2.1.11
 

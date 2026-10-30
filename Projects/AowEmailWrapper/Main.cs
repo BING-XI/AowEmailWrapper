@@ -543,7 +543,7 @@ namespace AowEmailWrapper
         /// Describes the available build and, if the player agrees, downloads its installer, closes
         /// the Wrapper and leaves the installer for Program.Main to start.
         /// </summary>
-        private async void OfferUpdate()
+        private void OfferUpdate()
         {
             UpdateInfo update = _availableUpdate;
             if (update == null)
@@ -583,10 +583,6 @@ namespace AowEmailWrapper
             {
                 return;
             }
-
-            //The player asked for it, so a check still running after the wait does not stop the install; its turn is
-            //left unread and filed at the next start
-            await WaitForMailChecks();
 
             UpdateHelper.PendingInstaller = installer;
             _closeCancel = false;
@@ -2196,11 +2192,12 @@ namespace AowEmailWrapper
             }
 
             HashSet<string> own = new HashSet<string>(ownAddresses ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
-            foreach (string fileName in log.Activities.Select(activity => activity.FileName).Where(name => !string.IsNullOrEmpty(name)).Distinct(StringComparer.OrdinalIgnoreCase))
+            //By the exact file name: GetLastActivityByFileName also matches a game whose name contains this one
+            foreach (IGrouping<string, Activity> lines in log.Activities.Where(activity => !string.IsNullOrEmpty(activity.FileName)).GroupBy(activity => activity.FileName, StringComparer.OrdinalIgnoreCase))
             {
-                Activity last = log.GetLastActivityByFileName(fileName);
-                long ticks;
-                if (last == null || last.Status != ActivityState.Sent || !long.TryParse(last.DateTicks, out ticks))
+                Activity last = lines.OrderByDescending(TicksOf).First();
+                long ticks = TicksOf(last);
+                if (last.Status != ActivityState.Sent || ticks <= 0)
                 {
                     continue;
                 }
@@ -2216,11 +2213,17 @@ namespace AowEmailWrapper
                 games.Add(new SentGame
                 {
                     FileName = last.FileName,
-                    Sent = new DateTimeOffset(new DateTime(ticks, DateTimeKind.Local)),
+                    Sent = new DateTime(ticks, DateTimeKind.Local),
                     Players = players
                 });
             }
             return games;
+        }
+
+        private static long TicksOf(Activity activity)
+        {
+            long ticks;
+            return long.TryParse(activity.DateTicks, out ticks) ? ticks : 0;
         }
 
         #region Who has the turn
