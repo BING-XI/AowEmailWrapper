@@ -3,7 +3,9 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
-## Unreleased
+## 2.1.12
+
+Thanks to BING-XI for this release.
 
 - A turn no longer goes unannounced when the Wrapper closes in the middle of a mail check, as an automatic update
   at start-up could. The turn was put in the game's folder and its email marked as read, but the Activity Log never
@@ -16,6 +18,9 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
   game's players carries that very save.
 - With several accounts, a turn that arrived while another account was still being checked could go without its
   notification. It is now shown once the checks are done.
+
+Run `AowEmailWrapper-2.1.12-setup.exe` on Windows 10 or later, or let an installed Wrapper fetch it through
+*Check for updates* on the Settings tab. Accounts and settings carry over.
 
 ## 2.1.11
 
