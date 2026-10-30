@@ -15,6 +15,7 @@ namespace AowEmailWrapper.Pollers
     public delegate void PollerHistoryEventHandler(BasePoller sender, MailboxHistory history);
     public delegate void PollerRecoveredEventHandler(BasePoller sender, int count);
     public delegate void PollerWrapperMessageEventHandler(BasePoller sender, MimeMessage message);
+    public delegate void PollerSentGamesEventHandler(BasePoller sender, List<SentGame> games);
 
     public abstract class BasePoller
     {
@@ -40,6 +41,13 @@ namespace AowEmailWrapper.Pollers
 
         /// <summary>Raised after unplayed turns from the mailbox were downloaded and filed.</summary>
         public event PollerRecoveredEventHandler OnTurnsRecovered;
+
+        /// <summary>
+        /// Raised on the poller's thread when it connects, to learn which games the activity log shows as sent. The
+        /// handler fills the list before returning; the poller then looks for turns of those games that arrived but
+        /// were never recorded.
+        /// </summary>
+        public event PollerSentGamesEventHandler OnSentGamesWanted;
 
         /// <summary>The player's own addresses; mail from them counts as a turn the player sent.</summary>
         public IEnumerable<string> OwnAddresses { get; set; }
@@ -69,11 +77,26 @@ namespace AowEmailWrapper.Pollers
         /// </summary>
         public bool ImportHistoryOnNextScan { get; set; }
         private Queue<string> _pollQueue;
+        private int _connectionWork;
         protected EmailSaveFolder _saveFolder;
 
+        /// <summary>
+        /// True during a check of the mailbox, and while a new connection looks through it for turns to recover:
+        /// both can store a turn, and closing the Wrapper in the middle cuts that off.
+        /// </summary>
         public bool IsPolling
         {
-            get { return !_pollQueue.Count.Equals(0); }
+            get { return !_pollQueue.Count.Equals(0) || System.Threading.Volatile.Read(ref _connectionWork) > 0; }
+        }
+
+        protected void BeginConnectionWork()
+        {
+            System.Threading.Interlocked.Increment(ref _connectionWork);
+        }
+
+        protected void EndConnectionWork()
+        {
+            System.Threading.Interlocked.Decrement(ref _connectionWork);
         }
 
         /// <summary>Empty for password sign-in, otherwise the OAuth provider name.</summary>
@@ -209,12 +232,36 @@ namespace AowEmailWrapper.Pollers
             }
         }
 
+        /// <summary>The games the activity log shows as sent; empty when nothing answers.</summary>
+        protected List<SentGame> RaiseSentGamesWanted()
+        {
+            List<SentGame> games = new List<SentGame>();
+            PollerSentGamesEventHandler handler = OnSentGamesWanted;
+            if (handler != null)
+            {
+                handler(this, games);
+            }
+            return games;
+        }
+
         /// <summary>
         /// Saves every Age of Wonders save game attached to the email and returns how many were found.
         /// </summary>
         protected int ProcessEmailAttachments(MimeMessage email)
         {
+            bool recorded;
+            return ProcessEmailAttachments(email, out recorded);
+        }
+
+        /// <summary>
+        /// Saves every Age of Wonders save game attached to the email and returns how many were found.
+        /// <paramref name="recorded"/> is false when one of them was stored but did not reach the activity log, which
+        /// happens when the Wrapper is closing; the email is then to be left for the next check.
+        /// </summary>
+        protected int ProcessEmailAttachments(MimeMessage email, out bool recorded)
+        {
             int count = 0;
+            recorded = true;
 
             try
             {
@@ -234,7 +281,10 @@ namespace AowEmailWrapper.Pollers
                             {
                                 if (theASG.Length > 0)
                                 {
-                                    _gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender, MailHelper.GetSharedNames(email), TurnQuery.WantsNotices(email));
+                                    if (!_gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender, MailHelper.GetSharedNames(email), TurnQuery.WantsNotices(email)))
+                                    {
+                                        recorded = false;
+                                    }
 
                                     TurnLogger.SaveLog(theASG.FileNameTrue, bodyText);
                                 }

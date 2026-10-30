@@ -53,6 +53,12 @@
         /// <summary>The names the turn carried for the game's players, from the sender's Aliases tab and their own name.</summary>
         public System.Collections.Generic.IList<ConfigFramework.PlayerAlias> SharedNames { get; set; }
 
+        /// <summary>
+        /// Set by the handler once the turn is in the saved activity log. Left false when the Wrapper is closing and
+        /// the log can no longer take it, so the mail checker leaves the email to be fetched again.
+        /// </summary>
+        public bool Recorded { get; set; }
+
         public string TurnNumber
         {
             get { return _turnNo; }

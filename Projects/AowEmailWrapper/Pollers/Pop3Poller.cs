@@ -86,8 +86,17 @@ namespace AowEmailWrapper.Pollers
 
                             MessageStoreMessage theMessage = new MessageStoreMessage(uid);
 
-                            if (ProcessEmailAttachments(email) > 0)
+                            bool recorded;
+                            if (ProcessEmailAttachments(email, out recorded) > 0)
                             {
+                                if (!recorded)
+                                {
+                                    //The Wrapper is closing and the activity log did not take the turn: left out of the
+                                    //message store, so the next check fetches it again
+                                    Trace.TraceWarning("Message {0} was stored but not recorded, as the Wrapper is closing; left for the next check", uid);
+                                    break;
+                                }
+
                                 emailDownloaded = true;
 
                                 //Only populate the extra data for game emails

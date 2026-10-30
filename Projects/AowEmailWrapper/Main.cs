@@ -145,8 +145,9 @@ namespace AowEmailWrapper
         private EventHandler _activityLogRefresh;
         private bool _closeCancel = true;
 
-        //Automatic installs happen right after start-up, before anything is in flight; a check that
-        //only announces waits until the pollers and the games have settled
+        //Automatic installs happen right after start-up, before a game or a send is under way, though the
+        //first mail check is (the install waits for it); a check that only announces waits until the pollers
+        //and the games have settled
         private const int UpdateInstallDelayMilliseconds = 3000;
         private const int UpdateCheckDelayMilliseconds = 20000;
         //A Wrapper that runs for days, or started while offline, still learns of new builds
@@ -154,6 +155,9 @@ namespace AowEmailWrapper
         //An automatic install waits while a game is running or a turn is being sent
         private const int UpdateBusyRetryMilliseconds = 60 * 60 * 1000;
         private const int UpdateNotesMaxLength = 600;
+        //How long closing for an installer waits for a mail check to finish, and how often it looks
+        private const int MailCheckWaitMilliseconds = 2 * 60 * 1000;
+        private const int MailCheckWaitStepMilliseconds = 250;
         private System.Windows.Forms.Timer _updateTimer;
         private UpdateInfo _availableUpdate;
         private bool _updateCheckRunning;
@@ -494,6 +498,18 @@ namespace AowEmailWrapper
                 return false;
             }
 
+            //The first mail check after a start runs while the installer downloads, and a game may have been
+            //started meanwhile; closing on either cuts it off
+            if (!await WaitForMailChecks() || IsBusyForUpdate)
+            {
+                Trace.TraceInformation("Update {0} waits: a mail check, a game or a send is still running, or settings are unsaved", update.Describe());
+                if (_updateTimer != null)
+                {
+                    _updateTimer.Interval = UpdateBusyRetryMilliseconds;
+                }
+                return true;
+            }
+
             Trace.TraceInformation("Installing {0} automatically", update.Describe());
             ShowBalloon(10000, Translator.Translate(WrapperUpdateAvailableKey), Translator.Translate(WrapperUpdateInstallingKey, update.Describe()), ToolTipIcon.Info);
 
@@ -504,10 +520,30 @@ namespace AowEmailWrapper
         }
 
         /// <summary>
+        /// Waits, without holding up the window, until no account is checking its mailbox, for at most two
+        /// minutes. Closing the Wrapper in the middle of a check used to stop it after a turn was stored but
+        /// before the activity log recorded it, so the game stayed Sent with its turn waiting unseen. Returns
+        /// false when a check is still running.
+        /// </summary>
+        private async Task<bool> WaitForMailChecks()
+        {
+            Stopwatch waited = Stopwatch.StartNew();
+            while (IsAnyPolling)
+            {
+                if (waited.ElapsedMilliseconds >= MailCheckWaitMilliseconds)
+                {
+                    return false;
+                }
+                await Task.Delay(MailCheckWaitStepMilliseconds);
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Describes the available build and, if the player agrees, downloads its installer, closes
         /// the Wrapper and leaves the installer for Program.Main to start.
         /// </summary>
-        private void OfferUpdate()
+        private async void OfferUpdate()
         {
             UpdateInfo update = _availableUpdate;
             if (update == null)
@@ -547,6 +583,10 @@ namespace AowEmailWrapper
             {
                 return;
             }
+
+            //The player asked for it, so a check still running after the wait does not stop the install; its turn is
+            //left unread and filed at the next start
+            await WaitForMailChecks();
 
             UpdateHelper.PendingInstaller = installer;
             _closeCancel = false;
@@ -1931,6 +1971,7 @@ namespace AowEmailWrapper
             poller.OwnAddresses = OwnAddresses();
             poller.OnHistoryImported += new PollerHistoryEventHandler(PollerHistoryImported);
             poller.OnTurnsRecovered += new PollerRecoveredEventHandler(PollerTurnsRecovered);
+            poller.OnSentGamesWanted += new PollerSentGamesEventHandler(PollerSentGamesWanted);
             poller.OnWrapperMessage += new PollerWrapperMessageEventHandler(PollerWrapperMessage);
             return poller;
         }
@@ -2127,6 +2168,59 @@ namespace AowEmailWrapper
 
             RaiseEvent(_activityLogRefresh, this, new EventArgs());
             CheckNotifyIconState();
+        }
+
+        /// <summary>
+        /// The games whose last line in the activity log is Sent, for the mail checker to look up in the mailbox: a turn
+        /// that came for one of them but was never recorded is then filed after all. Filled on the window's thread,
+        /// which owns the log, before the checker goes on.
+        /// </summary>
+        private void PollerSentGamesWanted(BasePoller poller, List<SentGame> games)
+        {
+            if (!OnWindowThread)
+            {
+                SendToWindow(() => PollerSentGamesWanted(poller, games));
+                return;
+            }
+
+            games.AddRange(SentGames(_activityLog, OwnAddresses()));
+        }
+
+        /// <summary>The games whose last line is Sent, each with when it went and who may send the next turn.</summary>
+        internal static List<SentGame> SentGames(ActivityList log, IEnumerable<string> ownAddresses)
+        {
+            List<SentGame> games = new List<SentGame>();
+            if (log == null)
+            {
+                return games;
+            }
+
+            HashSet<string> own = new HashSet<string>(ownAddresses ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+            foreach (string fileName in log.Activities.Select(activity => activity.FileName).Where(name => !string.IsNullOrEmpty(name)).Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                Activity last = log.GetLastActivityByFileName(fileName);
+                long ticks;
+                if (last == null || last.Status != ActivityState.Sent || !long.TryParse(last.DateTicks, out ticks))
+                {
+                    continue;
+                }
+
+                //Players come from the save; Recipients, whom the turn went to, covers a line from before players were kept
+                List<string> players = string.Join(ActivityList.AddressSeparator.ToString(), last.Players, last.Recipients)
+                    .Split(ActivityList.AddressSeparator)
+                    .Select(address => address.Trim())
+                    .Where(address => address.Length > 0 && !own.Contains(address))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                games.Add(new SentGame
+                {
+                    FileName = last.FileName,
+                    Sent = new DateTimeOffset(new DateTime(ticks, DateTimeKind.Local)),
+                    Players = players
+                });
+            }
+            return games;
         }
 
         #region Who has the turn
@@ -2896,6 +2990,8 @@ namespace AowEmailWrapper
         /// while another reads it can throw or be saved half written, so the turn is recorded on the
         /// window's thread. It waits for it rather than queueing: the checker goes on to report the end of the
         /// check, and the turn must be in the log by then.
+        /// The log is saved here and the turn marked as recorded, and only then does the checker mark the email
+        /// as read. Once the window has closed this does not run, and the email is left for the next start.
         /// </summary>
         private void OnAowGameSaved(object sender, AowGameSavedEventArgs e)
         {
@@ -2933,6 +3029,9 @@ namespace AowEmailWrapper
             {
                 Trace.TraceWarning("Turn {0} came from {1}, an address that has not sent or received a turn before", e.FileName, e.Sender);
             }
+
+            DataManagerHelper.SaveActivityLog(_activityLog);
+            e.Recorded = true;
         }
 
         /// <summary>

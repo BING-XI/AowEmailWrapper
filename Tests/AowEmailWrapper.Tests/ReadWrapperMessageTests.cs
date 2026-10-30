@@ -114,8 +114,9 @@ namespace AowEmailWrapper.Tests
         }
 
         /// <summary>
-        /// An inbox in memory, behind MailKit's folder interface: the searches, summaries, downloads, flags
-        /// and expunges the scan uses. Anything else it is asked fails the test by name.
+        /// An inbox in memory, behind MailKit's folder interface: the searches, summaries, downloads, flags,
+        /// expunges and opening and closing the scan uses. Anything else it is asked fails the test by name.
+        /// Folders created on one server close each other when opened, as an IMAP connection has one open folder.
         /// </summary>
         public class FakeInbox : DispatchProxy
         {
@@ -128,22 +129,46 @@ namespace AowEmailWrapper.Tests
             }
 
             private readonly List<Stored> _messages = new List<Stored>();
+            private List<FakeInbox> _server;
+            private bool _open;
 
             public IMailFolder Folder { get; private set; }
 
             public uint[] Uids { get { return _messages.Select(stored => stored.Uid).ToArray(); } }
 
+            public bool IsOpen { get { return _open; } }
+
+            /// <summary>The inbox, open as the poller leaves it.</summary>
             public static FakeInbox Create()
+            {
+                return Create(null, true);
+            }
+
+            /// <summary>Another folder on the same server as <paramref name="sameServer"/>, closed.</summary>
+            public static FakeInbox CreateBeside(FakeInbox sameServer)
+            {
+                return Create(sameServer, false);
+            }
+
+            private static FakeInbox Create(FakeInbox sameServer, bool open)
             {
                 IMailFolder folder = Create<IMailFolder, FakeInbox>();
                 FakeInbox inbox = (FakeInbox)(object)folder;
                 inbox.Folder = folder;
+                inbox._open = open;
+                inbox._server = sameServer != null ? sameServer._server : new List<FakeInbox>();
+                inbox._server.Add(inbox);
                 return inbox;
             }
 
             public void Add(uint uid, MimeMessage message, bool seen, DateTime delivered)
             {
                 _messages.Add(new Stored { Uid = uid, Message = message, Flags = seen ? MessageFlags.Seen : MessageFlags.None, Delivered = delivered });
+            }
+
+            public bool IsSeen(uint uid)
+            {
+                return _messages.First(stored => stored.Uid == uid).Flags.HasFlag(MessageFlags.Seen);
             }
 
             private Stored Find(UniqueId uid)
@@ -160,9 +185,35 @@ namespace AowEmailWrapper.Tests
                     case SearchTerm.NotSeen: return !stored.Flags.HasFlag(MessageFlags.Seen);
                     case SearchTerm.DeliveredAfter: return stored.Delivered.Date > ((DateSearchQuery)query).Date.Date;
                     case SearchTerm.SubjectContains: return (stored.Message.Subject ?? string.Empty).IndexOf(((TextSearchQuery)query).Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    case SearchTerm.FromContains: return stored.Message.From.Mailboxes.Any(mailbox => mailbox.Address.IndexOf(((TextSearchQuery)query).Text, StringComparison.OrdinalIgnoreCase) >= 0);
                     case SearchTerm.And: return Matches(stored, ((BinarySearchQuery)query).Left) && Matches(stored, ((BinarySearchQuery)query).Right);
+                    case SearchTerm.Or: return Matches(stored, ((BinarySearchQuery)query).Left) || Matches(stored, ((BinarySearchQuery)query).Right);
                     default: throw new NotSupportedException("search term " + query.Term);
                 }
+            }
+
+            /// <summary>The structure the server reports for a message: its parts, with their types and file names.</summary>
+            private static BodyPart Structure(MimeEntity entity)
+            {
+                Multipart multipart = entity as Multipart;
+                if (multipart != null)
+                {
+                    BodyPartMultipart parts = new BodyPartMultipart { ContentType = multipart.ContentType };
+                    foreach (MimeEntity child in multipart)
+                    {
+                        parts.BodyParts.Add(Structure(child));
+                    }
+                    return parts;
+                }
+                return new BodyPartBasic { ContentType = entity.ContentType, ContentDisposition = entity.ContentDisposition };
+            }
+
+            private static Envelope EnvelopeOf(MimeMessage message)
+            {
+                Envelope envelope = new Envelope { Subject = message.Subject, Date = message.Date };
+                envelope.From.AddRange(message.From.Mailboxes);
+                envelope.To.AddRange(message.To.Mailboxes);
+                return envelope;
             }
 
             protected override object Invoke(MethodInfo method, object[] args)
@@ -170,18 +221,43 @@ namespace AowEmailWrapper.Tests
                 Type[] parameters = method.GetParameters().Select(parameter => parameter.ParameterType).ToArray();
                 switch (method.Name)
                 {
+                    case "get_IsOpen":
+                        return _open;
+
+                    case "Open" when parameters[0] == typeof(FolderAccess):
+                        foreach (FakeInbox other in _server)
+                        {
+                            other._open = false;
+                        }
+                        _open = true;
+                        return args[0];
+
+                    case "Close":
+                        _open = false;
+                        return null;
+
                     case "Search" when parameters.Length == 2 && parameters[0] == typeof(SearchQuery):
+                        Assert.True(_open, "searched a folder that is not open");
                         return (IList<UniqueId>)_messages.Where(stored => Matches(stored, (SearchQuery)args[0])).Select(stored => new UniqueId(stored.Uid)).ToList();
 
                     case "Fetch" when parameters[0] == typeof(IList<UniqueId>):
+                        Assert.True(_open, "fetched from a folder that is not open");
                         return (IList<IMessageSummary>)((IList<UniqueId>)args[0]).Select(uid =>
                         {
                             Stored stored = Find(uid);
-                            //Headers as a summary carries them; no body structure, as none of these has an attachment
-                            return (IMessageSummary)new MessageSummary(0) { UniqueId = uid, Flags = stored.Flags, Headers = stored.Message.Headers };
+                            return (IMessageSummary)new MessageSummary(0)
+                            {
+                                UniqueId = uid,
+                                Flags = stored.Flags,
+                                Headers = stored.Message.Headers,
+                                Envelope = EnvelopeOf(stored.Message),
+                                Body = Structure(stored.Message.Body),
+                                InternalDate = new DateTimeOffset(stored.Delivered)
+                            };
                         }).ToList();
 
                     case "GetMessage" when parameters[0] == typeof(UniqueId):
+                        Assert.True(_open, "downloaded from a folder that is not open");
                         return Find((UniqueId)args[0]).Message;
 
                     case "Store" when parameters[0] == typeof(IList<UniqueId>) && args[1] is IStoreFlagsRequest request:

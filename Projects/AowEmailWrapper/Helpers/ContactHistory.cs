@@ -20,6 +20,9 @@ namespace AowEmailWrapper.Helpers
         public DateTimeOffset Date { get; set; }
         public string From { get; set; }
 
+        /// <summary>When the message reached the mailbox, by the server's clock; null when the server did not say.</summary>
+        public DateTimeOffset? Arrived { get; set; }
+
         /// <summary>The game the file belongs to, ignoring the game's own truncation of the name at a dot.</summary>
         public string GameKey
         {
@@ -29,6 +32,23 @@ namespace AowEmailWrapper.Helpers
         public override string ToString()
         {
             return string.Format("{0} ({1:d}) from {2}", FileName, Date, From);
+        }
+    }
+
+    /// <summary>A game whose last line in the activity log is Sent.</summary>
+    public class SentGame
+    {
+        public string FileName { get; set; }
+
+        /// <summary>When the player's turn went out, by this computer's clock.</summary>
+        public DateTimeOffset Sent { get; set; }
+
+        /// <summary>The game's other players: whoever may send the next turn.</summary>
+        public List<string> Players { get; set; }
+
+        public string GameKey
+        {
+            get { return ContactHistory.GameKey(FileName); }
         }
     }
 
@@ -203,7 +223,8 @@ namespace AowEmailWrapper.Helpers
                         Uid = summary.UniqueId.Id,
                         FileName = fileName,
                         Date = summary.Envelope.Date ?? summary.InternalDate ?? DateTimeOffset.MinValue,
-                        From = AddressesOf(summary.Envelope, false).FirstOrDefault() ?? string.Empty
+                        From = AddressesOf(summary.Envelope, false).FirstOrDefault() ?? string.Empty,
+                        Arrived = summary.InternalDate
                     });
                 }
             }
@@ -253,6 +274,120 @@ namespace AowEmailWrapper.Helpers
             }
 
             return unplayed.OrderByDescending(t => t.Date).ToList();
+        }
+
+        /// <summary>
+        /// How far this computer's clock may be from the server's for the server's copy of a send to count as that
+        /// send. A copy older than the activity log's send by more than this is from an earlier send.
+        /// </summary>
+        public static readonly TimeSpan SentCopyTolerance = TimeSpan.FromMinutes(10);
+
+        /// <summary>
+        /// Turns the activity log missed: for each game it shows as sent, the newest save game from one of the game's
+        /// players that reached the inbox after the player's own newest copy of the game reached the server (in the
+        /// Sent folder, or in the inbox for a copy sent to oneself). Only mail already read is looked at; unread mail
+        /// is the poller's. Both times are the server's, so a computer clock that is off cannot make an answered turn
+        /// look new, and a game whose last send has no copy on the server is left alone. Nothing is downloaded. The
+        /// inbox is left open for reading and writing.
+        /// </summary>
+        public static List<MailboxTurn> FindMissedTurns(IMailFolder inbox, IMailFolder sentFolder, IList<SentGame> games, IEnumerable<string> ownAddresses, int lookBackDays, CancellationToken token)
+        {
+            HashSet<string> own = new HashSet<string>((ownAddresses ?? Enumerable.Empty<string>()).Where(a => !string.IsNullOrWhiteSpace(a)).Select(a => a.Trim()), StringComparer.OrdinalIgnoreCase);
+            List<SentGame> wanted = (games ?? new List<SentGame>()).Where(game => game != null && !string.IsNullOrEmpty(game.FileName) && game.Players != null && game.Players.Count > 0).ToList();
+            if (wanted.Count == 0)
+            {
+                return new List<MailboxTurn>();
+            }
+
+            //Searches go by date only; a day either side keeps a time zone from cutting off the first send
+            DateTimeOffset earliest = wanted.Min(game => game.Sent) - SentCopyTolerance;
+            DateTimeOffset oldest = DateTimeOffset.Now.AddDays(-lookBackDays);
+            DateTime since = (earliest > oldest ? earliest : oldest).LocalDateTime.Date.AddDays(-1);
+
+            //Turns come from the games' players; the player's own address in the inbox is a copy of a send
+            HashSet<string> senders = new HashSet<string>(own, StringComparer.OrdinalIgnoreCase);
+            foreach (SentGame game in wanted)
+            {
+                senders.UnionWith(game.Players.Where(address => !string.IsNullOrWhiteSpace(address)).Select(address => address.Trim()));
+            }
+            SearchQuery from = senders.Select(address => (SearchQuery)SearchQuery.FromContains(address)).Aggregate((left, right) => left.Or(right));
+
+            List<MailboxTurn> received = new List<MailboxTurn>();
+            HashSet<string> unused = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Collect(inbox, inbox.Search(SearchQuery.Seen.And(SearchQuery.DeliveredAfter(since)).And(from), token), false, unused, received, token);
+
+            List<MailboxTurn> sent = new List<MailboxTurn>();
+            if (sentFolder != null && sentFolder != inbox)
+            {
+                try
+                {
+                    sentFolder.Open(FolderAccess.ReadOnly, token);
+                    Collect(sentFolder, sentFolder.Search(SearchQuery.DeliveredAfter(since), token), true, unused, sent, token);
+                    sentFolder.Close(false, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning("Could not look through the Sent folder for the last sends: {0}", ex.Message);
+                }
+                finally
+                {
+                    if (!inbox.IsOpen)
+                    {
+                        inbox.Open(FolderAccess.ReadWrite, token);
+                    }
+                }
+            }
+
+            return PickMissed(received, sent, wanted, own);
+        }
+
+        /// <summary>
+        /// The choice behind <see cref="FindMissedTurns"/>, on what the mailbox holds: per game, the newest turn from
+        /// one of its players that arrived after the newest copy of the player's own send, when that copy is the
+        /// send the activity log knows of.
+        /// </summary>
+        public static List<MailboxTurn> PickMissed(IEnumerable<MailboxTurn> received, IEnumerable<MailboxTurn> sent, IEnumerable<SentGame> games, ICollection<string> ownAddresses)
+        {
+            HashSet<string> own = new HashSet<string>(ownAddresses ?? new string[0], StringComparer.OrdinalIgnoreCase);
+            List<MailboxTurn> inbox = (received ?? Enumerable.Empty<MailboxTurn>()).Where(turn => turn.Arrived.HasValue).ToList();
+
+            Dictionary<string, DateTimeOffset> lastCopy = new Dictionary<string, DateTimeOffset>();
+            foreach (MailboxTurn copy in (sent ?? Enumerable.Empty<MailboxTurn>()).Where(turn => turn.Arrived.HasValue).Concat(inbox.Where(turn => own.Contains(turn.From ?? string.Empty))))
+            {
+                DateTimeOffset date;
+                if (!lastCopy.TryGetValue(copy.GameKey, out date) || copy.Arrived.Value > date)
+                {
+                    lastCopy[copy.GameKey] = copy.Arrived.Value;
+                }
+            }
+
+            List<MailboxTurn> missed = new List<MailboxTurn>();
+            foreach (SentGame game in games ?? Enumerable.Empty<SentGame>())
+            {
+                DateTimeOffset copied;
+                //No copy of the send on this server (it went from another account, or the provider keeps none), or
+                //the newest copy is from an earlier send: either way the mailbox cannot say what came after it
+                if (!lastCopy.TryGetValue(game.GameKey, out copied) || copied < game.Sent - SentCopyTolerance)
+                {
+                    continue;
+                }
+
+                HashSet<string> players = new HashSet<string>((game.Players ?? new List<string>()).Where(address => !own.Contains(address)), StringComparer.OrdinalIgnoreCase);
+                MailboxTurn newest = inbox
+                    .Where(turn => turn.GameKey == game.GameKey && players.Contains(turn.From ?? string.Empty) && turn.Arrived.Value > copied)
+                    .OrderByDescending(turn => turn.Arrived.Value)
+                    .FirstOrDefault();
+                if (newest != null)
+                {
+                    missed.Add(newest);
+                }
+            }
+
+            return missed;
         }
 
         /// <summary>The game a save file belongs to: the name up to the first dot, as the game itself truncates it.</summary>
