@@ -37,10 +37,14 @@ namespace AowEmailWrapper.Pollers
             bool emailDownloaded = false;
             Exception error = null;
 
+            //A stopped poller begins no check, so the Wrapper can close once the one under way is done
+            if (!TryPollBegin())
+            {
+                return;
+            }
+
             try
             {
-                PollBegin();
-
                 using (Pop3Client pop3 = new Pop3Client())
                 {
                     pop3.Timeout = NETWORK_TIMEOUT_MS;
@@ -86,8 +90,17 @@ namespace AowEmailWrapper.Pollers
 
                             MessageStoreMessage theMessage = new MessageStoreMessage(uid);
 
-                            if (ProcessEmailAttachments(email) > 0)
+                            bool recorded;
+                            if (ProcessEmailAttachments(email, out recorded) > 0)
                             {
+                                if (!recorded)
+                                {
+                                    //The activity log did not take the turn: the Wrapper is closing, or storing it
+                                    //failed. Left out of the message store, so the next check fetches it again
+                                    Trace.TraceWarning("The turn in message {0} was not recorded; left for the next check", uid);
+                                    continue;
+                                }
+
                                 emailDownloaded = true;
 
                                 //Only populate the extra data for game emails

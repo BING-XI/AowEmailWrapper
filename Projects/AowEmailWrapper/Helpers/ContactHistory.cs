@@ -20,6 +20,9 @@ namespace AowEmailWrapper.Helpers
         public DateTimeOffset Date { get; set; }
         public string From { get; set; }
 
+        /// <summary>When the message reached the mailbox, by the server's clock; null when the server did not say.</summary>
+        public DateTimeOffset? Arrived { get; set; }
+
         /// <summary>The game the file belongs to, ignoring the game's own truncation of the name at a dot.</summary>
         public string GameKey
         {
@@ -29,6 +32,23 @@ namespace AowEmailWrapper.Helpers
         public override string ToString()
         {
             return string.Format("{0} ({1:d}) from {2}", FileName, Date, From);
+        }
+    }
+
+    /// <summary>A game whose last line in the activity log is Sent.</summary>
+    public class SentGame
+    {
+        public string FileName { get; set; }
+
+        /// <summary>When the player's turn went out, by this computer's clock (local time).</summary>
+        public DateTime Sent { get; set; }
+
+        /// <summary>The game's other players: whoever may send the next turn.</summary>
+        public List<string> Players { get; set; }
+
+        public string GameKey
+        {
+            get { return ContactHistory.GameKey(FileName); }
         }
     }
 
@@ -203,7 +223,8 @@ namespace AowEmailWrapper.Helpers
                         Uid = summary.UniqueId.Id,
                         FileName = fileName,
                         Date = summary.Envelope.Date ?? summary.InternalDate ?? DateTimeOffset.MinValue,
-                        From = AddressesOf(summary.Envelope, false).FirstOrDefault() ?? string.Empty
+                        From = AddressesOf(summary.Envelope, false).FirstOrDefault() ?? string.Empty,
+                        Arrived = summary.InternalDate
                     });
                 }
             }
@@ -253,6 +274,28 @@ namespace AowEmailWrapper.Helpers
             }
 
             return unplayed.OrderByDescending(t => t.Date).ToList();
+        }
+
+        /// <summary>
+        /// The save games, already read, that came from <paramref name="senders"/> on or after the day before
+        /// <paramref name="since"/>: what a stored turn that never reached the activity log may have arrived in.
+        /// Unread mail is left to the poller. Only message structures are fetched; nothing is downloaded.
+        /// </summary>
+        public static List<MailboxTurn> FindTurnsFrom(IMailFolder inbox, IEnumerable<string> senders, DateTime since, CancellationToken token)
+        {
+            List<string> from = (senders ?? Enumerable.Empty<string>()).Where(address => !string.IsNullOrWhiteSpace(address)).Select(address => address.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            List<MailboxTurn> turns = new List<MailboxTurn>();
+            if (from.Count == 0)
+            {
+                return turns;
+            }
+
+            //The search goes by date only, by the server's calendar; a day's margin keeps a time zone from cutting it short
+            SearchQuery query = SearchQuery.Seen
+                .And(SearchQuery.DeliveredAfter(since.Date.AddDays(-1)))
+                .And(from.Select(address => (SearchQuery)SearchQuery.FromContains(address)).Aggregate((left, right) => left.Or(right)));
+            Collect(inbox, inbox.Search(query, token), false, new HashSet<string>(StringComparer.OrdinalIgnoreCase), turns, token);
+            return turns;
         }
 
         /// <summary>The game a save file belongs to: the name up to the first dot, as the game itself truncates it.</summary>

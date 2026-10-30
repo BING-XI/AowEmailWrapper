@@ -482,7 +482,12 @@ namespace AowEmailWrapper.Games
             StoreDownloadFile(theAsgFile, saveFolder, accountName, modLabel, sender, sharedNames, false);
         }
 
-        public void StoreDownloadFile(ASGFileInfo theAsgFile, EmailSaveFolder saveFolder, string accountName, string modLabel, string sender, IList<PlayerAlias> sharedNames, bool wantsNotices)
+        /// <summary>
+        /// Puts the turn in its game's folder and has it recorded in the activity log. Returns false when the file
+        /// is stored but the log did not take it (the Wrapper is closing): the email must then stay where the next
+        /// check finds it again, or the turn is in the folder with nothing saying it waits.
+        /// </summary>
+        public bool StoreDownloadFile(ASGFileInfo theAsgFile, EmailSaveFolder saveFolder, string accountName, string modLabel, string sender, IList<PlayerAlias> sharedNames, bool wantsNotices)
         {
             AowGame theGame = theAsgFile.IsValid ? ResolveIncoming(theAsgFile.GameType, modLabel, theAsgFile.FileNameTrue) : null;
 
@@ -493,7 +498,7 @@ namespace AowEmailWrapper.Games
 
                 Trace.TraceInformation("Turn {0} ({1}, label '{2}') stored in {3}", theAsgFile.FileNameTrue, theAsgFile.GameType, modLabel, saveFolderInfo.FullName);
 
-                RaiseOnGameSaved(new AowGameSavedEventArgs(theAsgFile.GameType, theAsgFile.FileNameTrue, theAsgFile.GameTitle, theAsgFile.MapTitle, theAsgFile.TurnNumber.ToString())
+                return RaiseOnGameSaved(new AowGameSavedEventArgs(theAsgFile.GameType, theAsgFile.FileNameTrue, theAsgFile.GameTitle, theAsgFile.MapTitle, theAsgFile.TurnNumber.ToString())
                 {
                     AccountName = accountName,
                     Install = theGame,
@@ -507,7 +512,7 @@ namespace AowEmailWrapper.Games
             else
             {
                 theAsgFile.SaveToFolder(_checkEmailFolder);
-                RaiseOnGameSaved(new AowGameSavedEventArgs(AowGameType.Unknown, theAsgFile.FileName) { AccountName = accountName, ModLabel = modLabel, Sender = sender, Players = ASGFileInfo.JoinAddresses(theAsgFile.PlayerEmails), SharedNames = sharedNames, WantsNotices = wantsNotices });
+                return RaiseOnGameSaved(new AowGameSavedEventArgs(AowGameType.Unknown, theAsgFile.FileName) { AccountName = accountName, ModLabel = modLabel, Sender = sender, Players = ASGFileInfo.JoinAddresses(theAsgFile.PlayerEmails), SharedNames = sharedNames, WantsNotices = wantsNotices });
             }
         }
 
@@ -760,12 +765,50 @@ namespace AowEmailWrapper.Games
             }
         }
 
-        private void RaiseOnGameSaved(AowGameSavedEventArgs e)
+        /// <summary>True when the turn was recorded; false too when nothing listens yet to record it.</summary>
+        private bool RaiseOnGameSaved(AowGameSavedEventArgs e)
         {
-            if (OnGameSaved != null)
+            if (OnGameSaved == null)
             {
-                OnGameSaved(this, e);
+                return false;
             }
+            OnGameSaved(this, e);
+            return e.Recorded;
+        }
+
+        /// <summary>
+        /// The files this install holds under a game's turn name, where downloaded turns are put: each copy's EmailIn
+        /// and Save folders, and the folder for turns of unknown games. EmailOut is left out, as the Wrapper writes
+        /// there after a send.
+        /// </summary>
+        public List<FileInfo> StoredTurnFiles(string fileName)
+        {
+            List<string> folders = _games.Where(game => game.IsInstalled)
+                .SelectMany(game => new[] { game.EmailIn, game.Save })
+                .Where(folder => folder != null)
+                .Select(folder => folder.FullName)
+                .Concat(new[] { _checkEmailFolder })
+                .Where(folder => !string.IsNullOrEmpty(folder))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            List<FileInfo> files = new List<FileInfo>();
+            foreach (string folder in folders)
+            {
+                try
+                {
+                    string path = ASGFileInfo.GetPathInside(folder, fileName);
+                    if (path != null && File.Exists(path))
+                    {
+                        files.Add(new FileInfo(path));
+                    }
+                }
+                catch (Exception)
+                {
+                    //An unreadable folder simply does not count
+                }
+            }
+            return files;
         }
 
         private static DirectoryInfo GetSaveFolder(AowGame theGame, EmailSaveFolder saveFolder)

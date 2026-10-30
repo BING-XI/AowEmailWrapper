@@ -8,17 +8,20 @@ namespace AowEmailWrapper.Helpers
     {
         #region XML Data
 
-        public static void SaveXmlFile(string theFilePath, System.Object theObject)
+        /// <summary>False when the file could not be written; the error is logged.</summary>
+        public static bool SaveXmlFile(string theFilePath, System.Object theObject)
         {
             try
             {
                 string xml = XmlHelper.Serialize(theObject);
                 File.WriteAllText(theFilePath, xml);
+                return true;
             }
             catch (Exception ex)
             {
                 Trace.TraceError(ex.ToString());
                 Trace.Flush();
+                return false;
             }
         }
 

@@ -3,6 +3,20 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- A turn no longer goes unannounced when the Wrapper closes in the middle of a mail check, as an automatic update
+  at start-up could. The turn was put in the game's folder and its email marked as read, but the Activity Log never
+  recorded it, so the game stayed *Sent* with no envelope or notification. Before it closes, to install an update,
+  on *Exit* or to restart in another language, the Wrapper now lets a mail check under way finish and starts no new
+  one, and an email is marked as read only once its turn is in the Activity Log. A turn whose save could not be
+  written, to a locked file say, is left unread too and tried again; it used to be marked as read.
+- A turn already lost this way is filed and announced when the Wrapper next connects to an IMAP mailbox. Its game
+  shows as *Sent*, but the game's folder holds a save written after your turn went, and a read email from one of the
+  game's players carries that very save.
+- With several accounts, a turn that arrived while another account was still being checked could go without its
+  notification. It is now shown once the checks are done.
+
 ## 2.1.11
 
 - Notices between Wrappers ("AoW Wrapper: ...") are picked up and removed from the inbox even when they
