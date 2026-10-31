@@ -50,6 +50,12 @@ namespace AowEmailWrapper.Pollers
         /// </summary>
         public event PollerSentGamesEventHandler OnSentGamesWanted;
 
+        /// <summary>
+        /// Asked, for a resent turn, whether the player has answered that turn since it was first sent (the game's file
+        /// name, the first send's date). Such a resend is not stored: it would put back a turn already played.
+        /// </summary>
+        public Func<string, DateTimeOffset, bool> IsAnsweredResend { get; set; }
+
         /// <summary>The player's own addresses; mail from them counts as a turn the player sent.</summary>
         public IEnumerable<string> OwnAddresses { get; set; }
 
@@ -366,6 +372,16 @@ namespace AowEmailWrapper.Pollers
                             {
                                 if (theASG.Length > 0)
                                 {
+                                    //A resend of a turn the player has played since it first came: storing it would overwrite
+                                    //the game's file with the old turn and show it as waiting again
+                                    DateTimeOffset? firstSent = ResendHelper.ResentOf(email);
+                                    Func<string, DateTimeOffset, bool> answered = IsAnsweredResend;
+                                    if (firstSent.HasValue && answered != null && answered(theASG.FileNameTrue, firstSent.Value))
+                                    {
+                                        Trace.TraceInformation("Resend of {0} from {1}, first sent {2:u}, ignored: the turn was answered since", theASG.FileNameTrue, sender, firstSent.Value);
+                                        continue;
+                                    }
+
                                     if (!_gameManager.StoreDownloadFile(theASG, _saveFolder, AccountName, MailHelper.GetModLabel(email), sender, MailHelper.GetSharedNames(email), TurnQuery.WantsNotices(email)))
                                     {
                                         recorded = false;

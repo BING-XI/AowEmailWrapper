@@ -2014,6 +2014,7 @@ namespace AowEmailWrapper
             poller.OnHistoryImported += new PollerHistoryEventHandler(PollerHistoryImported);
             poller.OnTurnsRecovered += new PollerRecoveredEventHandler(PollerTurnsRecovered);
             poller.OnSentGamesWanted += new PollerSentGamesEventHandler(PollerSentGamesWanted);
+            poller.IsAnsweredResend = AnsweredResendOnWindow;
             poller.OnWrapperMessage += new PollerWrapperMessageEventHandler(PollerWrapperMessage);
             return poller;
         }
@@ -2228,6 +2229,37 @@ namespace AowEmailWrapper
             }
 
             games.AddRange(SentGames(_activityLog, OwnAddresses()));
+        }
+
+        /// <summary>Asked by a mail checker on its own thread; the activity log is read on the window's.</summary>
+        private bool AnsweredResendOnWindow(string fileName, DateTimeOffset firstSent)
+        {
+            if (OnWindowThread)
+            {
+                return IsAnsweredResend(_activityLog, fileName, firstSent);
+            }
+            bool answered = false;
+            SendToWindow(() => answered = IsAnsweredResend(_activityLog, fileName, firstSent));
+            return answered;
+        }
+
+        /// <summary>
+        /// True when the game's last line is a turn this player sent after <paramref name="firstSent"/>: a resend of the
+        /// turn sent then is one the player has already answered.
+        /// </summary>
+        internal static bool IsAnsweredResend(ActivityList log, string fileName, DateTimeOffset firstSent)
+        {
+            if (log == null || string.IsNullOrEmpty(fileName))
+            {
+                return false;
+            }
+            Activity last = log.Activities
+                .Where(activity => string.Equals(activity.FileName, fileName, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(TicksOf)
+                .FirstOrDefault();
+            long ticks = last != null ? TicksOf(last) : 0;
+            return last != null && last.Status == ActivityState.Sent && ticks > 0 &&
+                new DateTime(ticks, DateTimeKind.Local) > firstSent.LocalDateTime;
         }
 
         /// <summary>The games whose last line is Sent, each with when it went and who may send the next turn.</summary>

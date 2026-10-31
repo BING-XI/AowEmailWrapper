@@ -104,5 +104,23 @@ namespace AowEmailWrapper.Tests
             Assert.EndsWith("@example.com", email.MessageId);
             Assert.True(email.Date > firstSent.AddDays(2));
         }
+
+        [Fact]
+        public void A_resend_says_when_the_turn_was_first_sent_through_any_number_of_resends()
+        {
+            MimeMessage email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse("me@example.com"));
+            DateTimeOffset first = new DateTimeOffset(2026, 10, 20, 21, 15, 0, TimeSpan.FromHours(2));
+            email.Date = first;
+            Assert.Null(ResendHelper.ResentOf(email));
+
+            ResendHelper.Renew(email);
+            Assert.Equal(first, ResendHelper.ResentOf(email));
+            Assert.NotEqual(first, email.Date);
+
+            ResendHelper.Renew(email);
+            Assert.Equal(first, ResendHelper.ResentOf(email));
+            Assert.Single(email.Headers, header => header.Field == TurnQuery.ResendOfHeader);
+        }
     }
 }

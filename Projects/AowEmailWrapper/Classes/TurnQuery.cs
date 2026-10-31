@@ -61,6 +61,8 @@ namespace AowEmailWrapper.Classes
         public const string StateHeader = "X-AowEmailWrapper-State";
         public const string StateDateHeader = "X-AowEmailWrapper-State-Date";
         public const string SentToHeader = "X-AowEmailWrapper-Sent-To";
+        /// <summary>On a Resend: when the turn was first sent, so a player who has answered it since is not handed it again.</summary>
+        public const string ResendOfHeader = "X-AowEmailWrapper-Resend-Of";
         /// <summary>
         /// A Wrapper asking the other players' Wrappers to tell it where a turn went. It goes on every turn and
         /// Wrapper message the player sends while the setting is on, and only an address that has asked recently

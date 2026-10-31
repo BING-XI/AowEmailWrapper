@@ -83,8 +83,27 @@ namespace AowEmailWrapper.Helpers
         /// </summary>
         public static void Renew(MimeMessage theEmail)
         {
+            //When the turn first went, kept through any number of resends: a new email reaches a player who has already
+            //played the turn too, and their Wrapper must be able to tell it is not a new one
+            if (ResentOf(theEmail) == null)
+            {
+                theEmail.Headers.Add(Classes.TurnQuery.ResendOfHeader, theEmail.Date.ToString("o", System.Globalization.CultureInfo.InvariantCulture));
+            }
             theEmail.MessageId = MailHelper.NewMessageId(MailHelper.GetFromAddress(theEmail));
             theEmail.Date = DateTimeOffset.Now;
+        }
+
+        /// <summary>For a resent turn, when it was first sent; null for a turn sent once.</summary>
+        public static DateTimeOffset? ResentOf(MimeMessage theEmail)
+        {
+            string value = theEmail != null ? theEmail.Headers[Classes.TurnQuery.ResendOfHeader] : null;
+            DateTimeOffset first;
+            if (!string.IsNullOrWhiteSpace(value) &&
+                DateTimeOffset.TryParse(value.Trim(), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out first))
+            {
+                return first;
+            }
+            return null;
         }
 
         /// <summary>The copy kept of the game's last sent turn, written as it went out; null when there is none.</summary>

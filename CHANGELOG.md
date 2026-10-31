@@ -12,7 +12,9 @@ release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a ver
   for.
 - *Resend* sends the turn as a new email. It used to go out as the very email of the first send, and a mailbox that
   already held that email, as Gmail's do, dropped the second, so a player whose first copy had gone astray never got
-  it. Version 1's resends did arrive.
+  it. Version 1's resends did arrive. A resend says when the turn was first sent, and a Wrapper whose player has
+  sent their own turn in that game since leaves it out, so a resend to a player who did get the turn cannot put an
+  old turn back as waiting.
 - Emails from the Wrapper no longer carry your computer's name. The Wrapper's own mail server put a *Received* line
   naming it on every turn, and each email's Message-ID was made on it. Message-IDs are now made on the domain of
   your email address.
