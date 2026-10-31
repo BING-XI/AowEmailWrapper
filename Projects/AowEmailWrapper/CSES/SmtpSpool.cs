@@ -6,7 +6,6 @@ using AowEmailWrapper.Classes;
 using AowEmailWrapper.Helpers;
 using EricDaugherty.CSES.SmtpServer;
 using MimeKit;
-using MimeKit.Utils;
 
 namespace AowEmailWrapper.CSES
 {
@@ -64,7 +63,10 @@ namespace AowEmailWrapper.CSES
 
                     MailHelper.SetPlainText(message, bodyBuilder.ToString());
 
-                    message.MessageId = MimeUtils.GenerateMessageId();
+                    //The Received line is the Wrapper's own mail server taking the email from the game, and it names this
+                    //computer twice; the Message-ID is made on the sender's domain for the same reason
+                    message.Headers.RemoveAll(HeaderId.Received);
+                    message.MessageId = MailHelper.NewMessageId(fromAddress);
 
                     _message = message;
                 }

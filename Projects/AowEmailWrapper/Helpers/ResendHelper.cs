@@ -76,6 +76,17 @@ namespace AowEmailWrapper.Helpers
             return File.Exists(filePath);
         }
 
+        /// <summary>
+        /// Makes a kept copy a new email before it goes out again: a new Message-ID, and dated now. With the Message-ID
+        /// of the first send, a mailbox that already has that email, as Gmail's do, drops the second one as the same
+        /// message, so the turn never reached a player whose first copy had gone astray.
+        /// </summary>
+        public static void Renew(MimeMessage theEmail)
+        {
+            theEmail.MessageId = MailHelper.NewMessageId(MailHelper.GetFromAddress(theEmail));
+            theEmail.Date = DateTimeOffset.Now;
+        }
+
         /// <summary>The copy kept of the game's last sent turn, written as it went out; null when there is none.</summary>
         public static FileInfo GetCopy(string asgFileName)
         {

@@ -493,8 +493,10 @@ namespace AowEmailWrapper.Pollers
         /// this install's folders, and the turn the player answered was written before the send. "After the send"
         /// holds against both the line's time and the copy of the sent turn kept for Resend, written as it went out:
         /// the copy is dated by the same file system as the turn file, so a time zone changed since does not count,
-        /// and the line's time catches a copy left from an earlier send. A game without such a copy is left alone.
-        /// Games without the mark cost nothing; a file is looked up in the mailbox once. Returns how many were filed.
+        /// and the line's time catches a copy left from an earlier send. A game without such a copy has only the line's
+        /// time, so its file must be written later than any change of time zone could account for (see
+        /// <see cref="NoCopyMargin"/>). Games without the mark cost nothing; a file is looked up in the mailbox once.
+        /// Returns how many were filed.
         /// </summary>
         internal int RecoverStrandedTurns(IMailFolder inbox, IList<SentGame> games, CancellationToken token)
         {
@@ -502,16 +504,13 @@ namespace AowEmailWrapper.Pollers
             foreach (SentGame game in games.Where(game => game != null && game.Players != null && game.Players.Count > 0))
             {
                 FileInfo sentCopy = ResendHelper.GetCopy(game.FileName);
-                if (sentCopy == null)
-                {
-                    continue;
-                }
 
                 foreach (FileInfo file in _gameManager.StoredTurnFiles(game.FileName))
                 {
-                    if (file.LastWriteTimeUtc > sentCopy.LastWriteTimeUtc + StrandedMargin &&
-                        file.LastWriteTime > game.Sent + StrandedMargin &&
-                        !_strandedChecked.Contains(StrandedKey(file)))
+                    bool afterSend = sentCopy != null
+                        ? file.LastWriteTimeUtc > sentCopy.LastWriteTimeUtc + StrandedMargin && file.LastWriteTime > game.Sent + StrandedMargin
+                        : file.LastWriteTime > game.Sent + NoCopyMargin;
+                    if (afterSend && !_strandedChecked.Contains(StrandedKey(file)))
                     {
                         stranded.Add(new KeyValuePair<SentGame, FileInfo>(game, file));
                     }
@@ -572,6 +571,15 @@ namespace AowEmailWrapper.Pollers
         /// the copy for Resend too.
         /// </summary>
         private static readonly TimeSpan StrandedMargin = TimeSpan.FromMinutes(1);
+
+        /// <summary>
+        /// How much later than the line's time a turn file must be written when the game has no copy for Resend. Up to
+        /// 2.1.11 a turn that arrived deleted that copy before the activity log was saved, so a turn stored while the
+        /// Wrapper was still downloading an update, its window open, lost the copy as well as its line. The line's time
+        /// is this computer's clock when the turn went, and a time zone changed since moves it by up to the difference
+        /// between the two zones, which is never more than 26 hours.
+        /// </summary>
+        private static readonly TimeSpan NoCopyMargin = TimeSpan.FromHours(26);
 
         private readonly HashSet<string> _strandedChecked = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 

@@ -8,6 +8,7 @@ using AowEmailWrapper.ConfigFramework;
 using MailKit;
 using MailKit.Security;
 using MimeKit;
+using MimeKit.Utils;
 
 namespace AowEmailWrapper.Helpers
 {
@@ -215,6 +216,27 @@ namespace AowEmailWrapper.Helpers
         {
             MailboxAddress from = (message == null) ? null : message.From.Mailboxes.FirstOrDefault();
             return from == null ? string.Empty : from.Address;
+        }
+
+        private const string FallbackMessageIdDomain = "localhost.localdomain";
+
+        /// <summary>
+        /// A new Message-ID on the sender's mail domain, as mail programs make them. MimeKit's own is made on this
+        /// computer's name, which anyone the email reaches can read in its headers.
+        /// </summary>
+        public static string NewMessageId(string fromAddress)
+        {
+            string address = (fromAddress ?? string.Empty).Trim();
+            int at = address.LastIndexOf('@');
+            string domain = at >= 0 && at < address.Length - 1 ? address.Substring(at + 1) : FallbackMessageIdDomain;
+            try
+            {
+                return MimeUtils.GenerateMessageId(domain);
+            }
+            catch (ArgumentException)
+            {
+                return MimeUtils.GenerateMessageId(FallbackMessageIdDomain);
+            }
         }
 
         public static string GetFirstToAddress(MimeMessage message)

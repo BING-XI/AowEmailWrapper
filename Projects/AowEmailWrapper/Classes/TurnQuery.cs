@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using AowEmailWrapper.ConfigFramework;
 using MimeKit;
-using MimeKit.Utils;
 
 namespace AowEmailWrapper.Classes
 {
@@ -161,7 +160,7 @@ namespace AowEmailWrapper.Classes
             message.From.Add(new MailboxAddress(string.Empty, from));
             message.To.Add(new MailboxAddress(string.Empty, to));
             message.Subject = string.Format(QuerySubjectTemplate, gameFileName);
-            message.MessageId = MimeUtils.GenerateMessageId();
+            message.MessageId = Helpers.MailHelper.NewMessageId(from);
             message.Headers.Add(KindHeader, KindQuery);
             message.Headers.Add(GameHeader, gameFileName);
             message.Headers.Add(IdHeader, queryId);
@@ -185,7 +184,7 @@ namespace AowEmailWrapper.Classes
             message.From.Add(new MailboxAddress(string.Empty, from));
             message.To.Add(new MailboxAddress(string.Empty, query.From));
             message.Subject = string.Format(ReplySubjectTemplate, query.Game);
-            message.MessageId = MimeUtils.GenerateMessageId();
+            message.MessageId = Helpers.MailHelper.NewMessageId(from);
             message.Headers.Add(KindHeader, KindReply);
             message.Headers.Add(GameHeader, query.Game);
             message.Headers.Add(IdHeader, query.QueryId ?? string.Empty);

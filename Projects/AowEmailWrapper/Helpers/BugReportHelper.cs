@@ -8,7 +8,6 @@ using AowEmailWrapper.ConfigFramework;
 using AowEmailWrapper.Localization;
 using MailKit.Net.Smtp;
 using MimeKit;
-using MimeKit.Utils;
 
 namespace AowEmailWrapper.Helpers
 {
@@ -186,7 +185,7 @@ namespace AowEmailWrapper.Helpers
             message.From.Add(new MailboxAddress(string.IsNullOrEmpty(account.Name) ? from : account.Name, from));
             message.To.Add(MailboxAddress.Parse(Email));
             message.Subject = Subject;
-            message.MessageId = MimeUtils.GenerateMessageId();
+            message.MessageId = MailHelper.NewMessageId(from);
 
             BodyBuilder builder = new BodyBuilder();
             builder.TextBody = BuildBody(account, description);

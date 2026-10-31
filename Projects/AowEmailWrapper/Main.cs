@@ -3618,6 +3618,7 @@ namespace AowEmailWrapper
                                     theEmail.To.Add(MailboxAddress.Parse(newToAddress));
                                 }
 
+                                ResendHelper.Renew(theEmail);
                                 ResendHelper.Save(theEmail);
                                 resendSender.SendMessage(theEmail);
 

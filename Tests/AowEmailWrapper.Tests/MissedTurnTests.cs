@@ -189,16 +189,40 @@ namespace AowEmailWrapper.Tests
         }
 
         [Fact]
-        public void A_game_without_a_copy_of_its_last_send_is_left_alone()
+        public void Without_a_copy_of_its_last_send_a_turn_stored_days_after_it_is_filed()
         {
+            //Up to 2.1.11 the turn's arrival deleted the copy before the activity log was saved, so a turn stored while
+            //the Wrapper was still downloading an update lost the copy along with its line
             DateTime now = DateTime.Now;
             FakeInbox inbox = FakeInbox.Create();
-            inbox.Add(2, TurnEmail(Opponent, TheirTurn), seen: true, now.AddDays(-1));
+            inbox.Add(1, TurnEmail(Opponent, Answered), seen: true, now.AddDays(-4));
+            inbox.Add(2, TurnEmail(Opponent, TheirTurn), seen: true, now.AddDays(-1).AddHours(-1));
             Stored(TheirTurn, now.AddDays(-1));
-            SentGame game = new SentGame { FileName = Game, Sent = now.AddDays(-2), Players = new List<string> { Opponent } };
+            SentGame game = new SentGame { FileName = Game, Sent = now.AddDays(-3), Players = new List<string> { Opponent } };
+
+            List<AowGameSavedEventArgs> recorded = new List<AowGameSavedEventArgs>();
+            int filed = Poller(e => { e.Recorded = true; recorded.Add(e); }).RecoverStrandedTurns(inbox.Folder, new[] { game }, CancellationToken.None);
+
+            Assert.Equal(1, filed);
+            Assert.Equal(Opponent, Assert.Single(recorded).Sender);
+        }
+
+        [Fact]
+        public void Without_a_copy_of_its_last_send_a_change_of_time_zone_cannot_make_the_answered_turn_look_new()
+        {
+            //The player answered half an hour after the turn came, then the computer moved 25 hours east, nearly the 26
+            //that separate the two furthest time zones: with no copy, the line's time is all there is
+            DateTime now = DateTime.Now;
+            DateTime arrived = now.AddDays(-2);
+            DateTime answered = arrived.AddMinutes(30);
+            FakeInbox inbox = FakeInbox.Create();
+            inbox.Add(1, TurnEmail(Opponent, Answered), seen: true, arrived);
+            Stored(Answered, arrived);
+            SentGame game = new SentGame { FileName = Game, Sent = answered.AddHours(-25), Players = new List<string> { Opponent } };
 
             int offered = 0;
             Assert.Equal(0, Poller(e => offered++).RecoverStrandedTurns(inbox.Folder, new[] { game }, CancellationToken.None));
+            Assert.Equal(0, offered);
             Assert.Equal(0, inbox.Downloads);
         }
 

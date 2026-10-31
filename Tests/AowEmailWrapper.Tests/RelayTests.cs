@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Sockets;
@@ -130,6 +131,18 @@ namespace AowEmailWrapper.Tests
             Assert.Equal("player2@example.com", MailHelper.GetFirstToAddress(_f.Spooled));
             Assert.Equal("player1@example.com", MailHelper.GetFromAddress(_f.Spooled));
             Assert.False(string.IsNullOrEmpty(_f.Spooled.MessageId));
+        }
+
+        [Fact]
+        public void TheSpooledTurnDoesNotNameThisComputer()
+        {
+            //The local server's Received line named the game's computer and the server, and MimeKit makes its
+            //Message-IDs on the computer's name
+            string headers = string.Join("\n", _f.Spooled.Headers.Select(header => header.ToString()));
+            Assert.DoesNotContain(_f.Spooled.Headers, header => header.Id == HeaderId.Received);
+            Assert.DoesNotContain("test.local", headers, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain(Environment.MachineName, headers, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith("@example.com", _f.Spooled.MessageId);
         }
 
         [Fact]

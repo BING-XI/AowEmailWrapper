@@ -3,6 +3,20 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- More turns lost to an update that closed the Wrapper in the middle of a mail check are recovered. 2.1.12 filed
+  such a turn only when its game still had the copy of your last turn kept for *Resend*, but up to 2.1.11 a turn
+  that arrived while the update was still downloading deleted that copy. A game without the copy now counts too
+  when its turn file was written more than 26 hours after your turn went, which no change of time zone can account
+  for.
+- *Resend* sends the turn as a new email. It used to go out as the very email of the first send, and a mailbox that
+  already held that email, as Gmail's do, dropped the second, so a player whose first copy had gone astray never got
+  it. Version 1's resends did arrive.
+- Emails from the Wrapper no longer carry your computer's name. The Wrapper's own mail server put a *Received* line
+  naming it on every turn, and each email's Message-ID was made on it. Message-IDs are now made on the domain of
+  your email address.
+
 ## 2.1.12
 
 Thanks to BING-XI for this release.

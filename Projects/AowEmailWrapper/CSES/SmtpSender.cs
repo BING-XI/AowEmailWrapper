@@ -6,7 +6,6 @@ using AowEmailWrapper.ConfigFramework;
 using AowEmailWrapper.Helpers;
 using MailKit.Net.Smtp;
 using MimeKit;
-using MimeKit.Utils;
 
 namespace AowEmailWrapper.CSES
 {
@@ -74,10 +73,7 @@ namespace AowEmailWrapper.CSES
 
         public void SendMessage(MimeMessage theGameEmail)
         {
-            if (string.IsNullOrEmpty(theGameEmail.MessageId))
-            {
-                theGameEmail.MessageId = MimeUtils.GenerateMessageId();
-            }
+            PrepareForSending(theGameEmail);
 
             _messageQueue.Enqueue(theGameEmail);
 
@@ -85,6 +81,19 @@ namespace AowEmailWrapper.CSES
             newThread.SetApartmentState(System.Threading.ApartmentState.STA);
             newThread.IsBackground = true;
             newThread.Start();
+        }
+
+        /// <summary>
+        /// Takes off what would name this computer. The spool already does for a new turn, but a copy kept for Resend by
+        /// an older Wrapper still has the Received line of the Wrapper's own mail server.
+        /// </summary>
+        internal static void PrepareForSending(MimeMessage theGameEmail)
+        {
+            theGameEmail.Headers.RemoveAll(HeaderId.Received);
+            if (string.IsNullOrEmpty(theGameEmail.MessageId))
+            {
+                theGameEmail.MessageId = MailHelper.NewMessageId(MailHelper.GetFromAddress(theGameEmail));
+            }
         }
 
         #endregion
