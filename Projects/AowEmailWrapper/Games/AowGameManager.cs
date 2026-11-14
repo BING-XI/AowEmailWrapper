@@ -731,6 +731,11 @@ namespace AowEmailWrapper.Games
         {
             try
             {
+                //Two paths can lead to one file (see DiskIdentity); deleting the "other" one would delete the only one
+                if (DiskIdentity.SameFile(file.FullName, destination))
+                {
+                    return;
+                }
                 if (File.Exists(destination))
                 {
                     File.Delete(destination);

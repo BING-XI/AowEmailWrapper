@@ -3,6 +3,16 @@
 Each versioned release is described here. The section for a version is also the text of its GitHub
 release; CI publishes it when a `v<version>` tag is pushed (see "Releasing a version" in the README).
 
+## Unreleased
+
+- A copy of a game that can be reached by two paths is listed once on the Games tab. It was listed once per
+  path, and *Move to* on the Activity Log, from the one entry to the other, deleted the game's turn files. A
+  folder has two paths through a junction, for example, and under Wine on Linux, where a game kept in the
+  Documents folder is reached both as `C:\users\<name>\Documents` and under the drive letter of the Linux
+  file system.
+- The Wrapper runs on Linux under Wine, installed with the Windows setup into the Wine prefix the games run
+  in; the README's *Linux* section has the commands.
+
 ## 2.1.15
 
 - *Restart turn* takes the occasion a little more seriously.

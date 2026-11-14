@@ -423,9 +423,17 @@ namespace AowEmailWrapper.Games
             }
         }
 
+        /// <summary>
+        /// True when both paths name one folder: as text, or, where the text differs, as the folder on
+        /// disk both lead to (a junction, a subst drive, Wine's second path to the Documents folder).
+        /// A copy reached by two paths is otherwise listed twice, and moving a game from the one to
+        /// the other deletes it.
+        /// </summary>
         public static bool SameFolder(string a, string b)
         {
-            return NormalizeFolder(a) == NormalizeFolder(b);
+            string first = NormalizeFolder(a);
+            string second = NormalizeFolder(b);
+            return first == second || (first.Length > 0 && second.Length > 0 && DiskIdentity.SameFolder(a, b));
         }
 
         #endregion

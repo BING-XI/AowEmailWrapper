@@ -142,6 +142,42 @@ same fallbacks. The activity log records the copy per game and the Activity Log'
 first turn that landed wrongly. All copies of one game share the registry email settings, so the
 Wrapper writes them once per game.
 
+A folder can be reached by two paths, through a junction for example, and such a copy counts once:
+`AowGame.SameFolder` compares the paths as text and then, where they differ, the volume serial
+number and file ID of the folders they lead to (`Helpers/DiskIdentity.cs`).
+
+Linux
+-----
+
+There is no Linux build, but the Windows setup runs under [Wine](https://www.winehq.org/). The
+Wrapper finds the games through their registry keys and the games hand their turns to its local
+port, so it goes into the Wine prefix the games run in:
+
+    WINEPREFIX=/path/to/the/games/prefix wine AowEmailWrapper-<version>-setup.exe
+
+The setup downloads the .NET 8 Desktop Runtime and installs it inside that prefix, as it does on
+Windows; Wine's Mono is not used. Without administrator rights the Wrapper is installed for the
+user, so it starts with
+
+    WINEPREFIX=/path/to/the/games/prefix wine "C:\users\<name>\AppData\Local\Programs\Age of Wonders Email Wrapper\AowEmailWrapper.exe"
+
+Checked with Wine 11.0 on Fedora 43: the setup, the window and the account wizard, game detection,
+the local mail port and the update check. Sending and receiving turns has not been tried there yet.
+
+Wine links `C:\users\<name>\Documents` to the Linux home folder's Documents, so a game kept there
+has two paths, that one and the one under the drive letter of the Linux file system (`Z:`). It is
+listed once, as above.
+
+The solution builds on Linux with the .NET 8 SDK:
+
+    dotnet build Solution/AowEmailWrapper.sln -c Release -p:EnableWindowsTargeting=true
+
+The tests need the Windows runtime, so they run under Wine, with `vstest.console.dll` from the
+`Microsoft.TestPlatform.Portable` package started by the prefix's `dotnet.exe`. Two fail there:
+`ThemeTests.ApplyingAndRestoringLeavesControlsAsTheyWere` wants the Palatino Linotype font, and
+`UpdateTests.CurrentBuild_CarriesTheAssemblyVersionAndAFullCommitWhenBuiltFromGit` a commit date
+that a build on Linux does not stamp.
+
 Releasing a version
 -------------------
 
